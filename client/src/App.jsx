@@ -1,7 +1,7 @@
 
 function App() {
   return (
-    <h4>hello this is nibir</h4>
+    <h4 className='underline font-extrabold'>tailind test</h4>
   )
 }
 
