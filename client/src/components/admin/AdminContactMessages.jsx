@@ -7,6 +7,7 @@ import {
   CheckCircle, 
   Clock,
   Search,
+  Filter,
   RefreshCw,
   AlertCircle,
   User,
@@ -93,43 +94,16 @@ const AdminContactMessages = () => {
     }
   };
 
-  // Format date and time (same as user side)
-  const formatDateTime = (dateString) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    
-    // Format time
-    let hours = date.getHours();
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    const timeStr = `${hours}:${minutes} ${ampm}`;
-    
-    // Format date
-    if (date.toDateString() === today.toDateString()) {
-      return `Today at ${timeStr}`;
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return `Yesterday at ${timeStr}`;
-    } else {
-      const options = { month: 'short', day: 'numeric', year: 'numeric' };
-      return `${date.toLocaleDateString('en-US', options)} at ${timeStr}`;
-    }
-  };
-
   const getStatusBadge = (status) => {
     switch(status) {
       case 'unread':
-        return <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm flex items-center gap-1">🔴 Unread</span>;
+        return <span className="badge badge-danger">Unread</span>;
       case 'read':
-        return <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm flex items-center gap-1">📖 Read</span>;
+        return <span className="badge badge-info">Read</span>;
       case 'replied':
-        return <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm flex items-center gap-1">✅ Replied</span>;
+        return <span className="badge badge-success">Replied</span>;
       default:
-        return <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">{status}</span>;
+        return <span className="badge badge-gray">{status}</span>;
     }
   };
 
@@ -160,7 +134,7 @@ const AdminContactMessages = () => {
         </div>
         <button
           onClick={fetchMessages}
-          className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center gap-2"
+          className="btn-secondary flex items-center gap-2"
         >
           <RefreshCw className="w-4 h-4" />
           Refresh
@@ -169,7 +143,7 @@ const AdminContactMessages = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-xl shadow-md p-6">
+        <div className="card">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-primary-100 rounded-lg">
               <Mail className="w-6 h-6 text-primary-600" />
@@ -180,7 +154,7 @@ const AdminContactMessages = () => {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-md p-6">
+        <div className="card">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-red-100 rounded-lg">
               <AlertCircle className="w-6 h-6 text-red-600" />
@@ -191,7 +165,7 @@ const AdminContactMessages = () => {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-md p-6">
+        <div className="card">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-blue-100 rounded-lg">
               <Eye className="w-6 h-6 text-blue-600" />
@@ -202,7 +176,7 @@ const AdminContactMessages = () => {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-md p-6">
+        <div className="card">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-green-100 rounded-lg">
               <CheckCircle className="w-6 h-6 text-green-600" />
@@ -224,13 +198,13 @@ const AdminContactMessages = () => {
             placeholder="Search messages..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className="input-field pl-10"
           />
         </div>
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="w-full md:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          className="input-field md:w-48"
         >
           <option value="all">All Messages</option>
           <option value="unread">Unread</option>
@@ -245,7 +219,7 @@ const AdminContactMessages = () => {
           {filteredMessages.map((message) => (
             <div 
               key={message._id} 
-              className={`bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow ${
+              className={`card hover:shadow-lg transition-shadow ${
                 !message.isRead ? 'border-l-4 border-primary-500' : ''
               }`}
             >
@@ -275,30 +249,23 @@ const AdminContactMessages = () => {
                   </div>
                   
                   {message.replyMessage && (
-                    <div className="mt-3 p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="p-1 bg-green-100 rounded-full">
-                          <Reply className="w-4 h-4 text-green-600" />
-                        </div>
-                        <p className="text-sm font-semibold text-green-700">Reply Sent:</p>
-                      </div>
-                      <p className="text-gray-700 bg-white p-3 rounded-lg border border-green-100">
-                        {message.replyMessage}
-                      </p>
-                      {message.repliedAt && (
-                        <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
-                          <Clock className="w-3 h-3" />
-                          <span>Replied: {formatDateTime(message.repliedAt)}</span>
-                        </div>
-                      )}
+                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm font-medium text-green-700">Reply:</p>
+                      <p className="text-sm text-green-600">{message.replyMessage}</p>
                     </div>
                   )}
                   
-                  <div className="mt-3 flex items-center gap-4 text-xs text-gray-400">
+                  <div className="mt-2 flex items-center gap-4 text-xs text-gray-400">
                     <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      Received: {formatDateTime(message.createdAt)}
+                      <Calendar className="w-3 h-3" />
+                      {new Date(message.createdAt).toLocaleString()}
                     </span>
+                    {message.repliedAt && (
+                      <span className="flex items-center gap-1">
+                        <Reply className="w-3 h-3" />
+                        Replied: {new Date(message.repliedAt).toLocaleString()}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -335,7 +302,7 @@ const AdminContactMessages = () => {
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-md p-6 text-center py-12">
+        <div className="card text-center py-12">
           <Mail className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-700">No Messages Found</h3>
           <p className="text-gray-600 mt-2">
@@ -361,14 +328,9 @@ const AdminContactMessages = () => {
             <div className="bg-gray-50 p-4 rounded-lg mb-4">
               <p className="text-sm text-gray-600 font-medium">Original Message:</p>
               <p className="text-gray-700 mt-1">{selectedMessage.message}</p>
-              <div className="mt-2 flex items-center gap-2 text-xs text-gray-400">
-                <User className="w-3 h-3" />
-                <span>{selectedMessage.name} ({selectedMessage.email})</span>
-              </div>
-              <div className="mt-1 flex items-center gap-2 text-xs text-gray-400">
-                <Clock className="w-3 h-3" />
-                <span>Received: {formatDateTime(selectedMessage.createdAt)}</span>
-              </div>
+              <p className="text-xs text-gray-400 mt-1">
+                From: {selectedMessage.name} ({selectedMessage.email})
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -379,7 +341,7 @@ const AdminContactMessages = () => {
                 <textarea
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="input-field"
                   rows="4"
                   placeholder="Type your reply here..."
                 />
@@ -387,14 +349,14 @@ const AdminContactMessages = () => {
               <div className="flex gap-2">
                 <button
                   onClick={() => handleReply(selectedMessage._id)}
-                  className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+                  className="btn-primary flex-1"
                 >
-                  <Reply className="w-4 h-4" />
+                  <Reply className="inline-block w-4 h-4 mr-2" />
                   Send Reply
                 </button>
                 <button
                   onClick={() => setShowReplyModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition duration-200"
+                  className="btn-secondary flex-1"
                 >
                   Cancel
                 </button>
