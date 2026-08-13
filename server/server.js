@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const contactRoutes = require('./routes/contactRoutes');
+
 
 // Load environment variables FIRST
 dotenv.config();
@@ -11,6 +13,8 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+// Add with your other routes
+app.use('/api/contact', contactRoutes);
 
 // Log all requests
 app.use((req, res, next) => {

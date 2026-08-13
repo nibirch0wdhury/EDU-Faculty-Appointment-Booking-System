@@ -20,6 +20,8 @@ import BookAppointment from './components/student/BookAppointment';
 import MyAppointments from './components/student/MyAppointments';
 import FacultyAppointments from './components/faculty/FacultyAppointments';
 import ManageSchedule from './components/faculty/ManageSchedule';
+import AdminContactMessages from './components/admin/AdminContactMessages';
+import UserContactMessages from './components/user/UserContactMessages';
 
 function App() {
   return (
@@ -29,6 +31,7 @@ function App() {
           <Navbar />
           <main className="flex-grow">
             <Routes>
+              {/* Public Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
@@ -90,7 +93,20 @@ function App() {
                   <SystemSettings />
                 </PrivateRoute>
               } />
+              <Route path="/admin/contact-messages" element={
+                <PrivateRoute role="admin">
+                  <AdminContactMessages />
+                </PrivateRoute>
+              } />
               
+              {/* User Routes - Accessible by ALL logged-in users (Students, Faculty, Admin) */}
+              <Route path="/user/messages" element={
+                <PrivateRoute>
+                  <UserContactMessages />
+                </PrivateRoute>
+              } />
+              
+              {/* 404 - Not Found */}
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </main>

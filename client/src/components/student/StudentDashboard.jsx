@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, User, FileText, PlusCircle, List } from 'lucide-react';
+import { Calendar, Clock, User, FileText, PlusCircle, List, Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 
@@ -68,6 +68,13 @@ const StudentDashboard = () => {
       link: '/student/my-appointments',
       color: 'bg-green-500',
     },
+    {
+      icon: <Mail className="w-6 h-6" />,
+      title: 'My Messages',
+      description: 'View your contact messages and replies',
+      link: '/user/messages',
+      color: 'bg-blue-500',
+    },
   ];
 
   return (
@@ -79,7 +86,7 @@ const StudentDashboard = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="card">
+        <div className="bg-white rounded-xl shadow-md p-6">
           <div className="flex items-center">
             <div className="p-3 bg-primary-100 rounded-lg">
               <Calendar className="w-6 h-6 text-primary-600" />
@@ -90,7 +97,7 @@ const StudentDashboard = () => {
             </div>
           </div>
         </div>
-        <div className="card">
+        <div className="bg-white rounded-xl shadow-md p-6">
           <div className="flex items-center">
             <div className="p-3 bg-green-100 rounded-lg">
               <Clock className="w-6 h-6 text-green-600" />
@@ -101,7 +108,7 @@ const StudentDashboard = () => {
             </div>
           </div>
         </div>
-        <div className="card">
+        <div className="bg-white rounded-xl shadow-md p-6">
           <div className="flex items-center">
             <div className="p-3 bg-purple-100 rounded-lg">
               <FileText className="w-6 h-6 text-purple-600" />
@@ -115,9 +122,9 @@ const StudentDashboard = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {quickActions.map((action, index) => (
-          <Link key={index} to={action.link} className="card hover:shadow-lg transition-shadow cursor-pointer">
+          <Link key={index} to={action.link} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer">
             <div className="flex items-center">
               <div className={`p-3 ${action.color} rounded-lg text-white`}>
                 {action.icon}
@@ -132,7 +139,7 @@ const StudentDashboard = () => {
       </div>
 
       {/* Upcoming Appointments */}
-      <div className="card">
+      <div className="bg-white rounded-xl shadow-md p-6">
         <h2 className="text-xl font-semibold mb-4">Upcoming Appointments</h2>
         {loading ? (
           <p className="text-gray-600">Loading...</p>

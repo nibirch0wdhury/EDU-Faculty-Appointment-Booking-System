@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Users, Calendar, CheckCircle, XCircle, UserPlus, Settings, Clock, AlertCircle } from 'lucide-react';
+import { Users, Calendar, CheckCircle, XCircle, UserPlus, Settings, Clock, AlertCircle, Mail } from 'lucide-react';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 
@@ -13,6 +13,7 @@ const AdminDashboard = () => {
     totalStudents: 0,
     totalAppointments: 0,
     pendingAppointments: 0,
+    unreadMessages: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -41,6 +42,7 @@ const AdminDashboard = () => {
         totalStudents: 17,
         totalAppointments: 45,
         pendingAppointments: 3,
+        unreadMessages: 5,
       });
     } finally {
       setLoading(false);
@@ -63,6 +65,14 @@ const AdminDashboard = () => {
       link: '/admin/manage-faculties',
       color: 'bg-green-500',
       onClick: () => navigate('/admin/manage-faculties')
+    },
+    {
+      icon: <Mail className="w-6 h-6" />,
+      title: 'Contact Messages',
+      description: 'View and manage contact messages',
+      link: '/admin/contact-messages',
+      color: 'bg-blue-500',
+      onClick: () => navigate('/admin/contact-messages')
     },
     {
       icon: <Settings className="w-6 h-6" />,
@@ -101,7 +111,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stats Cards - Clickable */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
         <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin/manage-users')}>
           <div className="flex items-center">
             <div className="p-3 bg-primary-100 rounded-lg">
@@ -157,10 +167,21 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
+        <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin/contact-messages')}>
+          <div className="flex items-center">
+            <div className="p-3 bg-red-100 rounded-lg">
+              <Mail className="w-6 h-6 text-red-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm text-gray-600">Unread Messages</p>
+              <p className="text-2xl font-bold text-red-600">{stats.unreadMessages || 0}</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Quick Actions - Now Clickable */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {quickActions.map((action, index) => (
           <div 
             key={index} 
@@ -181,45 +202,51 @@ const AdminDashboard = () => {
       </div>
 
       {/* System Overview */}
-      <div className="card">
-        <h2 className="text-xl font-semibold mb-4">System Overview</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="font-medium mb-3">Quick Stats</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center p-2 bg-white rounded">
-                <span className="text-sm text-gray-600">Total Users</span>
-                <span className="font-semibold text-primary-600">{stats.totalUsers}</span>
-              </div>
-              <div className="flex justify-between items-center p-2 bg-white rounded">
-                <span className="text-sm text-gray-600">Total Faculties</span>
-                <span className="font-semibold text-purple-600">{stats.totalFaculties}</span>
-              </div>
-              <div className="flex justify-between items-center p-2 bg-white rounded">
-                <span className="text-sm text-gray-600">Total Students</span>
-                <span className="font-semibold text-green-600">{stats.totalStudents}</span>
-              </div>
-              <div className="flex justify-between items-center p-2 bg-white rounded">
-                <span className="text-sm text-gray-600">Total Appointments</span>
-                <span className="font-semibold text-blue-600">{stats.totalAppointments}</span>
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="card">
+          <h2 className="text-xl font-semibold mb-4">System Overview</h2>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+              <span className="text-sm text-gray-600">Total Users</span>
+              <span className="font-semibold text-primary-600">{stats.totalUsers}</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+              <span className="text-sm text-gray-600">Total Faculties</span>
+              <span className="font-semibold text-purple-600">{stats.totalFaculties}</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+              <span className="text-sm text-gray-600">Total Students</span>
+              <span className="font-semibold text-green-600">{stats.totalStudents}</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+              <span className="text-sm text-gray-600">Total Appointments</span>
+              <span className="font-semibold text-blue-600">{stats.totalAppointments}</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+              <span className="text-sm text-gray-600">Unread Contact Messages</span>
+              <span className="font-semibold text-red-600">{stats.unreadMessages || 0}</span>
             </div>
           </div>
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="font-medium mb-3">Appointment Status</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center p-2 bg-white rounded">
-                <span className="text-sm text-gray-600">Pending</span>
-                <span className="font-semibold text-yellow-600">{stats.pendingAppointments}</span>
-              </div>
-              <div className="flex justify-between items-center p-2 bg-white rounded">
-                <span className="text-sm text-gray-600">Confirmed</span>
-                <span className="font-semibold text-green-600">{stats.totalAppointments - stats.pendingAppointments}</span>
-              </div>
-              <div className="flex justify-between items-center p-2 bg-white rounded">
-                <span className="text-sm text-gray-600">Total</span>
-                <span className="font-semibold text-blue-600">{stats.totalAppointments}</span>
-              </div>
+        </div>
+
+        <div className="card">
+          <h2 className="text-xl font-semibold mb-4">Appointment Status</h2>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+              <span className="text-sm text-gray-600">Pending</span>
+              <span className="font-semibold text-yellow-600">{stats.pendingAppointments}</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+              <span className="text-sm text-gray-600">Confirmed</span>
+              <span className="font-semibold text-green-600">{stats.totalAppointments - stats.pendingAppointments}</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+              <span className="text-sm text-gray-600">Total</span>
+              <span className="font-semibold text-blue-600">{stats.totalAppointments}</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+              <span className="text-sm text-gray-600">Contact Messages</span>
+              <span className="font-semibold text-red-600">{stats.unreadMessages || 0} unread</span>
             </div>
           </div>
         </div>
