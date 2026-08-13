@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './context/AuthContext';
@@ -21,10 +22,25 @@ import MyAppointments from './components/student/MyAppointments';
 import FacultyAppointments from './components/faculty/FacultyAppointments';
 import ManageSchedule from './components/faculty/ManageSchedule';
 
+// ScrollToTop component to handle scroll restoration on route changes
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, [pathname]);
+
+  return null;
+}
+
 function App() {
   return (
     <AuthProvider>
       <Router>
+        <ScrollToTop />
         <div className="min-h-screen flex flex-col">
           <Navbar />
           <main className="flex-grow">
