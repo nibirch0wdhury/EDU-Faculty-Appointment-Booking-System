@@ -51,9 +51,9 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center relative">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
+          <Link to="/" className="flex items-center gap-3 group shrink-0">
             <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform duration-300">
               <Calendar className="w-5 h-5" />
               <div className="absolute inset-0 rounded-xl bg-indigo-400/20 animate-ping opacity-20" />
@@ -68,8 +68,8 @@ const Navbar = () => {
             </div>
           </Link>
 
-          {/* Desktop Menu */}
-          <nav className="hidden md:flex items-center gap-1 bg-slate-850/60 p-1.5 rounded-2xl border border-slate-800/80 backdrop-blur-md">
+          {/* Desktop Menu - Mathematically Centered */}
+          <nav className="hidden md:flex items-center gap-1 bg-slate-850/80 p-1.5 rounded-2xl border border-slate-800/80 backdrop-blur-md absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
             {[
               { path: '/', label: 'Home' },
               { path: '/about', label: 'About' },
@@ -97,7 +97,7 @@ const Navbar = () => {
           </nav>
 
           {/* User Auth Buttons */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3 shrink-0 z-10">
             {isAuthenticated ? (
               <>
                 <Link 
@@ -118,14 +118,22 @@ const Navbar = () => {
                 </Link>
 
                 <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
-                  <div className="flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 px-3 py-1.5 rounded-xl">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-indigo-500 to-emerald-400 flex items-center justify-center text-xs font-bold text-white shadow-sm">
-                      {user?.name?.[0]?.toUpperCase() || 'U'}
+                  <Link 
+                    to="/user/profile"
+                    className="flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 hover:border-indigo-500/50 px-3 py-1.5 rounded-xl transition-all duration-200 group"
+                    title="View Profile"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white shadow-sm overflow-hidden">
+                      {user?.profileImage ? (
+                        <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+                      ) : (
+                        user?.name?.[0]?.toUpperCase() || 'U'
+                      )}
                     </div>
-                    <span className="text-xs font-semibold text-slate-200 max-w-[100px] truncate">
+                    <span className="text-xs font-semibold text-slate-200 group-hover:text-indigo-300 max-w-[100px] truncate">
                       {user?.name?.split(' ')[0] || 'User'}
                     </span>
-                  </div>
+                  </Link>
 
                   <button 
                     onClick={handleLogout} 
@@ -210,6 +218,14 @@ const Navbar = () => {
                   >
                     <LayoutDashboard className="w-4 h-4" />
                     <span>Dashboard</span>
+                  </Link>
+                  <Link 
+                    to="/user/profile" 
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-slate-800 text-slate-200 font-medium text-sm border border-slate-700/60 hover:border-indigo-500/50"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <User className="w-4 h-4 text-indigo-400" />
+                    <span>My Profile</span>
                   </Link>
                   <Link 
                     to="/user/messages" 

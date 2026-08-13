@@ -23,6 +23,7 @@ import FacultyAppointments from './components/faculty/FacultyAppointments';
 import ManageSchedule from './components/faculty/ManageSchedule';
 import AdminContactMessages from './components/admin/AdminContactMessages';
 import UserContactMessages from './components/user/UserContactMessages';
+import UserProfile from './components/user/UserProfile';
 
 import AnimatedBackground from './components/ui/AnimatedBackground';
 
@@ -121,6 +122,11 @@ function App() {
               <Route path="/user/messages" element={
                 <PrivateRoute>
                   <UserContactMessages />
+                </PrivateRoute>
+              } />
+              <Route path="/user/profile" element={
+                <PrivateRoute>
+                  <UserProfile />
                 </PrivateRoute>
               } />
               

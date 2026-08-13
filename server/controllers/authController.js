@@ -119,11 +119,26 @@ const updateUserProfile = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
-    user.department = req.body.department || user.department;
+    if (req.body.name) user.name = req.body.name;
+    if (req.body.email) user.email = req.body.email;
+    if (req.body.department !== undefined) user.department = req.body.department;
+    if (req.body.designation !== undefined) user.designation = req.body.designation;
+    if (req.body.officeRoom !== undefined) user.officeRoom = req.body.officeRoom;
+    if (req.body.studentId !== undefined) user.studentId = req.body.studentId;
+    if (req.body.facultyId !== undefined) user.facultyId = req.body.facultyId;
+    if (req.body.bio !== undefined) user.bio = req.body.bio;
+    if (req.body.profileImage !== undefined) user.profileImage = req.body.profileImage;
     
-    if (req.body.password) {
+    // Password update check
+    if (req.body.newPassword) {
+      if (req.body.currentPassword) {
+        const isMatch = await user.matchPassword(req.body.currentPassword);
+        if (!isMatch) {
+          return res.status(400).json({ message: 'Current password is incorrect' });
+        }
+      }
+      user.password = req.body.newPassword;
+    } else if (req.body.password) {
       user.password = req.body.password;
     }
 
@@ -134,6 +149,12 @@ const updateUserProfile = async (req, res) => {
       email: updatedUser.email,
       role: updatedUser.role,
       department: updatedUser.department,
+      designation: updatedUser.designation,
+      officeRoom: updatedUser.officeRoom,
+      studentId: updatedUser.studentId,
+      facultyId: updatedUser.facultyId,
+      bio: updatedUser.bio,
+      profileImage: updatedUser.profileImage,
       token: generateToken(updatedUser._id),
     });
   } catch (error) {
