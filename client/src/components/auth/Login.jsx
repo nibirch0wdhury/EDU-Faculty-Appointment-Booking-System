@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Mail, Lock } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
+import MagneticButton from '../ui/MagneticButton';
+import PageTransition, { MotionContainer } from '../ui/PageTransition';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -15,67 +18,98 @@ const Login = () => {
     setLoading(true);
     const result = await login(email, password);
     setLoading(false);
-    if (result.success) {
+    if (result?.success) {
       navigate('/');
     }
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 card">
-        <div>
-          <h2 className="text-3xl font-bold text-center text-gray-900">Welcome Back</h2>
-          <p className="mt-2 text-center text-gray-600">Sign in to your account</p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="input-field pl-10"
-                  placeholder="you@example.com"
-                />
-              </div>
+    <PageTransition className="min-h-[calc(100vh-5rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <MotionContainer className="max-w-md w-full">
+        <div className="glass-panel p-8 sm:p-10 space-y-8 relative overflow-hidden">
+          {/* Subtle top glow line */}
+          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-400" />
+
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Welcome Back</span>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="input-field pl-10"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
+            <h2 className="text-3xl font-extrabold text-white tracking-tight">Sign In to EDU System</h2>
+            <p className="text-slate-400 text-sm">Enter your university credentials to continue</p>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full btn-primary disabled:opacity-50"
-          >
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-200 mb-1.5">Email Address</label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="glass-input pl-11"
+                    placeholder="you@eastdelta.edu.bd"
+                  />
+                </div>
+              </div>
 
-          <p className="text-center text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium">
-              Register here
-            </Link>
-          </p>
-        </form>
-      </div>
-    </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-200 mb-1.5">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="glass-input pl-11 pr-11"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <MagneticButton
+              type="submit"
+              disabled={loading}
+              variant="primary"
+              className="w-full py-3.5"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Signing in...</span>
+                </span>
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  <span>Sign In</span>
+                  <ArrowRight className="w-4 h-4" />
+                </span>
+              )}
+            </MagneticButton>
+
+            <div className="text-center pt-2 border-t border-slate-800">
+              <p className="text-sm text-slate-400">
+                Don't have an account?{' '}
+                <Link to="/register" className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">
+                  Create an account
+                </Link>
+              </p>
+            </div>
+          </form>
+        </div>
+      </MotionContainer>
+    </PageTransition>
   );
 };
 

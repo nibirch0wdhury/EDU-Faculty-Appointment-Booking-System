@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, User, FileText, PlusCircle, List, Mail } from 'lucide-react';
+import { Calendar, Clock, FileText, PlusCircle, List, Mail, ArrowRight, Sparkles, UserCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
+import SpotlightCard from '../ui/SpotlightCard';
+import Badge from '../ui/Badge';
+import PageTransition, { MotionContainer } from '../ui/PageTransition';
 
 const StudentDashboard = () => {
   const { user } = useAuth();
@@ -30,7 +33,6 @@ const StudentDashboard = () => {
       });
     } catch (error) {
       console.error('Error fetching appointments:', error);
-      // Use mock data if API fails
       const mockData = [
         {
           _id: '1',
@@ -55,122 +57,162 @@ const StudentDashboard = () => {
 
   const quickActions = [
     {
-      icon: <PlusCircle className="w-6 h-6" />,
+      icon: <PlusCircle className="w-6 h-6 text-indigo-400" />,
       title: 'Book Appointment',
-      description: 'Schedule a meeting with faculty',
+      description: 'Schedule a new consultation slot with faculty',
       link: '/student/book-appointment',
-      color: 'bg-primary-500',
+      spotlight: 'rgba(99, 102, 241, 0.25)',
     },
     {
-      icon: <List className="w-6 h-6" />,
+      icon: <List className="w-6 h-6 text-emerald-400" />,
       title: 'My Appointments',
-      description: 'View all your bookings',
+      description: 'View, track, or manage your bookings',
       link: '/student/my-appointments',
-      color: 'bg-green-500',
+      spotlight: 'rgba(16, 185, 129, 0.25)',
     },
     {
-      icon: <Mail className="w-6 h-6" />,
+      icon: <Mail className="w-6 h-6 text-cyan-400" />,
       title: 'My Messages',
-      description: 'View your contact messages and replies',
+      description: 'View your contact messages and admin replies',
       link: '/user/messages',
-      color: 'bg-blue-500',
+      spotlight: 'rgba(6, 182, 212, 0.25)',
     },
   ];
 
+  const upcomingList = appointments.filter(a => a.status === 'confirmed' || a.status === 'pending');
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Student Dashboard</h1>
-        <p className="text-gray-600">Welcome back, {user?.name || 'Student'}!</p>
-      </div>
+    <PageTransition className="py-8 md:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      {/* Header Banner */}
+      <MotionContainer className="glass-panel p-8 relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="space-y-2 z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
+            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Student Dashboard</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-white">
+            Welcome Back, <span className="animated-gradient-text">{user?.name || 'Student'}</span>!
+          </h1>
+          <p className="text-slate-400 text-sm">
+            {user?.department ? `${user.department} Department` : 'East Delta University'} • ID: {user?.studentId || 'EDU-Student'}
+          </p>
+        </div>
+        <div className="z-10 shrink-0">
+          <Link
+            to="/student/book-appointment"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold text-sm shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 border border-indigo-400/30"
+          >
+            <PlusCircle className="w-5 h-5" />
+            <span>Book New Slot</span>
+          </Link>
+        </div>
+      </MotionContainer>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <div className="flex items-center">
-            <div className="p-3 bg-primary-100 rounded-lg">
-              <Calendar className="w-6 h-6 text-primary-600" />
+      <MotionContainer delay={0.1} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <SpotlightCard spotlightColor="rgba(99, 102, 241, 0.25)" className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-xs uppercase font-bold tracking-wider text-slate-400">Total Bookings</p>
+              <p className="text-3xl font-extrabold text-white">{stats.total}</p>
             </div>
-            <div className="ml-4">
-              <p className="text-sm text-gray-600">Total Appointments</p>
-              <p className="text-2xl font-bold">{stats.total}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <div className="flex items-center">
-            <div className="p-3 bg-green-100 rounded-lg">
-              <Clock className="w-6 h-6 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm text-gray-600">Upcoming</p>
-              <p className="text-2xl font-bold">{stats.upcoming}</p>
+            <div className="p-3 bg-indigo-600/20 border border-indigo-500/30 rounded-2xl text-indigo-400">
+              <Calendar className="w-6 h-6" />
             </div>
           </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <div className="flex items-center">
-            <div className="p-3 bg-purple-100 rounded-lg">
-              <FileText className="w-6 h-6 text-purple-600" />
+        </SpotlightCard>
+
+        <SpotlightCard spotlightColor="rgba(16, 185, 129, 0.25)" className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-xs uppercase font-bold tracking-wider text-slate-400">Upcoming Consultations</p>
+              <p className="text-3xl font-extrabold text-emerald-400">{stats.upcoming}</p>
             </div>
-            <div className="ml-4">
-              <p className="text-sm text-gray-600">Completed</p>
-              <p className="text-2xl font-bold">{stats.completed}</p>
+            <div className="p-3 bg-emerald-600/20 border border-emerald-500/30 rounded-2xl text-emerald-400">
+              <Clock className="w-6 h-6" />
             </div>
           </div>
-        </div>
-      </div>
+        </SpotlightCard>
+
+        <SpotlightCard spotlightColor="rgba(168, 85, 247, 0.25)" className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-xs uppercase font-bold tracking-wider text-slate-400">Completed Sessions</p>
+              <p className="text-3xl font-extrabold text-purple-400">{stats.completed}</p>
+            </div>
+            <div className="p-3 bg-purple-600/20 border border-purple-500/30 rounded-2xl text-purple-400">
+              <FileText className="w-6 h-6" />
+            </div>
+          </div>
+        </SpotlightCard>
+      </MotionContainer>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {quickActions.map((action, index) => (
-          <Link key={index} to={action.link} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer">
-            <div className="flex items-center">
-              <div className={`p-3 ${action.color} rounded-lg text-white`}>
-                {action.icon}
+      <MotionContainer delay={0.2} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {quickActions.map((action, idx) => (
+          <Link key={idx} to={action.link} className="block group">
+            <SpotlightCard spotlightColor={action.spotlight} className="p-6 h-full hover:border-indigo-500/40">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-slate-900 border border-slate-700/60 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                  {action.icon}
+                </div>
+                <div className="min-w-0 flex-grow">
+                  <h3 className="text-base font-bold text-white group-hover:text-indigo-300 transition-colors flex items-center justify-between">
+                    <span>{action.title}</span>
+                    <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">{action.description}</p>
+                </div>
               </div>
-              <div className="ml-4">
-                <h3 className="font-semibold">{action.title}</h3>
-                <p className="text-sm text-gray-600">{action.description}</p>
-              </div>
-            </div>
+            </SpotlightCard>
           </Link>
         ))}
-      </div>
+      </MotionContainer>
 
       {/* Upcoming Appointments */}
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Upcoming Appointments</h2>
+      <MotionContainer delay={0.3} className="glass-panel p-6 sm:p-8 space-y-6">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div className="flex items-center gap-2">
+            <UserCheck className="w-5 h-5 text-indigo-400" />
+            <h2 className="text-xl font-bold text-white">Upcoming Consultations</h2>
+          </div>
+          <Link to="/student/my-appointments" className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+            <span>View All</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
         {loading ? (
-          <p className="text-gray-600">Loading...</p>
-        ) : appointments.filter(a => a.status === 'confirmed' || a.status === 'pending').length > 0 ? (
-          <div className="space-y-4">
-            {appointments.filter(a => a.status === 'confirmed' || a.status === 'pending').slice(0, 3).map((appointment) => (
-              <div key={appointment._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="font-medium">{appointment.facultyId?.name || 'Faculty'}</p>
-                  <p className="text-sm text-gray-600">
-                    {new Date(appointment.date).toLocaleDateString()} at {appointment.startTime}
+          <div className="py-8 text-center text-slate-400">Loading appointments...</div>
+        ) : upcomingList.length > 0 ? (
+          <div className="space-y-3">
+            {upcomingList.slice(0, 4).map((appointment) => (
+              <div key={appointment._id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl bg-slate-800/40 border border-slate-700/50 gap-4 hover:border-slate-600 transition-colors">
+                <div className="space-y-1">
+                  <p className="font-bold text-white">{appointment.facultyId?.name || 'Faculty Member'}</p>
+                  <p className="text-xs text-slate-400">
+                    📅 {new Date(appointment.date).toLocaleDateString()} at {appointment.startTime} - {appointment.endTime}
                   </p>
+                  {appointment.purpose && (
+                    <p className="text-xs text-slate-300 italic">"{appointment.purpose}"</p>
+                  )}
                 </div>
-                <span className={`px-3 py-1 rounded-full text-sm ${
-                  appointment.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                  appointment.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                  'bg-gray-100 text-gray-700'
-                }`}>
-                  {appointment.status}
-                </span>
+                <Badge status={appointment.status} />
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-600">No upcoming appointments.</p>
+          <div className="py-12 text-center text-slate-400 space-y-3">
+            <p>No upcoming appointments found.</p>
+            <Link to="/student/book-appointment">
+              <span className="inline-flex items-center gap-1 text-sm text-indigo-400 font-semibold hover:underline">
+                Book a consultation slot now →
+              </span>
+            </Link>
+          </div>
         )}
-        <Link to="/student/my-appointments" className="text-primary-600 hover:text-primary-700 mt-4 inline-block">
-          View all appointments →
-        </Link>
-      </div>
-    </div>
+      </MotionContainer>
+    </PageTransition>
   );
 };
 

@@ -4,34 +4,22 @@ const LoadingSpinner = ({
   size = 'md', 
   fullScreen = false, 
   text = 'Loading...',
-  color = 'primary' 
 }) => {
-  // Size variants
   const sizes = {
     sm: 'h-8 w-8 border-2',
-    md: 'h-12 w-12 border-4',
+    md: 'h-12 w-12 border-3',
     lg: 'h-16 w-16 border-4',
     xl: 'h-24 w-24 border-4',
   };
 
-  // Color variants
-  const colors = {
-    primary: 'border-primary-600 border-t-transparent',
-    white: 'border-white border-t-transparent',
-    gray: 'border-gray-400 border-t-transparent',
-    green: 'border-green-500 border-t-transparent',
-    blue: 'border-blue-500 border-t-transparent',
-  };
-
   const spinnerSize = sizes[size] || sizes.md;
-  const spinnerColor = colors[color] || colors.primary;
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
-        <div className={`animate-spin rounded-full ${spinnerSize} ${spinnerColor}`}></div>
+      <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl flex flex-col items-center justify-center z-50">
+        <div className={`animate-spin rounded-full ${spinnerSize} border-indigo-500 border-t-transparent shadow-lg shadow-indigo-500/30`}></div>
         {text && (
-          <p className="mt-4 text-gray-600 font-medium animate-pulse">
+          <p className="mt-4 text-xs font-semibold text-slate-300 tracking-wider uppercase animate-pulse">
             {text}
           </p>
         )}
@@ -40,10 +28,10 @@ const LoadingSpinner = ({
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh]">
-      <div className={`animate-spin rounded-full ${spinnerSize} ${spinnerColor}`}></div>
+    <div className="flex flex-col items-center justify-center min-h-[60vh] py-12">
+      <div className={`animate-spin rounded-full ${spinnerSize} border-indigo-500 border-t-transparent shadow-lg shadow-indigo-500/30`}></div>
       {text && (
-        <p className="mt-4 text-gray-600 font-medium">
+        <p className="mt-4 text-xs font-semibold text-slate-400 tracking-wider uppercase animate-pulse">
           {text}
         </p>
       )}

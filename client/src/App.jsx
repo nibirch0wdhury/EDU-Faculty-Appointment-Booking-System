@@ -24,7 +24,8 @@ import ManageSchedule from './components/faculty/ManageSchedule';
 import AdminContactMessages from './components/admin/AdminContactMessages';
 import UserContactMessages from './components/user/UserContactMessages';
 
-// ScrollToTop component to handle scroll restoration on route changes
+import AnimatedBackground from './components/ui/AnimatedBackground';
+
 function ScrollToTop() {
   const { pathname } = useLocation();
 
@@ -43,9 +44,10 @@ function App() {
     <AuthProvider>
       <Router>
         <ScrollToTop />
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col relative text-slate-100 selection:bg-indigo-500 selection:text-white">
+          <AnimatedBackground />
           <Navbar />
-          <main className="flex-grow">
+          <main className="flex-grow relative z-10">
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Home />} />

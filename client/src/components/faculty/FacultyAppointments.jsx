@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, User, FileText, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Calendar, Clock, User, FileText, CheckCircle2, XCircle, AlertCircle, Sparkles, Check, X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../../utils/api';
+import SpotlightCard from '../ui/SpotlightCard';
+import MagneticButton from '../ui/MagneticButton';
+import Badge from '../ui/Badge';
+import PageTransition, { MotionContainer } from '../ui/PageTransition';
 
 const FacultyAppointments = () => {
   const [appointments, setAppointments] = useState([]);
@@ -15,7 +19,7 @@ const FacultyAppointments = () => {
   const fetchAppointments = async () => {
     try {
       const response = await api.get('/appointments/faculty');
-      setAppointments(response.data);
+      setAppointments(response.data || []);
     } catch (error) {
       toast.error('Failed to load appointments');
     } finally {
@@ -33,134 +37,140 @@ const FacultyAppointments = () => {
     }
   };
 
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      pending: { color: 'bg-yellow-100 text-yellow-700', icon: <AlertCircle className="w-4 h-4" /> },
-      confirmed: { color: 'bg-green-100 text-green-700', icon: <CheckCircle className="w-4 h-4" /> },
-      cancelled: { color: 'bg-red-100 text-red-700', icon: <XCircle className="w-4 h-4" /> },
-      completed: { color: 'bg-blue-100 text-blue-700', icon: <CheckCircle className="w-4 h-4" /> },
-    };
-    const config = statusConfig[status] || statusConfig.pending;
-    return (
-      <span className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${config.color}`}>
-        {config.icon} {status}
-      </span>
-    );
-  };
-
   const filteredAppointments = appointments.filter(app => {
     if (filter === 'all') return true;
     return app.status === filter;
   });
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Faculty Appointments</h1>
+    <PageTransition className="py-8 md:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      {/* Header */}
+      <MotionContainer className="space-y-1">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
+          <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+          <span>Faculty Consultation Schedule</span>
+        </div>
+        <h1 className="text-3xl font-extrabold text-white">Student Consultations</h1>
+      </MotionContainer>
 
-      {/* Filters */}
-      <div className="flex gap-2 mb-6 flex-wrap">
-        {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map((status) => (
-          <button
-            key={status}
-            onClick={() => setFilter(status)}
-            className={`px-4 py-2 rounded-lg capitalize ${
-              filter === status
-                ? 'bg-primary-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            {status}
-          </button>
-        ))}
-      </div>
+      {/* Filter Tabs */}
+      <MotionContainer delay={0.1} className="flex gap-2 flex-wrap bg-slate-950/60 p-2 rounded-2xl border border-slate-800">
+        {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map((status) => {
+          const count = appointments.filter(a => status === 'all' || a.status === status).length;
+          const isActive = filter === status;
+          return (
+            <button
+              key={status}
+              onClick={() => setFilter(status)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold capitalize transition-all duration-200 ${
+                isActive
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+              }`}
+            >
+              {status} ({count})
+            </button>
+          );
+        })}
+      </MotionContainer>
 
+      {/* Appointment List */}
       {loading ? (
-        <p className="text-gray-600">Loading appointments...</p>
+        <div className="py-16 text-center text-slate-400">Loading consultations...</div>
       ) : filteredAppointments.length > 0 ? (
-        <div className="space-y-4">
+        <MotionContainer delay={0.2} className="space-y-4">
           {filteredAppointments.map((appointment) => (
-            <div key={appointment._id} className="card hover:shadow-lg transition-shadow">
-              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 bg-primary-100 rounded-lg">
-                      <User className="w-5 h-5 text-primary-600" />
+            <SpotlightCard key={appointment._id} spotlightColor="rgba(99, 102, 241, 0.2)" className="p-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="space-y-3 flex-grow">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-indigo-600/20 border border-indigo-500/30 rounded-2xl text-indigo-400">
+                      <User className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">
-                        {appointment.studentId?.name || 'Student'}
+                      <h3 className="font-bold text-lg text-white">
+                        {appointment.studentId?.name || 'Student Name'}
                       </h3>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-xs font-mono text-slate-400">
                         Student ID: {appointment.studentId?.studentId || 'N/A'}
                       </p>
                     </div>
                   </div>
-                  
-                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      {new Date(appointment.date).toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
+
+                  <div className="flex flex-wrap gap-4 text-xs text-slate-300">
+                    <div className="flex items-center gap-1.5 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-800">
+                      <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>
+                        {new Date(appointment.date).toLocaleDateString('en-US', {
+                          weekday: 'short',
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </span>
                     </div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Clock className="w-4 h-4 mr-2" />
-                      {appointment.startTime} - {appointment.endTime}
+                    <div className="flex items-center gap-1.5 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-800">
+                      <Clock className="w-3.5 h-3.5 text-purple-400" />
+                      <span>{appointment.startTime} - {appointment.endTime || 'End Slot'}</span>
                     </div>
                   </div>
-                  
-                  <p className="mt-2 text-sm text-gray-700">
-                    <FileText className="inline-block w-4 h-4 mr-1" />
-                    <strong>Purpose:</strong> {appointment.purpose}
+
+                  <p className="text-xs text-slate-300 bg-slate-800/30 p-3 rounded-xl border border-slate-700/40">
+                    <strong className="text-slate-200">Meeting Purpose:</strong> "{appointment.purpose}"
                   </p>
                 </div>
 
-                <div className="flex flex-col items-end gap-3">
-                  {getStatusBadge(appointment.status)}
+                <div className="flex flex-col items-end gap-4 border-t md:border-t-0 border-slate-800 pt-3 md:pt-0 shrink-0">
+                  <Badge status={appointment.status} />
+
                   {appointment.status === 'pending' && (
                     <div className="flex gap-2">
-                      <button
+                      <MagneticButton
+                        variant="emerald"
+                        className="py-1.5 px-3 text-xs"
                         onClick={() => handleStatusUpdate(appointment._id, 'confirmed')}
-                        className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm"
                       >
-                        Accept
-                      </button>
-                      <button
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Accept</span>
+                      </MagneticButton>
+                      <MagneticButton
+                        variant="danger"
+                        className="py-1.5 px-3 text-xs"
                         onClick={() => handleStatusUpdate(appointment._id, 'cancelled')}
-                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm"
                       >
-                        Reject
-                      </button>
+                        <X className="w-3.5 h-3.5" />
+                        <span>Decline</span>
+                      </MagneticButton>
                     </div>
                   )}
+
                   {appointment.status === 'confirmed' && (
-                    <button
+                    <MagneticButton
+                      variant="primary"
+                      className="py-1.5 px-4 text-xs"
                       onClick={() => handleStatusUpdate(appointment._id, 'completed')}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
                     >
-                      Mark Completed
-                    </button>
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Mark Completed</span>
+                    </MagneticButton>
                   )}
                 </div>
               </div>
-            </div>
+            </SpotlightCard>
           ))}
-        </div>
+        </MotionContainer>
       ) : (
-        <div className="card text-center py-12">
-          <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-700">No Appointments Found</h3>
-          <p className="text-gray-600 mt-2">
+        <MotionContainer delay={0.2} className="glass-panel p-12 text-center space-y-3">
+          <Calendar className="w-12 h-12 text-slate-600 mx-auto" />
+          <h3 className="text-lg font-bold text-white">No Consultations Found</h3>
+          <p className="text-xs text-slate-400">
             {filter === 'all' 
-              ? "You don't have any appointments yet."
-              : `No ${filter} appointments.`}
+              ? "You don't have any student consultation requests recorded yet."
+              : `No appointments currently marked as "${filter}".`}
           </p>
-        </div>
+        </MotionContainer>
       )}
-    </div>
+    </PageTransition>
   );
 };
 

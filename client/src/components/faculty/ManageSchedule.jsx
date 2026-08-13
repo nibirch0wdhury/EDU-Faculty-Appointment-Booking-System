@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { Plus, Trash2, Clock, Calendar as CalendarIcon } from 'lucide-react';
+import { Plus, Trash2, Clock, Sparkles } from 'lucide-react';
 import api from '../../utils/api';
+import MagneticButton from '../ui/MagneticButton';
+import SpotlightCard from '../ui/SpotlightCard';
+import PageTransition, { MotionContainer } from '../ui/PageTransition';
 
 const ManageSchedule = () => {
   const [schedule, setSchedule] = useState([]);
@@ -21,7 +24,7 @@ const ManageSchedule = () => {
   const fetchSchedule = async () => {
     try {
       const response = await api.get('/faculty/schedule');
-      setSchedule(response.data);
+      setSchedule(response.data || []);
     } catch (error) {
       toast.error('Failed to load schedule');
     } finally {
@@ -75,101 +78,128 @@ const ManageSchedule = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Manage Schedule</h1>
+    <PageTransition className="py-8 md:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <MotionContainer className="space-y-1">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
+          <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+          <span>Faculty Schedule Manager</span>
+        </div>
+        <h1 className="text-3xl font-extrabold text-white">Manage Consultation Availability</h1>
+      </MotionContainer>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Add New Slot Form */}
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-4">Add New Time Slot</h2>
-          <form onSubmit={handleAddSlot} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Day</label>
-              <select
-                value={newSlot.day}
-                onChange={(e) => setNewSlot({ ...newSlot, day: e.target.value })}
-                className="input-field"
-                required
-              >
-                {days.map(day => (
-                  <option key={day} value={day}>{day}</option>
-                ))}
-              </select>
-            </div>
+        <MotionContainer delay={0.1}>
+          <div className="glass-panel p-6 sm:p-8 space-y-6">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Plus className="w-5 h-5 text-indigo-400" />
+              <span>Add New Time Slot</span>
+            </h2>
 
-            <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={handleAddSlot} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
-                <input
-                  type="time"
-                  value={newSlot.startTime}
-                  onChange={(e) => setNewSlot({ ...newSlot, startTime: e.target.value })}
-                  className="input-field"
+                <label className="block text-sm font-semibold text-slate-200 mb-1.5">Day of Week</label>
+                <select
+                  value={newSlot.day}
+                  onChange={(e) => setNewSlot({ ...newSlot, day: e.target.value })}
+                  className="glass-input bg-slate-900"
                   required
-                />
+                >
+                  {days.map(day => (
+                    <option key={day} value={day} className="bg-slate-900">{day}</option>
+                  ))}
+                </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">End Time</label>
-                <input
-                  type="time"
-                  value={newSlot.endTime}
-                  onChange={(e) => setNewSlot({ ...newSlot, endTime: e.target.value })}
-                  className="input-field"
-                  required
-                />
-              </div>
-            </div>
 
-            <button type="submit" className="w-full btn-primary">
-              <Plus className="inline-block w-4 h-4 mr-2" />
-              Add Slot
-            </button>
-          </form>
-        </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-200 mb-1.5">Start Time</label>
+                  <input
+                    type="time"
+                    value={newSlot.startTime}
+                    onChange={(e) => setNewSlot({ ...newSlot, startTime: e.target.value })}
+                    className="glass-input"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-200 mb-1.5">End Time</label>
+                  <input
+                    type="time"
+                    value={newSlot.endTime}
+                    onChange={(e) => setNewSlot({ ...newSlot, endTime: e.target.value })}
+                    className="glass-input"
+                    required
+                  />
+                </div>
+              </div>
+
+              <MagneticButton type="submit" variant="primary" className="w-full py-3">
+                <Plus className="w-4 h-4" />
+                <span>Add Consultation Slot</span>
+              </MagneticButton>
+            </form>
+          </div>
+        </MotionContainer>
 
         {/* Current Schedule */}
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-4">Current Schedule</h2>
-          {loading ? (
-            <p className="text-gray-600">Loading schedule...</p>
-          ) : schedule.length > 0 ? (
-            <div className="space-y-4">
-              {schedule.map((slot) => (
-                <div key={slot._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="font-medium">{slot.day}</p>
-                    <p className="text-sm text-gray-600">
-                      <Clock className="inline-block w-4 h-4 mr-1" />
-                      {slot.startTime} - {slot.endTime}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => toggleAvailability(slot._id, slot.isAvailable)}
-                      className={`px-3 py-1 rounded text-sm ${
-                        slot.isAvailable
-                          ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                          : 'bg-red-100 text-red-700 hover:bg-red-200'
-                      }`}
-                    >
-                      {slot.isAvailable ? 'Available' : 'Unavailable'}
-                    </button>
-                    <button
-                      onClick={() => handleDeleteSlot(slot._id)}
-                      className="p-2 text-red-600 hover:bg-red-100 rounded"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-600">No schedule slots added yet.</p>
-          )}
-        </div>
+        <MotionContainer delay={0.2}>
+          <div className="glass-panel p-6 sm:p-8 space-y-6">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Clock className="w-5 h-5 text-emerald-400" />
+              <span>Configured Schedule Slots</span>
+            </h2>
+
+            {loading ? (
+              <div className="py-8 text-center text-slate-400 text-sm">Loading schedule...</div>
+            ) : schedule.length > 0 ? (
+              <div className="space-y-3">
+                {schedule.map((slot) => (
+                  <SpotlightCard key={slot._id} spotlightColor="rgba(99, 102, 241, 0.15)" className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="font-bold text-white text-sm">{slot.day}</p>
+                        <p className="text-xs text-slate-400 flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5 text-indigo-400" />
+                          <span>{slot.startTime} - {slot.endTime}</span>
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => toggleAvailability(slot._id, slot.isAvailable)}
+                          className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                            slot.isAvailable
+                              ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300'
+                              : 'bg-rose-500/15 border border-rose-500/30 text-rose-300'
+                          }`}
+                        >
+                          {slot.isAvailable ? 'Available' : 'Unavailable'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSlot(slot._id)}
+                          className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </SpotlightCard>
+                ))}
+              </div>
+            ) : (
+              <div className="py-12 text-center text-slate-400 space-y-2">
+                <Clock className="w-8 h-8 text-slate-600 mx-auto" />
+                <p className="text-slate-300 font-semibold text-sm">No slots created yet</p>
+                <p className="text-xs">Use the form to add your weekly availability slots.</p>
+              </div>
+            )}
+          </div>
+        </MotionContainer>
       </div>
-    </div>
+    </PageTransition>
   );
 };
 
