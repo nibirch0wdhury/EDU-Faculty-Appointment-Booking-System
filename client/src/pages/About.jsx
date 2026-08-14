@@ -23,23 +23,23 @@ const teamMembers = [
     id: 1,
     name: 'Sadman Chowdhury',
     email: '242021012@eastdelta.edu.bd',
-    role: 'Backend & Database Engineer',
-    responsibilities: ['Backend', 'Database Integration'],
+    role: 'Backend & DevOps Specialist',
+    responsibilities: ['Backend', 'Deployment and Hosting'],
     icon: Database,
     gradient: 'from-amber-500 via-orange-600 to-rose-600',
     borderGradient: 'hover:border-orange-500/50',
-    tags: ['Node.js', 'Express.js', 'MongoDB', 'Mongoose REST API']
+    tags: ['JWT Auth', 'Bcrypt Security', 'CORS Middleware', 'Cloud Hosting']
   },
   {
     id: 2,
     name: 'Muhammad Sharfuddin',
     email: '242020612@eastdelta.edu.bd',
-    role: 'Security & DevOps Specialist',
-    responsibilities: ['User Authentication & Security', 'Deployment and Hosting'],
+    role: 'Database Engineer & Security',
+    responsibilities: [ 'Database Integration','User Authentication & Security'],
     icon: ShieldCheck,
     gradient: 'from-emerald-500 via-teal-600 to-cyan-600',
     borderGradient: 'hover:border-emerald-500/50',
-    tags: ['JWT Auth', 'Bcrypt Security', 'CORS Middleware', 'Cloud Hosting']
+    tags: ['Node.js', 'Express.js', 'MongoDB', 'Mongoose REST API']
   },
   {
     id: 3,
