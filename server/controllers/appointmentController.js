@@ -13,25 +13,25 @@ const bookAppointment = async (req, res) => {
     
     // Validate required fields
     if (!facultyId || !date || !startTime || !purpose) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: 'Please provide all required fields: facultyId, date, startTime, purpose' 
+        message: 'Please provide all required fields: facultyId, date, startTime, purpose'
       });
     }
     
     // Check if faculty exists
     const faculty = await User.findById(facultyId);
     if (!faculty) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: 'Faculty not found' 
+        message: 'Faculty not found'
       });
     }
     
     if (faculty.role !== 'faculty') {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: 'Selected user is not a faculty member' 
+        message: 'Selected user is not a faculty member'
       });
     }
     
@@ -53,9 +53,9 @@ const bookAppointment = async (req, res) => {
     });
     
     if (existingAppointment) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: 'You already have an appointment at this time on this date' 
+        message: 'You already have an appointment at this time on this date'
       });
     }
     
@@ -87,14 +87,14 @@ const bookAppointment = async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Appointment booked successfully',
-      appointment: populatedAppointment
+      data: populatedAppointment
     });
     
   } catch (error) {
     console.error('❌ Book appointment error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: error.message || 'Failed to book appointment' 
+      message: error.message || 'Failed to book appointment'
     });
   }
 };
@@ -112,13 +112,13 @@ const getStudentAppointments = async (req, res) => {
       .sort({ date: -1, startTime: 1 });
     
     console.log(`✅ Found ${appointments.length} appointments in database`);
-    res.json(appointments);
+    res.json({ success: true, data: appointments });
     
   } catch (error) {
     console.error('❌ Get student appointments error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: error.message || 'Failed to fetch appointments' 
+      message: error.message || 'Failed to fetch appointments'
     });
   }
 };
@@ -135,13 +135,13 @@ const getFacultyAppointments = async (req, res) => {
       .sort({ date: -1, startTime: 1 });
     
     console.log(`✅ Found ${appointments.length} appointments`);
-    res.json(appointments);
+    res.json({ success: true, data: appointments });
     
   } catch (error) {
     console.error('❌ Get faculty appointments error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: error.message || 'Failed to fetch appointments' 
+      message: error.message || 'Failed to fetch appointments'
     });
   }
 };
@@ -156,12 +156,12 @@ const getAllAppointments = async (req, res) => {
       .populate('facultyId', 'name email department')
       .sort({ date: -1, startTime: 1 });
     
-    res.json(appointments);
+    res.json({ success: true, data: appointments });
   } catch (error) {
     console.error('❌ Get all appointments error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: error.message || 'Failed to fetch appointments' 
+      message: error.message || 'Failed to fetch appointments'
     });
   }
 };
@@ -176,28 +176,28 @@ const getAppointmentById = async (req, res) => {
       .populate('facultyId', 'name email department');
     
     if (!appointment) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: 'Appointment not found' 
+        message: 'Appointment not found'
       });
     }
     
     // Check if user is authorized to view this appointment
-    if (req.user.role !== 'admin' && 
+    if (req.user.role !== 'admin' &&
         req.user._id.toString() !== appointment.studentId._id.toString() &&
         req.user._id.toString() !== appointment.facultyId._id.toString()) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         success: false,
-        message: 'Not authorized to view this appointment' 
+        message: 'Not authorized to view this appointment'
       });
     }
     
-    res.json(appointment);
+    res.json({ success: true, data: appointment });
   } catch (error) {
     console.error('❌ Get appointment error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: error.message || 'Failed to fetch appointment' 
+      message: error.message || 'Failed to fetch appointment'
     });
   }
 };
@@ -210,27 +210,27 @@ const updateAppointmentStatus = async (req, res) => {
     const { status } = req.body;
     
     if (!status || !['pending', 'confirmed', 'cancelled', 'completed'].includes(status)) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: 'Invalid status value. Allowed values: pending, confirmed, cancelled, completed' 
+        message: 'Invalid status value. Allowed values: pending, confirmed, cancelled, completed'
       });
     }
     
     const appointment = await Appointment.findById(req.params.id);
     
     if (!appointment) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: 'Appointment not found' 
+        message: 'Appointment not found'
       });
     }
     
     // Check if user is authorized
-    if (req.user.role !== 'admin' && 
+    if (req.user.role !== 'admin' &&
         req.user._id.toString() !== appointment.facultyId.toString()) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         success: false,
-        message: 'Not authorized to update this appointment' 
+        message: 'Not authorized to update this appointment'
       });
     }
     
@@ -244,13 +244,13 @@ const updateAppointmentStatus = async (req, res) => {
     res.json({
       success: true,
       message: `Appointment ${status} successfully`,
-      appointment: updatedAppointment
+      data: updatedAppointment
     });
   } catch (error) {
     console.error('❌ Update appointment status error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: error.message || 'Failed to update appointment status' 
+      message: error.message || 'Failed to update appointment status'
     });
   }
 };
@@ -263,34 +263,34 @@ const cancelAppointment = async (req, res) => {
     const appointment = await Appointment.findById(req.params.id);
     
     if (!appointment) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: 'Appointment not found' 
+        message: 'Appointment not found'
       });
     }
     
     // Check if user is authorized to cancel
-    if (req.user.role !== 'admin' && 
+    if (req.user.role !== 'admin' &&
         req.user._id.toString() !== appointment.studentId.toString() &&
         req.user._id.toString() !== appointment.facultyId.toString()) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         success: false,
-        message: 'Not authorized to cancel this appointment' 
+        message: 'Not authorized to cancel this appointment'
       });
     }
     
     // Check if appointment is already completed or cancelled
     if (appointment.status === 'completed') {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: 'Cannot cancel a completed appointment' 
+        message: 'Cannot cancel a completed appointment'
       });
     }
     
     if (appointment.status === 'cancelled') {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: 'Appointment is already cancelled' 
+        message: 'Appointment is already cancelled'
       });
     }
     
@@ -300,13 +300,13 @@ const cancelAppointment = async (req, res) => {
     res.json({
       success: true,
       message: 'Appointment cancelled successfully',
-      appointment: appointment
+      data: appointment
     });
   } catch (error) {
     console.error('❌ Cancel appointment error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: error.message || 'Failed to cancel appointment' 
+      message: error.message || 'Failed to cancel appointment'
     });
   }
 };
@@ -319,9 +319,9 @@ const getAppointmentsByDateRange = async (req, res) => {
     const { startDate, endDate } = req.query;
     
     if (!startDate || !endDate) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: 'Start date and end date are required' 
+        message: 'Start date and end date are required'
       });
     }
     
@@ -346,12 +346,12 @@ const getAppointmentsByDateRange = async (req, res) => {
       .populate('facultyId', 'name email department')
       .sort({ date: 1, startTime: 1 });
     
-    res.json(appointments);
+    res.json({ success: true, data: appointments });
   } catch (error) {
     console.error('❌ Get appointments by range error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: error.message || 'Failed to fetch appointments' 
+      message: error.message || 'Failed to fetch appointments'
     });
   }
 };
@@ -383,12 +383,12 @@ const getUpcomingAppointments = async (req, res) => {
       .sort({ date: 1, startTime: 1 })
       .limit(10);
     
-    res.json(appointments);
+    res.json({ success: true, data: appointments });
   } catch (error) {
     console.error('❌ Get upcoming appointments error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: error.message || 'Failed to fetch upcoming appointments' 
+      message: error.message || 'Failed to fetch upcoming appointments'
     });
   }
 };

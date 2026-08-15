@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, Users, CheckCircle2, PlusCircle, List, Mail, ArrowRight, Sparkles, Check, X } from 'lucide-react';
+import { Calendar, Clock, Users, CheckCircle2, PlusCircle, List, Mail, ArrowRight, Sparkles, Check, X, Calendar as CalendarIcon, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
@@ -12,6 +12,7 @@ import PageTransition, { MotionContainer } from '../ui/PageTransition';
 const FacultyDashboard = () => {
   const { user } = useAuth();
   const [appointments, setAppointments] = useState([]);
+  const [schedule, setSchedule] = useState([]);
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -19,15 +20,18 @@ const FacultyDashboard = () => {
     completed: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [scheduleLoading, setScheduleLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchAppointments();
+    fetchSchedule();
   }, []);
 
   const fetchAppointments = async () => {
     try {
       const response = await api.get('/appointments/faculty');
-      const data = response.data || [];
+      const data = response.data?.data || response.data || [];
       setAppointments(data);
       setStats({
         total: data.length,
@@ -37,27 +41,42 @@ const FacultyDashboard = () => {
       });
     } catch (error) {
       console.error('Error fetching appointments:', error);
-      const mockData = [
-        {
-          _id: '1',
-          studentId: { name: 'John Doe', studentId: 'EDU-2024-001' },
-          date: new Date().toISOString(),
-          startTime: '10:00',
-          endTime: '11:00',
-          purpose: 'Project discussion',
-          status: 'pending'
-        }
-      ];
-      setAppointments(mockData);
-      setStats({
-        total: mockData.length,
-        pending: mockData.filter(a => a.status === 'pending').length,
-        confirmed: mockData.filter(a => a.status === 'confirmed').length,
-        completed: mockData.filter(a => a.status === 'completed').length,
-      });
+      toast.error('Failed to load appointments');
+      setAppointments([]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchSchedule = async (showToast = false) => {
+    try {
+      setScheduleLoading(true);
+      console.log('📋 Fetching faculty schedule for dashboard...');
+      const response = await api.get('/faculty/my-schedule');
+      console.log('✅ Schedule fetched:', response.data);
+      
+      // Handle both response formats
+      const data = response.data?.data || response.data || [];
+      setSchedule(data);
+      
+      if (showToast) {
+        toast.success(`Loaded ${data.length} schedule slots`);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching schedule:', error);
+      if (showToast) {
+        toast.error('Failed to load schedule');
+      }
+      setSchedule([]);
+    } finally {
+      setScheduleLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchSchedule(true);
   };
 
   const handleStatusUpdate = async (appointmentId, status) => {
@@ -96,6 +115,60 @@ const FacultyDashboard = () => {
 
   const pendingAppointments = appointments.filter(a => a.status === 'pending').slice(0, 4);
 
+  // Format time for display
+  const formatTimeDisplay = (time) => {
+    if (!time) return '';
+    const [hours, minutes] = time.split(':').map(Number);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const hour12 = hours % 12 || 12;
+    return `${hour12}:${String(minutes).padStart(2, '0')} ${ampm}`;
+  };
+
+  // Format date for display
+  const formatDateDisplay = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
+  // Get upcoming schedule slots (next 10)
+  const getUpcomingSlots = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return schedule
+      .filter(slot => {
+        const slotDate = new Date(slot.date);
+        slotDate.setHours(0, 0, 0, 0);
+        return slotDate >= today;
+      })
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .slice(0, 10);
+  };
+
+  // Get past schedule slots
+  const getPastSlots = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return schedule
+      .filter(slot => {
+        const slotDate = new Date(slot.date);
+        slotDate.setHours(0, 0, 0, 0);
+        return slotDate < today;
+      })
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 5);
+  };
+
+  const upcomingSlots = getUpcomingSlots();
+  const pastSlots = getPastSlots();
+
   return (
     <PageTransition className="py-8 md:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
       {/* Header Banner */}
@@ -112,7 +185,15 @@ const FacultyDashboard = () => {
             {user?.department ? `${user.department} Department` : 'East Delta University Faculty'} • ID: {user?.facultyId || 'FAC-Member'}
           </p>
         </div>
-        <div className="z-10 shrink-0">
+        <div className="z-10 shrink-0 flex items-center gap-3">
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 text-slate-400 hover:text-white hover:bg-slate-700/60 transition-all"
+            title="Refresh dashboard"
+          >
+            <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
           <Link
             to="/faculty/manage-schedule"
             className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold text-sm shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 border border-indigo-400/30"
@@ -196,12 +277,110 @@ const FacultyDashboard = () => {
         ))}
       </MotionContainer>
 
+      {/* Upcoming Schedule Slots */}
+      <MotionContainer delay={0.25} className="glass-panel p-6 sm:p-8 space-y-6">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div className="flex items-center gap-2">
+            <CalendarIcon className="w-5 h-5 text-emerald-400" />
+            <h2 className="text-xl font-bold text-white">Your Upcoming Availability</h2>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-400">
+              {schedule.length} total slot{schedule.length !== 1 ? 's' : ''}
+            </span>
+            <Link to="/faculty/manage-schedule" className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+              <span>Manage</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+
+        {scheduleLoading ? (
+          <div className="py-8 text-center text-slate-400 text-sm flex items-center justify-center gap-2">
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-indigo-500 border-t-transparent"></div>
+            <span>Loading schedule...</span>
+          </div>
+        ) : schedule.length === 0 ? (
+          <div className="py-8 text-center text-slate-400 space-y-3">
+            <CalendarIcon className="w-12 h-12 text-slate-600 mx-auto" />
+            <p className="text-slate-300 font-semibold text-base">No slots created yet</p>
+            <p className="text-sm">Use the "Manage Schedule" button above to add your availability slots.</p>
+            <Link to="/faculty/manage-schedule" className="inline-block mt-2">
+              <MagneticButton variant="primary" className="py-2.5 px-5 text-sm">
+                <PlusCircle className="w-4 h-4" />
+                <span>Create Your First Slot</span>
+              </MagneticButton>
+            </Link>
+          </div>
+        ) : upcomingSlots.length === 0 && pastSlots.length > 0 ? (
+          <div className="py-8 text-center text-slate-400 space-y-2">
+            <CalendarIcon className="w-8 h-8 text-slate-600 mx-auto" />
+            <p className="text-slate-300 font-semibold text-sm">No upcoming slots</p>
+            <p className="text-xs">All your slots are in the past. Create new slots for future dates.</p>
+            <Link to="/faculty/manage-schedule" className="inline-block mt-2">
+              <MagneticButton variant="primary" className="py-2 px-4 text-xs">
+                <PlusCircle className="w-4 h-4" />
+                <span>Add New Slots</span>
+              </MagneticButton>
+            </Link>
+          </div>
+        ) : (
+          <div>
+            {/* Upcoming Slots */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {upcomingSlots.map((slot) => (
+                <div key={slot._id} className="p-3 rounded-xl bg-slate-800/40 border border-slate-700/50 hover:border-emerald-500/30 transition-colors">
+                  <p className="text-sm font-medium text-white">{formatDateDisplay(slot.date)}</p>
+                  <p className="text-xs text-emerald-400">
+                    {formatTimeDisplay(slot.startTime)} - {formatTimeDisplay(slot.endTime)}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`text-[10px] font-medium ${slot.isAvailable ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      {slot.isAvailable ? '✅ Available' : '❌ Unavailable'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Past Slots (collapsible) */}
+            {pastSlots.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-slate-700/50">
+                <details className="group">
+                  <summary className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer hover:text-slate-300 transition-colors">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>Past Slots ({pastSlots.length})</span>
+                    <span className="text-[10px] text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+                  </summary>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
+                    {pastSlots.map((slot) => (
+                      <div key={slot._id} className="p-3 rounded-xl bg-slate-800/20 border border-slate-700/30 opacity-60">
+                        <p className="text-sm font-medium text-slate-400">{formatDateDisplay(slot.date)}</p>
+                        <p className="text-xs text-slate-500">
+                          {formatTimeDisplay(slot.startTime)} - {formatTimeDisplay(slot.endTime)}
+                        </p>
+                        <span className="text-[10px] text-slate-500">📅 Past</span>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              </div>
+            )}
+          </div>
+        )}
+      </MotionContainer>
+
       {/* Pending Requests Queue */}
       <MotionContainer delay={0.3} className="glass-panel p-6 sm:p-8 space-y-6">
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
           <div className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-amber-400" />
             <h2 className="text-xl font-bold text-white">Pending Student Requests</h2>
+            {pendingAppointments.length > 0 && (
+              <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-amber-500/20 text-amber-300">
+                {pendingAppointments.length}
+              </span>
+            )}
           </div>
           <Link to="/faculty/appointments" className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
             <span>View All</span>
@@ -223,7 +402,7 @@ const FacultyDashboard = () => {
                     </span>
                   </div>
                   <p className="text-xs text-slate-400">
-                    📅 {new Date(appointment.date).toLocaleDateString()} at {appointment.startTime} - {appointment.endTime}
+                    📅 {formatDateDisplay(appointment.date)} at {formatTimeDisplay(appointment.startTime)} - {formatTimeDisplay(appointment.endTime)}
                   </p>
                   <p className="text-xs text-slate-300 italic">Purpose: "{appointment.purpose}"</p>
                 </div>

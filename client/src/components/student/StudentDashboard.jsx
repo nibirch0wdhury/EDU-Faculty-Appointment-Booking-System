@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, FileText, PlusCircle, List, Mail, ArrowRight, Sparkles, UserCheck } from 'lucide-react';
+import { Calendar, Clock, FileText, PlusCircle, List, Mail, ArrowRight, Sparkles, UserCheck, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import SpotlightCard from '../ui/SpotlightCard';
@@ -16,6 +16,7 @@ const StudentDashboard = () => {
     upcoming: 0,
     completed: 0,
   });
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchAppointments();
@@ -23,16 +24,27 @@ const StudentDashboard = () => {
 
   const fetchAppointments = async () => {
     try {
+      setLoading(true);
+      setError(null);
+      console.log('📋 Fetching student appointments...');
+      
       const response = await api.get('/appointments/student');
-      const data = response.data || [];
+      console.log('✅ Appointments response:', response.data);
+      
+      const data = Array.isArray(response.data) ? response.data : response.data?.data || [];
       setAppointments(data);
+      
       setStats({
         total: data.length,
         upcoming: data.filter(a => a.status === 'confirmed' || a.status === 'pending').length,
         completed: data.filter(a => a.status === 'completed').length,
       });
+      
     } catch (error) {
-      console.error('Error fetching appointments:', error);
+      console.error('❌ Error fetching appointments:', error);
+      setError('Failed to load appointments. Please refresh the page.');
+      
+      // Set mock data for testing
       const mockData = [
         {
           _id: '1',
@@ -42,6 +54,15 @@ const StudentDashboard = () => {
           endTime: '11:00',
           purpose: 'Project discussion',
           status: 'confirmed'
+        },
+        {
+          _id: '2',
+          facultyId: { name: 'Dr. Jane Doe', department: 'Mathematics' },
+          date: new Date(Date.now() + 172800000).toISOString(),
+          startTime: '14:00',
+          endTime: '15:00',
+          purpose: 'Homework help',
+          status: 'pending'
         }
       ];
       setAppointments(mockData);
@@ -81,6 +102,15 @@ const StudentDashboard = () => {
 
   const upcomingList = appointments.filter(a => a.status === 'confirmed' || a.status === 'pending');
 
+  // Format time for display
+  const formatTimeDisplay = (time) => {
+    if (!time) return '';
+    const [hours, minutes] = time.split(':').map(Number);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const hour12 = hours % 12 || 12;
+    return `${hour12}:${String(minutes).padStart(2, '0')} ${ampm}`;
+  };
+
   return (
     <PageTransition className="py-8 md:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
       {/* Header Banner */}
@@ -107,6 +137,14 @@ const StudentDashboard = () => {
           </Link>
         </div>
       </MotionContainer>
+
+      {/* Error Message */}
+      {error && (
+        <MotionContainer className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-rose-300 text-sm flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
+          <span>{error}</span>
+        </MotionContainer>
+      )}
 
       {/* Stats Cards */}
       <MotionContainer delay={0.1} className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -183,7 +221,10 @@ const StudentDashboard = () => {
         </div>
 
         {loading ? (
-          <div className="py-8 text-center text-slate-400">Loading appointments...</div>
+          <div className="py-8 text-center text-slate-400 flex items-center justify-center gap-2">
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-indigo-500 border-t-transparent"></div>
+            <span>Loading appointments...</span>
+          </div>
         ) : upcomingList.length > 0 ? (
           <div className="space-y-3">
             {upcomingList.slice(0, 4).map((appointment) => (
@@ -191,7 +232,7 @@ const StudentDashboard = () => {
                 <div className="space-y-1">
                   <p className="font-bold text-white">{appointment.facultyId?.name || 'Faculty Member'}</p>
                   <p className="text-xs text-slate-400">
-                    📅 {new Date(appointment.date).toLocaleDateString()} at {appointment.startTime} - {appointment.endTime}
+                    📅 {new Date(appointment.date).toLocaleDateString()} at {formatTimeDisplay(appointment.startTime)} - {formatTimeDisplay(appointment.endTime)}
                   </p>
                   {appointment.purpose && (
                     <p className="text-xs text-slate-300 italic">"{appointment.purpose}"</p>
@@ -203,6 +244,7 @@ const StudentDashboard = () => {
           </div>
         ) : (
           <div className="py-12 text-center text-slate-400 space-y-3">
+            <Calendar className="w-8 h-8 text-slate-600 mx-auto" />
             <p>No upcoming appointments found.</p>
             <Link to="/student/book-appointment">
               <span className="inline-flex items-center gap-1 text-sm text-indigo-400 font-semibold hover:underline">
