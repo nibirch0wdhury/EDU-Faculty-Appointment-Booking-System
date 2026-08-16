@@ -1,6 +1,15 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const getBaseUrl = () => {
+  let url = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  url = url.trim().replace(/\/+$/, '');
+  if (!url.endsWith('/api')) {
+    url += '/api';
+  }
+  return url;
+};
+
+const API_URL = getBaseUrl();
 
 const api = axios.create({
   baseURL: API_URL,
@@ -35,7 +44,6 @@ api.interceptors.response.use(
     console.error('Response error:', error.response?.data || error.message);
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      delete axios.defaults.headers.common['Authorization'];
       window.location.href = '/login';
     }
     return Promise.reject(error);
