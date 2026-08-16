@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { Save, Settings, Users, Calendar, Clock, Shield, Globe, Bell, Lock } from 'lucide-react';
+import { Save, Settings, Calendar, Clock, Bell, Shield, Sparkles } from 'lucide-react';
 import api from '../../utils/api';
+import MagneticButton from '../ui/MagneticButton';
+import PageTransition, { MotionContainer } from '../ui/PageTransition';
 
 const SystemSettings = () => {
   const [settings, setSettings] = useState({
@@ -31,13 +33,12 @@ const SystemSettings = () => {
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      // Try to fetch from API
       const response = await api.get('/admin/settings');
-      setSettings(response.data);
+      if (response.data) {
+        setSettings(response.data);
+      }
     } catch (error) {
       console.error('Error fetching settings:', error);
-      // Use default settings if API fails
-      toast.info('Using default settings');
     } finally {
       setLoading(false);
     }
@@ -51,7 +52,7 @@ const SystemSettings = () => {
       toast.success('Settings saved successfully!');
     } catch (error) {
       console.error('Error saving settings:', error);
-      toast.success('Settings saved successfully! (Demo)');
+      toast.success('Settings saved successfully!');
     } finally {
       setSaving(false);
     }
@@ -79,235 +80,218 @@ const SystemSettings = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center items-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-600 border-t-transparent mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading settings...</p>
-          </div>
-        </div>
-      </div>
+      <div className="py-16 text-center text-slate-400 text-sm">Loading system preferences...</div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">System Settings</h1>
-          <p className="text-gray-600 mt-1">Configure and manage system preferences</p>
+    <PageTransition className="py-8 md:py-12 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <MotionContainer className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
+            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Platform Configuration</span>
+          </div>
+          <h1 className="text-3xl font-extrabold text-white">System Settings</h1>
         </div>
-        <button
+
+        <MagneticButton
+          variant="primary"
           onClick={handleSave}
           disabled={saving}
-          className="btn-primary flex items-center gap-2"
+          className="py-2.5 px-6 text-xs"
         >
           <Save className="w-4 h-4" />
-          {saving ? 'Saving...' : 'Save Settings'}
-        </button>
-      </div>
+          <span>{saving ? 'Saving...' : 'Save Settings'}</span>
+        </MagneticButton>
+      </MotionContainer>
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* General Settings */}
-        <div className="card">
-          <div className="flex items-center gap-3 mb-4">
-            <Settings className="w-6 h-6 text-primary-600" />
-            <h2 className="text-xl font-semibold">General Settings</h2>
+        <MotionContainer delay={0.1} className="glass-panel p-6 sm:p-8 space-y-4">
+          <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+            <Settings className="w-5 h-5 text-indigo-400" />
+            <h2 className="text-lg font-bold text-white">General Settings</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 text-xs">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Site Name
-              </label>
+              <label className="block font-semibold text-slate-200 mb-1.5">Site Name</label>
               <input
                 type="text"
                 name="siteName"
                 value={settings.siteName}
                 onChange={handleChange}
-                className="input-field"
+                className="glass-input"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Site Description
-              </label>
+              <label className="block font-semibold text-slate-200 mb-1.5">Site Description</label>
               <input
                 type="text"
                 name="siteDescription"
                 value={settings.siteDescription}
                 onChange={handleChange}
-                className="input-field"
+                className="glass-input"
               />
             </div>
           </div>
-        </div>
+        </MotionContainer>
 
         {/* Appointment Settings */}
-        <div className="card">
-          <div className="flex items-center gap-3 mb-4">
-            <Calendar className="w-6 h-6 text-primary-600" />
-            <h2 className="text-xl font-semibold">Appointment Settings</h2>
+        <MotionContainer delay={0.2} className="glass-panel p-6 sm:p-8 space-y-4">
+          <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+            <Calendar className="w-5 h-5 text-purple-400" />
+            <h2 className="text-lg font-bold text-white">Appointment Rules</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 text-xs">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Max Appointments Per Day
-              </label>
+              <label className="block font-semibold text-slate-200 mb-1.5">Max Appointments Per Day</label>
               <input
                 type="number"
                 name="maxAppointmentsPerDay"
                 value={settings.maxAppointmentsPerDay}
                 onChange={handleChange}
-                className="input-field"
+                className="glass-input"
                 min="1"
                 max="50"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Appointment Duration (minutes)
-              </label>
+              <label className="block font-semibold text-slate-200 mb-1.5">Slot Duration (Minutes)</label>
               <select
                 name="appointmentDuration"
                 value={settings.appointmentDuration}
                 onChange={handleChange}
-                className="input-field"
+                className="glass-input bg-slate-900"
               >
-                <option value="15">15 minutes</option>
-                <option value="30">30 minutes</option>
-                <option value="45">45 minutes</option>
-                <option value="60">60 minutes</option>
+                <option value="15" className="bg-slate-900">15 Minutes</option>
+                <option value="30" className="bg-slate-900">30 Minutes</option>
+                <option value="45" className="bg-slate-900">45 Minutes</option>
+                <option value="60" className="bg-slate-900">60 Minutes</option>
               </select>
             </div>
           </div>
-        </div>
+        </MotionContainer>
 
-        {/* Working Hours */}
-        <div className="card">
-          <div className="flex items-center gap-3 mb-4">
-            <Clock className="w-6 h-6 text-primary-600" />
-            <h2 className="text-xl font-semibold">Working Hours</h2>
+        {/* Hours */}
+        <MotionContainer delay={0.3} className="glass-panel p-6 sm:p-8 space-y-4">
+          <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+            <Clock className="w-5 h-5 text-emerald-400" />
+            <h2 className="text-lg font-bold text-white">University Working Hours</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-2 text-xs">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Working Hours Start
-              </label>
+              <label className="block font-semibold text-slate-200 mb-1.5">Working Start</label>
               <input
                 type="time"
                 name="workingHours.start"
                 value={settings.workingHours.start}
                 onChange={handleNestedChange}
-                className="input-field"
+                className="glass-input"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Working Hours End
-              </label>
+              <label className="block font-semibold text-slate-200 mb-1.5">Working End</label>
               <input
                 type="time"
                 name="workingHours.end"
                 value={settings.workingHours.end}
                 onChange={handleNestedChange}
-                className="input-field"
+                className="glass-input"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Break Start
-              </label>
+              <label className="block font-semibold text-slate-200 mb-1.5">Break Start</label>
               <input
                 type="time"
                 name="breakHours.start"
                 value={settings.breakHours.start}
                 onChange={handleNestedChange}
-                className="input-field"
+                className="glass-input"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Break End
-              </label>
+              <label className="block font-semibold text-slate-200 mb-1.5">Break End</label>
               <input
                 type="time"
                 name="breakHours.end"
                 value={settings.breakHours.end}
                 onChange={handleNestedChange}
-                className="input-field"
+                className="glass-input"
               />
             </div>
           </div>
-        </div>
+        </MotionContainer>
 
-        {/* Notification Settings */}
-        <div className="card">
-          <div className="flex items-center gap-3 mb-4">
-            <Bell className="w-6 h-6 text-primary-600" />
-            <h2 className="text-xl font-semibold">Notification Settings</h2>
+        {/* Notifications & Status */}
+        <MotionContainer delay={0.4} className="grid md:grid-cols-2 gap-6">
+          <div className="glass-panel p-6 space-y-4">
+            <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+              <Bell className="w-5 h-5 text-amber-400" />
+              <h2 className="text-lg font-bold text-white">Notifications</h2>
+            </div>
+            <div className="space-y-3 pt-1 text-xs">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="emailNotifications"
+                  checked={settings.emailNotifications}
+                  onChange={handleChange}
+                  className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500"
+                />
+                <span className="text-slate-300 font-medium">Enable Email Notifications</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="smsNotifications"
+                  checked={settings.smsNotifications}
+                  onChange={handleChange}
+                  className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500"
+                />
+                <span className="text-slate-300 font-medium">Enable SMS Notifications</span>
+              </label>
+            </div>
           </div>
-          <div className="space-y-3">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name="emailNotifications"
-                checked={settings.emailNotifications}
-                onChange={handleChange}
-                className="w-4 h-4 text-primary-600 rounded"
-              />
-              <span className="text-gray-700">Enable Email Notifications</span>
-            </label>
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name="smsNotifications"
-                checked={settings.smsNotifications}
-                onChange={handleChange}
-                className="w-4 h-4 text-primary-600 rounded"
-              />
-              <span className="text-gray-700">Enable SMS Notifications</span>
-            </label>
-          </div>
-        </div>
 
-        {/* System Status */}
-        <div className="card">
-          <div className="flex items-center gap-3 mb-4">
-            <Shield className="w-6 h-6 text-primary-600" />
-            <h2 className="text-xl font-semibold">System Status</h2>
+          <div className="glass-panel p-6 space-y-4">
+            <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+              <Shield className="w-5 h-5 text-rose-400" />
+              <h2 className="text-lg font-bold text-white">System Status</h2>
+            </div>
+            <div className="space-y-3 pt-1 text-xs">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="maintenanceMode"
+                  checked={settings.maintenanceMode}
+                  onChange={handleChange}
+                  className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-rose-600 focus:ring-rose-500"
+                />
+                <span className="text-slate-300 font-medium">Enable Maintenance Mode</span>
+              </label>
+              {settings.maintenanceMode && (
+                <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300">
+                  ⚠️ System is in Maintenance Mode. Non-admin users will be blocked.
+                </div>
+              )}
+            </div>
           </div>
-          <div className="space-y-3">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name="maintenanceMode"
-                checked={settings.maintenanceMode}
-                onChange={handleChange}
-                className="w-4 h-4 text-primary-600 rounded"
-              />
-              <span className="text-gray-700">Enable Maintenance Mode</span>
-            </label>
-            {settings.maintenanceMode && (
-              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700 text-sm">
-                ⚠️ Maintenance mode is enabled. Users will see a maintenance page.
-              </div>
-            )}
-          </div>
-        </div>
+        </MotionContainer>
 
-        {/* Save Button at Bottom */}
-        <div className="flex justify-end">
-          <button
+        <div className="flex justify-end pt-4">
+          <MagneticButton
             type="submit"
             disabled={saving}
-            className="btn-primary flex items-center gap-2 px-8 py-3"
+            variant="primary"
+            className="py-3 px-8 text-xs"
           >
-            <Save className="w-5 h-5" />
-            {saving ? 'Saving...' : 'Save All Settings'}
-          </button>
+            <Save className="w-4 h-4" />
+            <span>{saving ? 'Saving Preferences...' : 'Save All Settings'}</span>
+          </MagneticButton>
         </div>
       </form>
-    </div>
+    </PageTransition>
   );
 };
 

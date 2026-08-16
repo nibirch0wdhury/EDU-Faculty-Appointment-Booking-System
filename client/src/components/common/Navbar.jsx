@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Calendar, User, LogOut, MessageSquare, LayoutDashboard, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // Handle scroll effect for navbar background
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 20);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -43,114 +40,124 @@ const Navbar = () => {
     }
   };
 
+  const isActive = (path) => location.pathname === path;
+
   return (
-    <nav 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+    <header 
+      className={`sticky top-0 z-50 transition-all duration-300 ${
         isScrolled 
-          ? 'bg-white/95 backdrop-blur-md shadow-lg' 
-          : 'bg-transparent'
+          ? 'bg-slate-950/85 backdrop-blur-xl border-b border-slate-800/90 shadow-2xl shadow-indigo-950/20 py-3' 
+          : 'bg-slate-900/70 backdrop-blur-md border-b border-slate-800/50 py-4'
       }`}
     >
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center relative">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <span className={`text-2xl font-bold transition-colors duration-300 ${
-              isScrolled ? 'text-primary-600' : 'text-white'
-            }`}>
-              EDU
-            </span>
-            <span className={`text-sm transition-colors duration-300 ${
-              isScrolled ? 'text-gray-600' : 'text-white/80'
-            }`}>
-              Appointment System
-            </span>
+          <Link to="/" className="flex items-center gap-3 group shrink-0">
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform duration-300">
+              <Calendar className="w-5 h-5" />
+              <div className="absolute inset-0 rounded-xl bg-indigo-400/20 animate-ping opacity-20" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-indigo-300 bg-clip-text text-transparent">
+                EDU<span className="text-indigo-400 font-light">Book</span>
+              </span>
+              <span className="text-[10px] font-medium tracking-widest text-slate-400 uppercase">
+                Appointment Portal
+              </span>
+            </div>
           </Link>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Link 
-              to="/" 
-              className={`transition-colors duration-300 ${
-                isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'
-              }`}
-            >
-              Home
-            </Link>
-            <Link 
-              to="/about" 
-              className={`transition-colors duration-300 ${
-                isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'
-              }`}
-            >
-              About
-            </Link>
-            <Link 
-              to="/contact" 
-              className={`transition-colors duration-300 ${
-                isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'
-              }`}
-            >
-              Contact
-            </Link>
-            
+          {/* Desktop Menu - Mathematically Centered */}
+          <nav className="hidden md:flex items-center gap-1 bg-slate-850/80 p-1.5 rounded-2xl border border-slate-800/80 backdrop-blur-md absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+            {[
+              { path: '/', label: 'Home' },
+              { path: '/about', label: 'About' },
+              { path: '/contact', label: 'Contact' },
+            ].map((navItem) => (
+              <Link
+                key={navItem.path}
+                to={navItem.path}
+                className={`relative px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
+                  isActive(navItem.path)
+                    ? 'text-white'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                }`}
+              >
+                {isActive(navItem.path) && (
+                  <motion.div
+                    layoutId="activePill"
+                    className="absolute inset-0 bg-gradient-to-r from-indigo-600/80 to-purple-600/80 rounded-xl shadow-md"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10">{navItem.label}</span>
+              </Link>
+            ))}
+          </nav>
+
+          {/* User Auth Buttons */}
+          <div className="hidden md:flex items-center gap-3 shrink-0 z-10">
             {isAuthenticated ? (
               <>
                 <Link 
                   to={getDashboardLink()} 
-                  className={`px-4 py-2 rounded-lg transition duration-200 ${
-                    isScrolled 
-                      ? 'bg-primary-600 hover:bg-primary-700 text-white' 
-                      : 'bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm'
-                  }`}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium text-sm shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 border border-indigo-400/30"
                 >
-                  Dashboard
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span>Dashboard</span>
                 </Link>
+                
                 <Link 
                   to="/user/messages" 
-                  className={`transition-colors duration-300 flex items-center gap-1 ${
-                    isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'
-                  }`}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/70 text-sm font-medium transition-all duration-200 border border-slate-700/50"
+                  title="Messages"
                 >
-                  📧 Messages
+                  <MessageSquare className="w-4 h-4 text-indigo-400" />
+                  <span>Messages</span>
                 </Link>
-                <button 
-                  onClick={handleLogout} 
-                  className={`px-4 py-2 rounded-lg transition duration-200 ${
-                    isScrolled 
-                      ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' 
-                      : 'bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm'
-                  }`}
-                >
-                  Logout
-                </button>
-                <span className={`text-sm transition-colors duration-300 ${
-                  isScrolled ? 'text-gray-600' : 'text-white/80'
-                }`}>
-                  Welcome, {user?.name?.split(' ')[0] || 'User'}!
-                </span>
+
+                <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
+                  <Link 
+                    to="/user/profile"
+                    className="flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 hover:border-indigo-500/50 px-3 py-1.5 rounded-xl transition-all duration-200 group"
+                    title="View Profile"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white shadow-sm overflow-hidden">
+                      {user?.profileImage ? (
+                        <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+                      ) : (
+                        user?.name?.[0]?.toUpperCase() || 'U'
+                      )}
+                    </div>
+                    <span className="text-xs font-semibold text-slate-200 group-hover:text-indigo-300 max-w-[100px] truncate">
+                      {user?.name?.split(' ')[0] || 'User'}
+                    </span>
+                  </Link>
+
+                  <button 
+                    onClick={handleLogout} 
+                    className="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                    title="Logout"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
               </>
             ) : (
               <>
                 <Link 
                   to="/login" 
-                  className={`px-4 py-2 rounded-lg transition duration-200 ${
-                    isScrolled 
-                      ? 'bg-primary-600 hover:bg-primary-700 text-white' 
-                      : 'bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm'
-                  }`}
+                  className="px-4 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 text-sm font-medium transition-all duration-200"
                 >
-                  Login
+                  Sign In
                 </Link>
                 <Link 
                   to="/register" 
-                  className={`px-4 py-2 rounded-lg transition duration-200 ${
-                    isScrolled 
-                      ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' 
-                      : 'bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm'
-                  }`}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold text-sm shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 border border-indigo-400/30"
                 >
-                  Register
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Get Started</span>
                 </Link>
               </>
             )}
@@ -159,122 +166,107 @@ const Navbar = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={`md:hidden p-2 rounded-lg transition-colors duration-300 ${
-              isScrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/20'
-            }`}
+            className="md:hidden p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/80 transition-colors"
+            aria-label="Toggle Menu"
           >
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden pb-4 space-y-2">
-            <Link 
-              to="/" 
-              className={`block px-4 py-2 rounded-lg transition-colors duration-300 ${
-                isScrolled 
-                  ? 'text-gray-700 hover:bg-gray-100' 
-                  : 'text-white hover:bg-white/20'
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link 
-              to="/about" 
-              className={`block px-4 py-2 rounded-lg transition-colors duration-300 ${
-                isScrolled 
-                  ? 'text-gray-700 hover:bg-gray-100' 
-                  : 'text-white hover:bg-white/20'
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              About
-            </Link>
-            <Link 
-              to="/contact" 
-              className={`block px-4 py-2 rounded-lg transition-colors duration-300 ${
-                isScrolled 
-                  ? 'text-gray-700 hover:bg-gray-100' 
-                  : 'text-white hover:bg-white/20'
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Contact
-            </Link>
-            
-            {isAuthenticated ? (
-              <>
-                <Link 
-                  to={getDashboardLink()} 
-                  className={`block px-4 py-2 rounded-lg transition duration-200 ${
-                    isScrolled 
-                      ? 'bg-primary-600 hover:bg-primary-700 text-white' 
-                      : 'bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm'
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Dashboard
-                </Link>
-                <Link 
-                  to="/user/messages" 
-                  className={`block px-4 py-2 rounded-lg transition-colors duration-300 ${
-                    isScrolled 
-                      ? 'text-gray-700 hover:bg-gray-100' 
-                      : 'text-white hover:bg-white/20'
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  📧 Messages
-                </Link>
-                <button 
-                  onClick={handleLogout} 
-                  className={`block w-full text-left px-4 py-2 rounded-lg transition duration-200 ${
-                    isScrolled 
-                      ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' 
-                      : 'bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm'
-                  }`}
-                >
-                  Logout
-                </button>
-                <div className={`px-4 py-2 text-sm ${
-                  isScrolled ? 'text-gray-600' : 'text-white/80'
-                }`}>
-                  Welcome, {user?.name?.split(' ')[0] || 'User'}!
-                </div>
-              </>
-            ) : (
-              <>
-                <Link 
-                  to="/login" 
-                  className={`block px-4 py-2 rounded-lg transition duration-200 ${
-                    isScrolled 
-                      ? 'bg-primary-600 hover:bg-primary-700 text-white' 
-                      : 'bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm'
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Login
-                </Link>
-                <Link 
-                  to="/register" 
-                  className={`block px-4 py-2 rounded-lg transition duration-200 ${
-                    isScrolled 
-                      ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' 
-                      : 'bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm'
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Register
-                </Link>
-              </>
-            )}
-          </div>
-        )}
       </div>
-    </nav>
+
+      {/* Mobile Drawer */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="md:hidden overflow-hidden bg-slate-900/95 backdrop-blur-2xl border-b border-slate-800 px-4 py-6 space-y-4"
+          >
+            <div className="flex flex-col space-y-2">
+              <Link 
+                to="/" 
+                className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive('/') ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30' : 'text-slate-300 hover:bg-slate-800/60'}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <Link 
+                to="/about" 
+                className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive('/about') ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30' : 'text-slate-300 hover:bg-slate-800/60'}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                About
+              </Link>
+              <Link 
+                to="/contact" 
+                className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive('/contact') ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30' : 'text-slate-300 hover:bg-slate-800/60'}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Contact
+              </Link>
+            </div>
+
+            <div className="pt-4 border-t border-slate-800/80">
+              {isAuthenticated ? (
+                <div className="space-y-2">
+                  <Link 
+                    to={getDashboardLink()} 
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold text-sm shadow-md"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                  <Link 
+                    to="/user/profile" 
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-slate-800 text-slate-200 font-medium text-sm border border-slate-700/60 hover:border-indigo-500/50"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <User className="w-4 h-4 text-indigo-400" />
+                    <span>My Profile</span>
+                  </Link>
+                  <Link 
+                    to="/user/messages" 
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-slate-800 text-slate-200 font-medium text-sm border border-slate-700/60"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <MessageSquare className="w-4 h-4 text-indigo-400" />
+                    <span>Messages</span>
+                  </Link>
+                  <button 
+                    onClick={handleLogout} 
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-rose-500/10 text-rose-300 font-medium text-sm border border-rose-500/20"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Logout ({user?.name})</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <Link 
+                    to="/login" 
+                    className="flex items-center justify-center py-3 rounded-xl bg-slate-800 text-slate-200 font-medium text-sm border border-slate-700/60"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Sign In
+                  </Link>
+                  <Link 
+                    to="/register" 
+                    className="flex items-center justify-center py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold text-sm shadow-md"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Get Started
+                  </Link>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
   );
 };
 
-export default Navbar;
+export default Navbar;

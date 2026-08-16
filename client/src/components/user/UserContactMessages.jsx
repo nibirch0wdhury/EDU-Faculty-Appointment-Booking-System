@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, MessageSquare, CheckCircle, Clock, Reply, User, RefreshCw } from 'lucide-react';
+import { Mail, MessageSquare, CheckCircle, Clock, Reply, User, RefreshCw, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
+import SpotlightCard from '../ui/SpotlightCard';
+import MagneticButton from '../ui/MagneticButton';
+import Badge from '../ui/Badge';
+import PageTransition, { MotionContainer } from '../ui/PageTransition';
 
 const UserContactMessages = () => {
   const { user } = useAuth();
@@ -17,13 +22,8 @@ const UserContactMessages = () => {
   const fetchMessages = async (showToast = false) => {
     try {
       setLoading(true);
-      console.log('Fetching messages for user:', user?.email);
-      
       const response = await api.get('/contact/user/messages');
-      console.log('Messages response:', response.data);
-      
       setMessages(response.data.data || []);
-      
       if (showToast) {
         toast.success(`Loaded ${response.data.data?.length || 0} messages`);
       }
@@ -42,229 +42,157 @@ const UserContactMessages = () => {
     fetchMessages(true);
   };
 
-  // Format date and time
   const formatDateTime = (dateString) => {
+    if (!dateString) return '';
     const date = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    
-    // Format time
-    let hours = date.getHours();
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
-    const timeStr = `${hours}:${minutes} ${ampm}`;
-    
-    // Format date
-    if (date.toDateString() === today.toDateString()) {
-      return `Today at ${timeStr}`;
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return `Yesterday at ${timeStr}`;
-    } else {
-      const options = { month: 'short', day: 'numeric', year: 'numeric' };
-      return `${date.toLocaleDateString('en-US', options)} at ${timeStr}`;
-    }
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
   };
-
-  // Format date only
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const options = { month: 'short', day: 'numeric', year: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
-  };
-
-  // Format time only
-  const formatTime = (dateString) => {
-    const date = new Date(dateString);
-    let hours = date.getHours();
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    return `${hours}:${minutes} ${ampm}`;
-  };
-
-  const getStatusBadge = (status) => {
-    switch(status) {
-      case 'unread':
-        return <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm flex items-center gap-1">⏳ Pending</span>;
-      case 'read':
-        return <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm flex items-center gap-1">📖 Read</span>;
-      case 'replied':
-        return <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm flex items-center gap-1">✅ Replied</span>;
-      default:
-        return <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">{status}</span>;
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-600 border-t-transparent mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your messages...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Messages</h1>
-          <p className="text-gray-600 mt-1">View all your contact messages and admin replies</p>
+    <PageTransition className="py-8 md:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      {/* Header */}
+      <MotionContainer className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
+            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Support Requests History</span>
+          </div>
+          <h1 className="text-3xl font-extrabold text-white">My Support Messages</h1>
         </div>
-        <button
+
+        <MagneticButton
+          variant="secondary"
           onClick={handleRefresh}
           disabled={refreshing}
-          className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center gap-2"
+          className="py-2.5 px-4 text-xs"
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
-      </div>
+          <span>Refresh</span>
+        </MagneticButton>
+      </MotionContainer>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl shadow-md p-6">
+      <MotionContainer delay={0.1} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <SpotlightCard spotlightColor="rgba(99, 102, 241, 0.2)" className="p-5">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-primary-100 rounded-lg">
-              <Mail className="w-6 h-6 text-primary-600" />
+            <div className="p-3 bg-indigo-600/20 border border-indigo-500/30 rounded-2xl text-indigo-400">
+              <Mail className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Total Messages</p>
-              <p className="text-2xl font-bold">{messages.length}</p>
+              <p className="text-xs text-slate-400 font-medium">Total Messages Sent</p>
+              <p className="text-2xl font-extrabold text-white">{messages.length}</p>
             </div>
           </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-md p-6">
+        </SpotlightCard>
+
+        <SpotlightCard spotlightColor="rgba(245, 158, 11, 0.2)" className="p-5">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-yellow-100 rounded-lg">
-              <Clock className="w-6 h-6 text-yellow-600" />
+            <div className="p-3 bg-amber-500/20 border border-amber-500/30 rounded-2xl text-amber-400">
+              <Clock className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-yellow-600">
+              <p className="text-xs text-slate-400 font-medium">Awaiting Response</p>
+              <p className="text-2xl font-extrabold text-amber-400">
                 {messages.filter(m => m.status === 'unread' || m.status === 'read').length}
               </p>
             </div>
           </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-md p-6">
+        </SpotlightCard>
+
+        <SpotlightCard spotlightColor="rgba(16, 185, 129, 0.2)" className="p-5">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-green-100 rounded-lg">
-              <CheckCircle className="w-6 h-6 text-green-600" />
+            <div className="p-3 bg-emerald-600/20 border border-emerald-500/30 rounded-2xl text-emerald-400">
+              <CheckCircle className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Replied</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-xs text-slate-400 font-medium">Official Replies</p>
+              <p className="text-2xl font-extrabold text-emerald-400">
                 {messages.filter(m => m.status === 'replied').length}
               </p>
             </div>
           </div>
-        </div>
-      </div>
+        </SpotlightCard>
+      </MotionContainer>
 
       {/* Messages List */}
-      {messages.length > 0 ? (
-        <div className="space-y-4">
+      {loading ? (
+        <div className="py-16 text-center text-slate-400 text-sm">Loading support tickets...</div>
+      ) : messages.length > 0 ? (
+        <MotionContainer delay={0.2} className="space-y-4">
           {messages.map((message) => (
-            <div 
+            <SpotlightCard 
               key={message._id} 
-              className={`bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow ${
-                message.status === 'unread' ? 'border-l-4 border-yellow-500' : 
-                message.status === 'replied' ? 'border-l-4 border-green-500' : ''
+              spotlightColor="rgba(99, 102, 241, 0.2)"
+              className={`p-6 border-l-4 ${
+                message.status === 'replied' ? 'border-l-emerald-500' : 'border-l-amber-500'
               }`}
             >
-              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 bg-primary-100 rounded-full">
-                      <User className="w-5 h-5 text-primary-600" />
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                <div className="space-y-3 flex-grow">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-indigo-600/20 border border-indigo-500/30 rounded-full text-indigo-400">
+                      <User className="w-4 h-4" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold">{message.name}</h3>
-                        {getStatusBadge(message.status)}
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-base text-white">{message.name}</h3>
+                        <Badge status={message.status} />
                       </div>
-                      <p className="text-sm text-gray-600">{message.email}</p>
+                      <p className="text-xs text-slate-400">{message.email}</p>
                     </div>
                   </div>
                   
-                  <div className="mt-3">
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">
-                      <span className="font-medium">Your Message:</span><br />
-                      {message.message}
-                    </p>
+                  <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-200 leading-relaxed">
+                    <strong className="text-slate-400 block mb-1">Your Message:</strong>
+                    {message.message}
                   </div>
                   
                   {message.replyMessage && (
-                    <div className="mt-3 p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="p-1 bg-green-100 rounded-full">
-                          <Reply className="w-4 h-4 text-green-600" />
-                        </div>
-                        <p className="text-sm font-semibold text-green-700">Admin Reply</p>
+                    <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-1.5 text-xs">
+                      <div className="flex items-center gap-1.5 text-emerald-300 font-bold">
+                        <Reply className="w-3.5 h-3.5" />
+                        <span>University Support Reply:</span>
                       </div>
-                      <p className="text-gray-700 bg-white p-3 rounded-lg border border-green-100">
-                        {message.replyMessage}
-                      </p>
+                      <p className="text-slate-200">{message.replyMessage}</p>
                       {message.repliedAt && (
-                        <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
-                          <Clock className="w-3 h-3" />
-                          <span>
-                            {formatDateTime(message.repliedAt)}
-                          </span>
-                        </div>
+                        <p className="text-[11px] text-slate-400 pt-1">
+                          Replied: {formatDateTime(message.repliedAt)}
+                        </p>
                       )}
                     </div>
                   )}
                   
-                  <div className="mt-3 flex items-center gap-4 text-xs text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      Sent: {formatDateTime(message.createdAt)}
-                    </span>
+                  <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                    <Clock className="w-3.5 h-3.5 text-slate-500" />
+                    <span>Sent: {formatDateTime(message.createdAt)}</span>
                   </div>
                 </div>
-
-                <div className="flex gap-2 flex-wrap">
-                  {message.status === 'replied' && (
-                    <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs flex items-center gap-1">
-                      <CheckCircle className="w-3 h-3" />
-                      Replied
-                    </span>
-                  )}
-                  {message.status === 'unread' && (
-                    <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      Awaiting Reply
-                    </span>
-                  )}
-                </div>
               </div>
-            </div>
+            </SpotlightCard>
           ))}
-        </div>
+        </MotionContainer>
       ) : (
-        <div className="bg-white rounded-xl shadow-md p-6 text-center py-12">
-          <MessageSquare className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-700">No Messages Found</h3>
-          <p className="text-gray-600 mt-2">
-            You haven't sent any contact messages yet.
+        <MotionContainer delay={0.2} className="glass-panel p-12 text-center space-y-4">
+          <MessageSquare className="w-12 h-12 text-slate-600 mx-auto" />
+          <h3 className="text-lg font-bold text-white">No Support Messages Sent</h3>
+          <p className="text-xs text-slate-400 max-w-sm mx-auto">
+            You haven't submitted any support inquiries or messages yet.
           </p>
-          <button
-            onClick={() => window.location.href = '/contact'}
-            className="mt-4 bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
-          >
-            Contact Us
-          </button>
-        </div>
+          <Link to="/contact" className="inline-block pt-2">
+            <MagneticButton variant="primary" className="py-2.5 px-6 text-xs">
+              <span>Send Us a Message</span>
+            </MagneticButton>
+          </Link>
+        </MotionContainer>
       )}
-    </div>
+    </PageTransition>
   );
 };
 

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Edit, Trash2, UserPlus, User, Mail, Building, MapPin, Briefcase, Calendar } from 'lucide-react';
+import { Search, Edit, Trash2, UserPlus, User, Mail, Building, MapPin, Briefcase, Calendar, Sparkles, X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../../utils/api';
+import MagneticButton from '../ui/MagneticButton';
+import SpotlightCard from '../ui/SpotlightCard';
+import PageTransition, { MotionContainer } from '../ui/PageTransition';
 
 const ManageFaculties = () => {
   const [faculties, setFaculties] = useState([]);
@@ -29,11 +32,10 @@ const ManageFaculties = () => {
     try {
       setLoading(true);
       const response = await api.get('/admin/faculties');
-      setFaculties(response.data);
+      setFaculties(response.data || []);
     } catch (error) {
       console.error('Error fetching faculties:', error);
       toast.error('Failed to load faculties');
-      // Use mock data if API fails
       setFaculties([
         { 
           _id: '1', 
@@ -84,7 +86,6 @@ const ManageFaculties = () => {
   const handleAddFaculty = async (e) => {
     e.preventDefault();
     try {
-      // First register the user with faculty role
       const userData = {
         name: formData.name,
         email: formData.email,
@@ -95,8 +96,6 @@ const ManageFaculties = () => {
       };
       
       await api.post('/auth/register', userData);
-      
-      // Then add faculty details
       await api.post('/admin/faculties', {
         userId: userData._id,
         designation: formData.designation,
@@ -137,7 +136,6 @@ const ManageFaculties = () => {
   const handleUpdateFaculty = async (e) => {
     e.preventDefault();
     try {
-      // Update user info
       await api.put(`/admin/users/${editingFaculty.userId._id}`, {
         name: formData.name,
         email: formData.email,
@@ -145,7 +143,6 @@ const ManageFaculties = () => {
         ...(formData.password && { password: formData.password }),
       });
       
-      // Update faculty details
       await api.put(`/admin/faculties/${editingFaculty._id}`, {
         designation: formData.designation,
         officeRoom: formData.officeRoom,
@@ -187,70 +184,76 @@ const ManageFaculties = () => {
   });
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Manage Faculties</h1>
-        <button
+    <PageTransition className="py-8 md:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <MotionContainer className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold">
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <span>Academic Staff Management</span>
+          </div>
+          <h1 className="text-3xl font-extrabold text-white">Manage Faculty Members</h1>
+        </div>
+
+        <MagneticButton
+          variant="primary"
           onClick={() => setShowAddModal(true)}
-          className="btn-primary flex items-center gap-2"
+          className="py-2.5 px-4 text-xs"
         >
           <UserPlus className="w-4 h-4" />
-          Add Faculty
-        </button>
-      </div>
+          <span>Add Faculty Member</span>
+        </MagneticButton>
+      </MotionContainer>
 
       {/* Search */}
-      <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-        <input
-          type="text"
-          placeholder="Search faculties by name, department, or email..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="input-field pl-10"
-        />
-      </div>
-
-      {/* Faculties Grid */}
-      {loading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-600 border-t-transparent mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading faculties...</p>
-          </div>
+      <MotionContainer delay={0.1}>
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <input
+            type="text"
+            placeholder="Search faculties by name, department, or email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="glass-input pl-10 text-xs"
+          />
         </div>
+      </MotionContainer>
+
+      {/* Grid */}
+      {loading ? (
+        <div className="py-16 text-center text-slate-400 text-sm">Loading faculty records...</div>
       ) : filteredFaculties.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <MotionContainer delay={0.2} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredFaculties.map((faculty) => (
-            <div key={faculty._id} className="card hover:shadow-lg transition-shadow">
+            <SpotlightCard key={faculty._id} spotlightColor="rgba(168, 85, 247, 0.2)" className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-primary-100 rounded-full">
-                    <User className="w-6 h-6 text-primary-600" />
+                  <div className="w-10 h-10 rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center font-bold text-base">
+                    {faculty.userId?.name?.[0]?.toUpperCase() || 'F'}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">{faculty.userId?.name || 'Unknown'}</h3>
-                    <p className="text-sm text-gray-600">{faculty.designation || 'Faculty Member'}</p>
+                    <h3 className="font-bold text-base text-white">{faculty.userId?.name || 'Unknown'}</h3>
+                    <p className="text-xs text-purple-300 font-medium">{faculty.designation || 'Faculty Member'}</p>
                   </div>
                 </div>
-                <div className="flex gap-1">
+
+                <div className="flex items-center gap-1">
                   <button
                     onClick={() => viewSchedule(faculty)}
-                    className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
                     title="View Schedule"
                   >
                     <Calendar className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleEditFaculty(faculty)}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-300 hover:bg-indigo-500/10 transition-colors"
                     title="Edit Faculty"
                   >
                     <Edit className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(faculty._id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
                     title="Delete Faculty"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -258,255 +261,201 @@ const ManageFaculties = () => {
                 </div>
               </div>
 
-              <div className="mt-4 space-y-2 text-sm">
-                <p className="flex items-center gap-2 text-gray-600">
-                  <Mail className="w-4 h-4" />
-                  {faculty.userId?.email || 'No email'}
+              <div className="mt-4 space-y-2 text-xs text-slate-300 border-t border-slate-800/80 pt-4">
+                <p className="flex items-center gap-2">
+                  <Mail className="w-3.5 h-3.5 text-slate-400" />
+                  <span>{faculty.userId?.email || 'No email'}</span>
                 </p>
-                <p className="flex items-center gap-2 text-gray-600">
-                  <Building className="w-4 h-4" />
-                  {faculty.department || 'No department'}
+                <p className="flex items-center gap-2">
+                  <Building className="w-3.5 h-3.5 text-slate-400" />
+                  <span>{faculty.department || 'No department'}</span>
                 </p>
-                <p className="flex items-center gap-2 text-gray-600">
-                  <MapPin className="w-4 h-4" />
-                  Office: {faculty.officeRoom || 'N/A'}
+                <p className="flex items-center gap-2">
+                  <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Office: {faculty.officeRoom || 'N/A'}</span>
                 </p>
-                <p className="flex items-center gap-2 text-gray-600">
-                  <Briefcase className="w-4 h-4" />
-                  ID: {faculty.facultyId || 'N/A'}
+                <p className="flex items-center gap-2">
+                  <Briefcase className="w-3.5 h-3.5 text-slate-400" />
+                  <span>ID: {faculty.facultyId || 'N/A'}</span>
                 </p>
               </div>
 
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <div className="flex justify-between items-center text-xs text-gray-500">
-                  <span>Joined: {faculty.createdAt ? new Date(faculty.createdAt).toLocaleDateString() : 'N/A'}</span>
-                  <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full">Active</span>
-                </div>
+              <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-[11px]">
+                <span className="text-slate-500">Joined {faculty.createdAt ? new Date(faculty.createdAt).toLocaleDateString() : 'N/A'}</span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-bold">Active</span>
               </div>
-            </div>
+            </SpotlightCard>
           ))}
-        </div>
+        </MotionContainer>
       ) : (
-        <div className="text-center py-12">
-          <User className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-700">No Faculties Found</h3>
-          <p className="text-gray-600 mt-2">
-            {searchTerm ? 'Try adjusting your search' : 'Add your first faculty member'}
-          </p>
-          {!searchTerm && (
-            <button 
-              onClick={() => setShowAddModal(true)}
-              className="mt-4 btn-primary"
-            >
-              Add Faculty Member
-            </button>
-          )}
-        </div>
+        <MotionContainer delay={0.2} className="glass-panel p-12 text-center space-y-3">
+          <User className="w-12 h-12 text-slate-600 mx-auto" />
+          <h3 className="text-lg font-bold text-white">No Faculty Members Found</h3>
+          <p className="text-xs text-slate-400">Try adjusting your search criteria.</p>
+        </MotionContainer>
       )}
 
-      {/* Add Faculty Modal */}
+      {/* Add Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">Add Faculty Member</h2>
-            <form onSubmit={handleAddFaculty} className="space-y-4">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="glass-panel max-w-md w-full p-8 space-y-6 relative border border-slate-700/80">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h2 className="text-lg font-bold text-white">Add Faculty Member</h2>
+              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddFaculty} className="space-y-4 text-xs">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <label className="block font-semibold text-slate-200 mb-1">Full Name</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="input-field"
+                  className="glass-input"
                   required
                   placeholder="Dr. John Smith"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block font-semibold text-slate-200 mb-1">Email Address</label>
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="input-field"
+                  className="glass-input"
                   required
                   placeholder="john.smith@edu.edu"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <label className="block font-semibold text-slate-200 mb-1">Password</label>
                 <input
                   type="password"
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="input-field"
+                  className="glass-input"
                   required
                   placeholder="••••••••"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                <label className="block font-semibold text-slate-200 mb-1">Department</label>
                 <select
                   value={formData.department}
                   onChange={(e) => setFormData({...formData, department: e.target.value})}
-                  className="input-field"
+                  className="glass-input bg-slate-900"
                   required
                 >
-                  <option value="">Select Department</option>
-                  <option value="Computer Science">Computer Science</option>
-                  <option value="Mathematics">Mathematics</option>
-                  <option value="Physics">Physics</option>
-                  <option value="Chemistry">Chemistry</option>
-                  <option value="Biology">Biology</option>
-                  <option value="Business Administration">Business Administration</option>
-                  <option value="Economics">Economics</option>
-                  <option value="Psychology">Psychology</option>
-                  <option value="Sociology">Sociology</option>
-                  <option value="Engineering">Engineering</option>
+                  <option value="" className="bg-slate-900">Select Department...</option>
+                  <option value="Computer Science" className="bg-slate-900">Computer Science</option>
+                  <option value="Mathematics" className="bg-slate-900">Mathematics</option>
+                  <option value="Physics" className="bg-slate-900">Physics</option>
+                  <option value="Chemistry" className="bg-slate-900">Chemistry</option>
+                  <option value="Business Administration" className="bg-slate-900">Business Administration</option>
+                  <option value="Economics" className="bg-slate-900">Economics</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                <label className="block font-semibold text-slate-200 mb-1">Designation</label>
                 <input
                   type="text"
                   value={formData.designation}
                   onChange={(e) => setFormData({...formData, designation: e.target.value})}
-                  className="input-field"
+                  className="glass-input"
                   required
                   placeholder="Professor, Associate Professor, etc."
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Office Room</label>
-                <input
-                  type="text"
-                  value={formData.officeRoom}
-                  onChange={(e) => setFormData({...formData, officeRoom: e.target.value})}
-                  className="input-field"
-                  required
-                  placeholder="CS-301"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-200 mb-1">Office Room</label>
+                  <input
+                    type="text"
+                    value={formData.officeRoom}
+                    onChange={(e) => setFormData({...formData, officeRoom: e.target.value})}
+                    className="glass-input"
+                    required
+                    placeholder="CS-301"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-200 mb-1">Faculty ID</label>
+                  <input
+                    type="text"
+                    value={formData.facultyId}
+                    onChange={(e) => setFormData({...formData, facultyId: e.target.value})}
+                    className="glass-input"
+                    required
+                    placeholder="FAC-2024-001"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Faculty ID</label>
-                <input
-                  type="text"
-                  value={formData.facultyId}
-                  onChange={(e) => setFormData({...formData, facultyId: e.target.value})}
-                  className="input-field"
-                  required
-                  placeholder="FAC-2024-001"
-                />
-              </div>
-              <div className="flex gap-2 pt-2">
-                <button type="submit" className="btn-primary flex-1">Add Faculty</button>
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="btn-secondary flex-1"
-                >
-                  Cancel
-                </button>
+
+              <div className="flex gap-3 pt-2">
+                <MagneticButton type="submit" variant="primary" className="flex-1 py-2.5">
+                  <span>Add Faculty</span>
+                </MagneticButton>
+                <MagneticButton type="button" variant="secondary" onClick={() => setShowAddModal(false)} className="flex-1 py-2.5">
+                  <span>Cancel</span>
+                </MagneticButton>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Edit Faculty Modal */}
+      {/* Edit Modal */}
       {editingFaculty && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">Edit Faculty Member</h2>
-            <form onSubmit={handleUpdateFaculty} className="space-y-4">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="glass-panel max-w-md w-full p-8 space-y-6 relative border border-slate-700/80">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h2 className="text-lg font-bold text-white">Edit Faculty Member</h2>
+              <button onClick={() => setEditingFaculty(null)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateFaculty} className="space-y-4 text-xs">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <label className="block font-semibold text-slate-200 mb-1">Full Name</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="input-field"
+                  className="glass-input"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block font-semibold text-slate-200 mb-1">Email Address</label>
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="input-field"
+                  className="glass-input"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Password (leave blank to keep current)</label>
-                <input
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="input-field"
-                  placeholder="New password (optional)"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                <select
-                  value={formData.department}
-                  onChange={(e) => setFormData({...formData, department: e.target.value})}
-                  className="input-field"
-                  required
-                >
-                  <option value="Computer Science">Computer Science</option>
-                  <option value="Mathematics">Mathematics</option>
-                  <option value="Physics">Physics</option>
-                  <option value="Chemistry">Chemistry</option>
-                  <option value="Biology">Biology</option>
-                  <option value="Business Administration">Business Administration</option>
-                  <option value="Economics">Economics</option>
-                  <option value="Psychology">Psychology</option>
-                  <option value="Sociology">Sociology</option>
-                  <option value="Engineering">Engineering</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                <label className="block font-semibold text-slate-200 mb-1">Designation</label>
                 <input
                   type="text"
                   value={formData.designation}
                   onChange={(e) => setFormData({...formData, designation: e.target.value})}
-                  className="input-field"
+                  className="glass-input"
                   required
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Office Room</label>
-                <input
-                  type="text"
-                  value={formData.officeRoom}
-                  onChange={(e) => setFormData({...formData, officeRoom: e.target.value})}
-                  className="input-field"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Faculty ID</label>
-                <input
-                  type="text"
-                  value={formData.facultyId}
-                  onChange={(e) => setFormData({...formData, facultyId: e.target.value})}
-                  className="input-field"
-                  required
-                />
-              </div>
-              <div className="flex gap-2 pt-2">
-                <button type="submit" className="btn-primary flex-1">Update Faculty</button>
-                <button
-                  type="button"
-                  onClick={() => setEditingFaculty(null)}
-                  className="btn-secondary flex-1"
-                >
-                  Cancel
-                </button>
+
+              <div className="flex gap-3 pt-2">
+                <MagneticButton type="submit" variant="primary" className="flex-1 py-2.5">
+                  <span>Update Faculty</span>
+                </MagneticButton>
+                <MagneticButton type="button" variant="secondary" onClick={() => setEditingFaculty(null)} className="flex-1 py-2.5">
+                  <span>Cancel</span>
+                </MagneticButton>
               </div>
             </form>
           </div>
@@ -515,68 +464,46 @@ const ManageFaculties = () => {
 
       {/* View Schedule Modal */}
       {showScheduleModal && selectedFaculty && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="glass-panel max-w-lg w-full p-8 space-y-6 relative border border-slate-700/80">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h2 className="text-lg font-bold text-white">
                 Schedule - {selectedFaculty.userId?.name || 'Faculty'}
               </h2>
-              <button
-                onClick={() => setShowScheduleModal(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
+              <button onClick={() => setShowScheduleModal(false)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="space-y-3">
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <h3 className="font-semibold text-sm text-gray-700">Department</h3>
-                <p className="text-gray-600">{selectedFaculty.department}</p>
+            <div className="space-y-3 text-xs">
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1">
+                <p className="font-bold text-slate-400">Department</p>
+                <p className="text-white font-medium">{selectedFaculty.department}</p>
               </div>
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <h3 className="font-semibold text-sm text-gray-700">Office</h3>
-                <p className="text-gray-600">{selectedFaculty.officeRoom}</p>
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1">
+                <p className="font-bold text-slate-400">Office Room</p>
+                <p className="text-white font-medium">{selectedFaculty.officeRoom}</p>
               </div>
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <h3 className="font-semibold text-sm text-gray-700">Available Hours</h3>
-                <div className="mt-2 space-y-1 text-sm text-gray-600">
-                  <div className="flex justify-between p-2 bg-white rounded">
-                    <span>Monday</span>
-                    <span>9:00 AM - 5:00 PM</span>
-                  </div>
-                  <div className="flex justify-between p-2 bg-white rounded">
-                    <span>Tuesday</span>
-                    <span>9:00 AM - 5:00 PM</span>
-                  </div>
-                  <div className="flex justify-between p-2 bg-white rounded">
-                    <span>Wednesday</span>
-                    <span>9:00 AM - 5:00 PM</span>
-                  </div>
-                  <div className="flex justify-between p-2 bg-white rounded">
-                    <span>Thursday</span>
-                    <span>9:00 AM - 5:00 PM</span>
-                  </div>
-                  <div className="flex justify-between p-2 bg-white rounded">
-                    <span>Friday</span>
-                    <span>9:00 AM - 1:00 PM</span>
-                  </div>
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
+                <p className="font-bold text-slate-400">Weekly Office Hours</p>
+                <div className="space-y-1 text-slate-300">
+                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map((day) => (
+                    <div key={day} className="flex justify-between p-2 rounded-lg bg-slate-950/80">
+                      <span>{day}</span>
+                      <span className="font-mono text-indigo-300">09:00 AM - 05:00 PM</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 pt-4 border-t">
-              <button
-                onClick={() => setShowScheduleModal(false)}
-                className="btn-secondary w-full"
-              >
-                Close
-              </button>
-            </div>
+            <MagneticButton variant="secondary" onClick={() => setShowScheduleModal(false)} className="w-full py-2.5 text-xs">
+              <span>Close Schedule Window</span>
+            </MagneticButton>
           </div>
         </div>
       )}
-    </div>
+    </PageTransition>
   );
 };
 
