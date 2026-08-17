@@ -1,19 +1,7 @@
 import React, { useState } from 'react';
 import { 
-  Code2, 
-  Database, 
-  ShieldCheck, 
-  Server, 
-  Globe, 
-  Mail, 
-  Copy, 
-  Check, 
-  Sparkles, 
-  Terminal, 
-  Cpu, 
-  Layers, 
-  Users, 
-  ExternalLink 
+  Code2, Database, ShieldCheck, Server, Globe, Mail, Copy, Check, 
+  Sparkles, Terminal, Cpu, Layers, Users, ExternalLink, GraduationCap, BookOpen
 } from 'lucide-react';
 import PageTransition, { MotionContainer } from '../components/ui/PageTransition';
 import { toast } from 'react-toastify';
@@ -27,7 +15,7 @@ const teamMembers = [
     responsibilities: ['Backend', 'Deployment and Hosting'],
     icon: Database,
     gradient: 'from-amber-500 via-orange-600 to-rose-600',
-    borderGradient: 'hover:border-orange-500/50',
+    borderGradient: 'hover:border-amber-500/50',
     tags: ['JWT Auth', 'Bcrypt Security', 'CORS Middleware', 'Cloud Hosting']
   },
   {
@@ -35,7 +23,7 @@ const teamMembers = [
     name: 'Muhammad Sharfuddin',
     email: '242020612@eastdelta.edu.bd',
     role: 'Database Engineer & Security',
-    responsibilities: [ 'Database Integration','User Authentication & Security'],
+    responsibilities: ['Database Integration', 'User Authentication & Security'],
     icon: ShieldCheck,
     gradient: 'from-emerald-500 via-teal-600 to-cyan-600',
     borderGradient: 'hover:border-emerald-500/50',
@@ -76,26 +64,27 @@ const About = () => {
   };
 
   return (
-    <PageTransition className="py-12 md:py-20">
+    <PageTransition className="py-12 md:py-20 bg-slate-50/80 pattern-dots">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
         
-        {/* Header Hero */}
+        {/* Header */}
         <MotionContainer className="text-center space-y-4 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold tracking-wide">
-            <Users className="w-4 h-4 text-indigo-400" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-50 border border-primary-500/20 text-primary-600 text-xs font-semibold tracking-wide">
+            <Users className="w-4 h-4 text-primary-500" />
             <span>Meet The Engineering Team</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight">
-            About the <span className="animated-gradient-text">Developers</span>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-extrabold text-slate-900 tracking-tight">
+            About the <span className="brand-text-gradient">Developers</span>
           </h1>
 
-          <p className="text-slate-300 text-base sm:text-lg leading-relaxed">
-            The talented team of East Delta University students behind the design, architecture, and deployment of the <strong className="text-white">EDU Faculty Appointment Booking System</strong>.
+          <p className="text-slate-500 text-base sm:text-lg leading-relaxed">
+            The talented team of East Delta University students behind the design, architecture, 
+            and deployment of the <strong className="text-slate-900">EDU Faculty Appointment Booking System</strong>.
           </p>
         </MotionContainer>
 
-        {/* Developer Team Cards Grid */}
+        {/* Team Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
           {teamMembers.map((member, index) => {
             const IconComponent = member.icon;
@@ -105,28 +94,27 @@ const About = () => {
               <MotionContainer
                 key={member.id}
                 delay={index * 0.15}
-                className={`glass-panel p-6 sm:p-8 space-y-6 relative overflow-hidden group transition-all duration-300 border border-slate-800 ${member.borderGradient}`}
+                className={`bg-white rounded-2xl border border-primary-500/10 shadow-card p-6 sm:p-8 space-y-6 relative overflow-hidden group transition-all duration-300 hover:shadow-card-hover hover:border-primary-500/30 ${member.borderGradient}`}
               >
-                {/* Background Accent Blur */}
-                <div className={`absolute -right-16 -top-16 w-48 h-48 bg-gradient-to-br ${member.gradient} opacity-10 rounded-full blur-3xl group-hover:opacity-20 transition-opacity duration-500 pointer-events-none`} />
+                {/* Background Accent */}
+                <div className={`absolute -right-16 -top-16 w-48 h-48 bg-gradient-to-br ${member.gradient} opacity-5 rounded-full blur-3xl group-hover:opacity-10 transition-opacity duration-500 pointer-events-none`} />
 
                 <div className="flex items-start justify-between gap-4 relative z-10">
-                  {/* Avatar & Role Badge */}
                   <div className="flex items-center gap-4">
-                    <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${member.gradient} p-0.5 shadow-xl shadow-indigo-950/40 group-hover:scale-105 transition-transform duration-300`}>
-                      <div className="w-full h-full rounded-[14px] bg-slate-950 flex items-center justify-center">
-                        <IconComponent className="w-7 h-7 text-white" />
+                    <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${member.gradient} p-0.5 shadow-lg shadow-primary-500/10 group-hover:scale-105 transition-transform duration-300`}>
+                      <div className="w-full h-full rounded-[14px] bg-white flex items-center justify-center">
+                        <IconComponent className="w-7 h-7 text-slate-700" />
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-indigo-400">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-primary-500">
                         Team Member 0{member.id}
                       </span>
-                      <h3 className="text-xl sm:text-2xl font-bold text-white group-hover:text-indigo-200 transition-colors">
+                      <h3 className="text-xl sm:text-2xl font-display font-bold text-slate-900 group-hover:text-primary-600 transition-colors">
                         {member.name}
                       </h3>
-                      <p className="text-xs font-medium text-slate-400">
+                      <p className="text-xs font-medium text-slate-500">
                         {member.role}
                       </p>
                     </div>
@@ -134,38 +122,38 @@ const About = () => {
                 </div>
 
                 {/* Email Section */}
-                <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-3 text-xs">
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 text-xs">
                   <a 
                     href={`mailto:${member.email}`}
-                    className="flex items-center gap-2 text-slate-300 hover:text-indigo-300 truncate font-mono transition-colors"
+                    className="flex items-center gap-2 text-slate-600 hover:text-primary-500 truncate font-mono transition-colors"
                     title="Send Email"
                   >
-                    <Mail className="w-4 h-4 text-indigo-400 shrink-0" />
+                    <Mail className="w-4 h-4 text-primary-500 shrink-0" />
                     <span className="truncate">{member.email}</span>
                   </a>
 
                   <button
                     onClick={() => handleCopyEmail(member.email)}
-                    className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-all shrink-0"
+                    className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-primary-500 hover:border-primary-500 hover:bg-primary-50 transition-all shrink-0"
                     title="Copy Email"
                   >
-                    {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                   </button>
                 </div>
 
                 {/* Responsibilities */}
                 <div className="space-y-2.5">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                    <Terminal className="w-3.5 h-3.5 text-indigo-400" />
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                    <Terminal className="w-3.5 h-3.5 text-primary-500" />
                     Responsibilities
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {member.responsibilities.map((resp, idx) => (
                       <span 
                         key={idx}
-                        className="px-3 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 text-xs font-semibold flex items-center gap-1.5"
+                        className="px-3 py-1 rounded-lg bg-primary-50 border border-primary-500/10 text-primary-600 text-xs font-semibold flex items-center gap-1.5"
                       >
-                        <Sparkles className="w-3 h-3 text-indigo-400" />
+                        <Sparkles className="w-3 h-3 text-primary-500" />
                         {resp}
                       </span>
                     ))}
@@ -173,11 +161,11 @@ const About = () => {
                 </div>
 
                 {/* Tech Stack Tags */}
-                <div className="pt-2 border-t border-slate-800/80 flex flex-wrap gap-1.5">
+                <div className="pt-2 border-t border-slate-200 flex flex-wrap gap-1.5">
                   {member.tags.map((tag, idx) => (
                     <span 
                       key={idx}
-                      className="px-2.5 py-0.5 rounded-md bg-slate-800/60 border border-slate-700/50 text-[11px] font-medium text-slate-400"
+                      className="px-2.5 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-[11px] font-medium text-slate-500"
                     >
                       {tag}
                     </span>
@@ -189,14 +177,16 @@ const About = () => {
         </div>
 
         {/* Academic Mission Banner */}
-        <MotionContainer delay={0.6} className="glass-panel p-8 md:p-10 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/30 text-center space-y-4">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 mx-auto">
-            <Cpu className="w-6 h-6" />
+        <MotionContainer delay={0.6} className="bg-white rounded-3xl p-8 md:p-10 bg-gradient-to-r from-slate-50 via-primary-50/50 to-slate-50 border border-primary-500/20 text-center space-y-4 shadow-card">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-500 text-white shadow-lg shadow-primary-500/25 mx-auto">
+            <GraduationCap className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-bold text-white">East Delta University Engineering Project</h2>
-          <p className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-            Built as part of our academic excellence initiative to connect students and faculty through real-time digital consultation booking, secure user authentication, and centralized administration.
+          <h2 className="text-2xl font-display font-bold text-slate-900">East Delta University Engineering Project</h2>
+          <p className="text-slate-500 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+            Built as part of our academic excellence initiative to connect students and faculty through 
+            real-time digital consultation booking, secure user authentication, and centralized administration.
           </p>
+          <div className="academic-divider mx-auto" />
         </MotionContainer>
 
       </div>

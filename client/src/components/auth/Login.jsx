@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight, Loader2, GraduationCap } from 'lucide-react';
 import MagneticButton from '../ui/MagneticButton';
 import PageTransition, { MotionContainer } from '../ui/PageTransition';
 
@@ -24,25 +24,30 @@ const Login = () => {
   };
 
   return (
-    <PageTransition className="min-h-[calc(100vh-5rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <PageTransition className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50/80 pattern-dots">
       <MotionContainer className="max-w-md w-full">
-        <div className="glass-panel p-8 sm:p-10 space-y-8 relative overflow-hidden">
-          {/* Subtle top glow line */}
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-400" />
+        <div className="bg-white rounded-3xl shadow-card border border-primary-500/10 p-8 sm:p-10 space-y-8 relative overflow-hidden">
+          {/* Top red accent */}
+          <div className="absolute top-0 inset-x-0 h-1 bg-primary-500" />
 
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+            <div className="flex justify-center">
+              <div className="w-16 h-16 rounded-2xl bg-primary-500 text-white flex items-center justify-center shadow-lg shadow-primary-500/25">
+                <GraduationCap className="w-8 h-8" />
+              </div>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-50 border border-primary-500/20 text-primary-600 text-xs font-semibold">
+              <Sparkles className="w-3.5 h-3.5 text-primary-500" />
               <span>Welcome Back</span>
             </div>
-            <h2 className="text-3xl font-extrabold text-white tracking-tight">Sign In to EDU System</h2>
-            <p className="text-slate-400 text-sm">Enter your university credentials to continue</p>
+            <h2 className="text-3xl font-display font-bold text-slate-900">Sign In to EDU System</h2>
+            <p className="text-slate-500 text-sm">Enter your university credentials to continue</p>
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-200 mb-1.5">Email Address</label>
+                <label className="input-label">Email Address</label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                   <input
@@ -50,14 +55,14 @@ const Login = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="glass-input pl-11"
+                    className="input-field pl-11"
                     placeholder="you@eastdelta.edu.bd"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-200 mb-1.5">Password</label>
+                <label className="input-label">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                   <input
@@ -65,13 +70,13 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="glass-input pl-11 pr-11"
+                    className="input-field pl-11 pr-11"
                     placeholder="••••••••"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -98,10 +103,10 @@ const Login = () => {
               )}
             </MagneticButton>
 
-            <div className="text-center pt-2 border-t border-slate-800">
-              <p className="text-sm text-slate-400">
+            <div className="text-center pt-2 border-t border-slate-200">
+              <p className="text-sm text-slate-500">
                 Don't have an account?{' '}
-                <Link to="/register" className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">
+                <Link to="/register" className="text-primary-500 hover:text-primary-600 font-semibold transition-colors">
                   Create an account
                 </Link>
               </p>
