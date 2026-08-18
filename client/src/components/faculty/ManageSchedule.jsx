@@ -179,10 +179,10 @@ const ManageSchedule = () => {
           disabled={disabled}
           className={`
             h-9 w-9 rounded-xl text-sm font-medium transition-all duration-200
-            ${disabled ? 'opacity-30 cursor-not-allowed text-slate-400 line-through' : 'hover:scale-105 cursor-pointer'}
-            ${selected ? 'bg-primary-500 text-white shadow-md shadow-primary-500/25' : ''}
-            ${today && !selected ? 'border-2 border-primary-500/50 text-primary-600' : ''}
-            ${!disabled && !selected ? 'hover:bg-primary-50 text-slate-700' : ''}
+            ${disabled ? 'opacity-30 cursor-not-allowed text-slate-400 dark:text-slate-600 line-through' : 'hover:scale-105 cursor-pointer'}
+            ${selected ? 'bg-primary-500 text-white shadow-md shadow-primary-500/25 dark:shadow-primary-500/50' : ''}
+            ${today && !selected ? 'border-2 border-primary-500/50 dark:border-primary-400/50 text-primary-600 dark:text-primary-400' : ''}
+            ${!disabled && !selected ? 'hover:bg-primary-50 dark:hover:bg-primary-950/30 text-slate-700 dark:text-slate-300' : ''}
           `}
         >
           {day}
@@ -300,31 +300,31 @@ const ManageSchedule = () => {
   const sortedDates = Object.keys(groupedSchedule).sort((a, b) => b.localeCompare(a));
 
   return (
-    <PageTransition className="py-8 md:py-12 bg-slate-50/80 pattern-dots">
+    <PageTransition className="py-8 md:py-12 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <MotionContainer className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 border border-primary-500/20 text-primary-600 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5 text-primary-500" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-semibold">
+            <Sparkles className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
             <span>Faculty Schedule Manager</span>
           </div>
-          <h1 className="text-3xl font-display font-bold text-slate-900">Manage Consultation Availability</h1>
-          <p className="text-slate-500 text-sm">Set your availability for specific dates</p>
+          <h1 className="text-3xl font-display font-bold text-slate-900 dark:text-white">Manage Consultation Availability</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Set your availability for specific dates</p>
         </MotionContainer>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Add New Slot Form */}
           <MotionContainer delay={0.1}>
-            <div className="bg-white rounded-3xl shadow-card border border-primary-500/10 p-6 sm:p-8 space-y-6">
-              <div className="absolute top-0 inset-x-0 h-1 bg-primary-500" />
+            <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 space-y-6 transition-all duration-300">
+              <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-display font-bold text-slate-900 flex items-center gap-2">
-                  <Plus className="w-5 h-5 text-primary-500" />
+                <h2 className="text-xl font-display font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Plus className="w-5 h-5 text-primary-500 dark:text-primary-400" />
                   <span>Add New Time Slot</span>
                 </h2>
                 <button
                   onClick={handleRefresh}
                   disabled={refreshing}
-                  className="p-2 rounded-xl text-slate-400 hover:text-primary-500 hover:bg-primary-50 transition-colors"
+                  className="p-2 rounded-xl text-slate-400 dark:text-slate-500 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/30 transition-colors"
                   title="Refresh schedule"
                 >
                   <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
@@ -334,40 +334,40 @@ const ManageSchedule = () => {
               <form onSubmit={handleAddSlot} className="space-y-5">
                 <div>
                   <label className="input-label">
-                    <CalendarIcon className="inline-block w-4 h-4 mr-1.5 text-primary-500" />
+                    <CalendarIcon className="inline-block w-4 h-4 mr-1.5 text-primary-500 dark:text-primary-400" />
                     Select Date
                   </label>
-                  <div className="bg-white rounded-2xl border border-slate-200 p-4">
+                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <button type="button" onClick={goToPreviousMonth} className="p-1.5 rounded-lg hover:bg-primary-50 text-slate-400 hover:text-primary-500 transition-colors">
+                      <button type="button" onClick={goToPreviousMonth} className="p-1.5 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-950/30 text-slate-400 dark:text-slate-500 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">
                         <ChevronLeft className="w-4 h-4" />
                       </button>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-slate-900">{months[currentMonth]} {currentYear}</span>
+                        <span className="text-sm font-bold text-slate-900 dark:text-white">{months[currentMonth]} {currentYear}</span>
                       </div>
-                      <button type="button" onClick={goToNextMonth} className="p-1.5 rounded-lg hover:bg-primary-50 text-slate-400 hover:text-primary-500 transition-colors">
+                      <button type="button" onClick={goToNextMonth} className="p-1.5 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-950/30 text-slate-400 dark:text-slate-500 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">
                         <ChevronRight className="w-4 h-4" />
                       </button>
                     </div>
                     <div className="grid grid-cols-7 gap-1 mb-2">
                       {days.map((day) => (
-                        <div key={day} className="h-7 flex items-center justify-center text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                        <div key={day} className="h-7 flex items-center justify-center text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                           {day}
                         </div>
                       ))}
                     </div>
                     <div className="grid grid-cols-7 gap-1">{renderCalendarDays()}</div>
-                    <div className="mt-3 pt-2 border-t border-slate-200 flex items-center justify-between">
-                      <button type="button" onClick={clearDate} className="text-[10px] font-medium text-slate-400 hover:text-red-500 transition-colors">
+                    <div className="mt-3 pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                      <button type="button" onClick={clearDate} className="text-[10px] font-medium text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors">
                         Clear
                       </button>
-                      <button type="button" onClick={goToToday} className="text-[10px] font-medium px-2 py-0.5 rounded-lg bg-primary-50 border border-primary-500/20 text-primary-600 hover:bg-primary-100 transition-colors">
+                      <button type="button" onClick={goToToday} className="text-[10px] font-medium px-2 py-0.5 rounded-lg bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-950/50 transition-colors">
                         Today
                       </button>
                     </div>
                   </div>
                   {newSlot.date && (
-                    <p className="text-xs text-primary-600 mt-2 text-center">Selected: {formatDateDisplay(newSlot.date)}</p>
+                    <p className="text-xs text-primary-600 dark:text-primary-400 mt-2 text-center">Selected: {formatDateDisplay(newSlot.date)}</p>
                   )}
                 </div>
 
@@ -379,17 +379,17 @@ const ManageSchedule = () => {
                   <div>
                     <label className="input-label">End Time</label>
                     <input type="time" value={newSlot.endTime} onChange={(e) => handleTimeChange('endTime', e.target.value)} className="input-field" required disabled={submitting} step="300" />
-                    <p className="text-[10px] text-slate-500 mt-1">
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
                       Duration: {newSlot.startTime && newSlot.endTime && isTimeValid(newSlot.startTime, newSlot.endTime) ? (
-                        <span className="text-emerald-600">{getDurationString(newSlot.startTime, newSlot.endTime)}</span>
+                        <span className="text-emerald-600 dark:text-emerald-400">{getDurationString(newSlot.startTime, newSlot.endTime)}</span>
                       ) : (
-                        <span className="text-red-500">⚠️ Invalid time range</span>
+                        <span className="text-red-500 dark:text-red-400">⚠️ Invalid time range</span>
                       )}
                     </p>
                   </div>
                 </div>
 
-                <MagneticButton type="submit" variant="primary" className="w-full py-3" disabled={submitting || !isTimeValid(newSlot.startTime, newSlot.endTime) || !newSlot.date}>
+                <MagneticButton type="submit" variant="primary" className="w-full py-3 shadow-md shadow-primary-500/25 dark:shadow-primary-500/50" disabled={submitting || !isTimeValid(newSlot.startTime, newSlot.endTime) || !newSlot.date}>
                   {submitting ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /><span>Adding Slot...</span></>
                   ) : (
@@ -402,19 +402,19 @@ const ManageSchedule = () => {
 
           {/* Current Schedule */}
           <MotionContainer delay={0.2}>
-            <div className="bg-white rounded-3xl shadow-card border border-primary-500/10 p-6 sm:p-8 space-y-6">
-              <div className="absolute top-0 inset-x-0 h-1 bg-primary-500" />
-              <h2 className="text-xl font-display font-bold text-slate-900 flex items-center gap-2">
-                <Clock className="w-5 h-5 text-primary-500" />
+            <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 space-y-6 transition-all duration-300">
+              <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
+              <h2 className="text-xl font-display font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Clock className="w-5 h-5 text-primary-500 dark:text-primary-400" />
                 <span>Configured Schedule Slots</span>
-                <span className="ml-auto text-xs text-slate-500 font-normal">
+                <span className="ml-auto text-xs text-slate-500 dark:text-slate-400 font-normal">
                   {schedule.length} slot{schedule.length !== 1 ? 's' : ''}
                 </span>
               </h2>
 
               {loading ? (
-                <div className="py-8 text-center text-slate-500 text-sm flex items-center justify-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin text-primary-500" />
+                <div className="py-8 text-center text-slate-500 dark:text-slate-400 text-sm flex items-center justify-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-primary-500 dark:text-primary-400" />
                   <span>Loading schedule...</span>
                 </div>
               ) : schedule.length > 0 ? (
@@ -423,28 +423,28 @@ const ManageSchedule = () => {
                     const daySlots = groupedSchedule[dateKey] || [];
                     return (
                       <div key={dateKey} className="space-y-2">
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-primary-600 border-b border-primary-500/20 pb-1.5 flex items-center justify-between">
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 border-b border-primary-500/20 dark:border-primary-500/30 pb-1.5 flex items-center justify-between">
                           <span>{formatDateDisplay(dateKey)}</span>
-                          <span className="text-slate-500 font-normal text-[10px]">
+                          <span className="text-slate-500 dark:text-slate-400 font-normal text-[10px]">
                             {daySlots.length} slot{daySlots.length !== 1 ? 's' : ''}
                           </span>
                         </h3>
                         {daySlots.map((slot) => (
-                          <SpotlightCard key={slot._id} spotlightColor="rgba(153, 0, 0, 0.06)" className="p-3">
+                          <SpotlightCard key={slot._id} spotlightColor="rgba(153, 0, 0, 0.08)" className="p-3 bg-white dark:bg-slate-900/95 border-primary-500/10 dark:border-primary-500/20 shadow-card dark:shadow-card-dark transition-all duration-300">
                             <div className="flex items-center justify-between">
                               <div className="space-y-0.5">
-                                <p className="text-sm font-medium text-slate-900">
+                                <p className="text-sm font-medium text-slate-900 dark:text-white">
                                   {formatTimeDisplay(slot.startTime)} - {formatTimeDisplay(slot.endTime)}
                                 </p>
-                                <span className={`text-xs font-medium ${slot.isAvailable ? 'text-emerald-600' : 'text-red-500'}`}>
+                                <span className={`text-xs font-medium ${slot.isAvailable ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
                                   {slot.isAvailable ? '● Available' : '● Unavailable'}
                                 </span>
                               </div>
                               <div className="flex items-center gap-1.5">
-                                <button type="button" onClick={() => toggleAvailability(slot._id, slot.isAvailable)} className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${slot.isAvailable ? 'bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100' : 'bg-red-50 border border-red-200 text-red-600 hover:bg-red-100'}`}>
+                                <button type="button" onClick={() => toggleAvailability(slot._id, slot.isAvailable)} className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${slot.isAvailable ? 'bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/50' : 'bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/50 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50'}`}>
                                   {slot.isAvailable ? 'Available' : 'Unavailable'}
                                 </button>
-                                <button type="button" onClick={() => handleDeleteSlot(slot._id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" aria-label="Delete slot">
+                                <button type="button" onClick={() => handleDeleteSlot(slot._id)} className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors" aria-label="Delete slot">
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
                               </div>
@@ -456,9 +456,9 @@ const ManageSchedule = () => {
                   })}
                 </div>
               ) : (
-                <div className="py-12 text-center text-slate-500 space-y-2">
-                  <Clock className="w-8 h-8 text-slate-400 mx-auto" />
-                  <p className="text-slate-700 font-semibold text-sm">No slots created yet</p>
+                <div className="py-12 text-center text-slate-500 dark:text-slate-400 space-y-2">
+                  <Clock className="w-8 h-8 text-slate-400 dark:text-slate-600 mx-auto" />
+                  <p className="text-slate-700 dark:text-slate-300 font-semibold text-sm">No slots created yet</p>
                   <p className="text-xs">Use the form to add your availability for specific dates.</p>
                 </div>
               )}

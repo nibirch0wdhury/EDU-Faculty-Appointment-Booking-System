@@ -4,7 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  darkMode: 'class', // Enable dark mode with class strategy
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -48,6 +48,9 @@ export default {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'dark-gradient': 'linear-gradient(180deg, #0f172a 0%, #1a1a2e 50%, #16213e 100%)',
+        'dark-card': 'linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95))',
+        'dark-glow': 'radial-gradient(ellipse at center, rgba(153, 0, 0, 0.15), transparent 70%)',
       },
       boxShadow: {
         'red-glow': '0 0 30px -5px rgba(153, 0, 0, 0.3)',
@@ -55,8 +58,9 @@ export default {
         'red-inner': 'inset 0 0 30px rgba(153, 0, 0, 0.1)',
         'card': '0 4px 24px rgba(0, 0, 0, 0.06)',
         'card-hover': '0 8px 40px rgba(153, 0, 0, 0.12)',
-        'card-dark': '0 4px 24px rgba(0, 0, 0, 0.3)',
-        'card-hover-dark': '0 8px 40px rgba(153, 0, 0, 0.2)',
+        'card-dark': '0 4px 30px rgba(0, 0, 0, 0.4)',
+        'card-hover-dark': '0 8px 50px rgba(0, 0, 0, 0.6)',
+        'dark-glow': '0 0 60px rgba(153, 0, 0, 0.08)',
       },
       animation: {
         'float': 'float 6s ease-in-out infinite',
@@ -68,6 +72,8 @@ export default {
         'scale-in': 'scaleIn 0.4s ease-out',
         'marquee': 'marquee 20s linear infinite',
         'border-pulse': 'borderPulse 2s ease-in-out infinite',
+        'glow-pulse': 'glowPulse 3s ease-in-out infinite',
+        'dark-float': 'darkFloat 8s ease-in-out infinite',
       },
       keyframes: {
         float: {
@@ -105,6 +111,14 @@ export default {
         borderPulse: {
           '0%, 100%': { borderColor: 'rgba(153, 0, 0, 0.3)' },
           '50%': { borderColor: 'rgba(153, 0, 0, 0.8)' },
+        },
+        glowPulse: {
+          '0%, 100%': { opacity: 0.3, transform: 'scale(1)' },
+          '50%': { opacity: 0.6, transform: 'scale(1.05)' },
+        },
+        darkFloat: {
+          '0%, 100%': { transform: 'translateY(0px) scale(1)' },
+          '50%': { transform: 'translateY(-5px) scale(1.02)' },
         },
       },
     },

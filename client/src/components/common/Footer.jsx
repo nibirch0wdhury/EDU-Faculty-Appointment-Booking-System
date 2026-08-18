@@ -6,17 +6,20 @@ const Footer = () => {
   return (
     <footer className="relative mt-auto bg-slate-900 dark:bg-slate-950 text-slate-300 dark:text-slate-400 overflow-hidden z-10">
       {/* Top red accent line */}
-      <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-primary-500 to-transparent" />
+      <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-primary-500 to-transparent dark:shadow-[0_0_30px_rgba(153,0,0,0.3)]" />
       
       {/* Background pattern */}
-      <div className="absolute inset-0 opacity-5 pattern-dots pointer-events-none" />
+      <div className="absolute inset-0 opacity-5 dark:opacity-10 pattern-dots pointer-events-none" />
+      
+      {/* Dark mode glow */}
+      <div className="absolute inset-0 bg-gradient-to-t from-primary-500/5 to-transparent dark:from-primary-500/10 pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand Column */}
           <div className="md:col-span-2 space-y-4">
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary-500 text-white shadow-lg shadow-primary-500/25 group-hover:scale-105 transition-transform duration-300">
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary-500 text-white shadow-lg shadow-primary-500/25 dark:shadow-primary-500/50 group-hover:scale-105 transition-transform duration-300">
                 <BookOpen className="w-5 h-5" />
               </div>
               <span className="text-xl font-display font-bold text-white">
@@ -29,7 +32,7 @@ const Footer = () => {
               productivity with ease.
             </p>
             <div className="flex items-center gap-2 pt-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 dark:border-emerald-500/30 text-emerald-400">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 Live System Operational
               </span>
@@ -87,7 +90,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-slate-800 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-600">
+        <div className="mt-12 pt-8 border-t border-slate-800 dark:border-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-600">
           <p>© {new Date().getFullYear()} EDU Faculty Appointment Booking System. All rights reserved.</p>
           <div className="flex items-center gap-1">
             <span>Crafted with</span>

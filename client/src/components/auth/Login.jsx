@@ -24,32 +24,36 @@ const Login = () => {
   };
 
   return (
-    <PageTransition className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50/80 pattern-dots">
+    <PageTransition className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
       <MotionContainer className="max-w-md w-full">
-        <div className="bg-white rounded-3xl shadow-card border border-primary-500/10 p-8 sm:p-10 space-y-8 relative overflow-hidden">
+        <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-8 sm:p-10 space-y-8 relative overflow-hidden transition-all duration-300">
           {/* Top red accent */}
-          <div className="absolute top-0 inset-x-0 h-1 bg-primary-500" />
+          <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
+          
+          {/* Dark mode glow */}
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="text-center space-y-2">
+          <div className="text-center space-y-2 relative z-10">
             <div className="flex justify-center">
-              <div className="w-16 h-16 rounded-2xl bg-primary-500 text-white flex items-center justify-center shadow-lg shadow-primary-500/25">
+              <div className="w-16 h-16 rounded-2xl bg-primary-500 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 dark:shadow-primary-500/50">
                 <GraduationCap className="w-8 h-8" />
               </div>
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-50 border border-primary-500/20 text-primary-600 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-primary-500" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-semibold">
+              <Sparkles className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
               <span>Welcome Back</span>
             </div>
-            <h2 className="text-3xl font-display font-bold text-slate-900">Sign In to EDU System</h2>
-            <p className="text-slate-500 text-sm">Enter your university credentials to continue</p>
+            <h2 className="text-3xl font-display font-bold text-slate-900 dark:text-white">Sign In to EDU System</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Enter your university credentials to continue</p>
           </div>
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6 relative z-10" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
                 <label className="input-label">Email Address</label>
                 <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
                   <input
                     type="email"
                     value={email}
@@ -64,7 +68,7 @@ const Login = () => {
               <div>
                 <label className="input-label">Password</label>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
@@ -76,7 +80,7 @@ const Login = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -88,7 +92,7 @@ const Login = () => {
               type="submit"
               disabled={loading}
               variant="primary"
-              className="w-full py-3.5"
+              className="w-full py-3.5 shadow-lg shadow-primary-500/25 dark:shadow-primary-500/50 hover:shadow-primary-500/40 dark:hover:shadow-primary-500/70"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -103,10 +107,10 @@ const Login = () => {
               )}
             </MagneticButton>
 
-            <div className="text-center pt-2 border-t border-slate-200">
-              <p className="text-sm text-slate-500">
+            <div className="text-center pt-2 border-t border-slate-200 dark:border-slate-700">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
                 Don't have an account?{' '}
-                <Link to="/register" className="text-primary-500 hover:text-primary-600 font-semibold transition-colors">
+                <Link to="/register" className="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300 font-semibold transition-colors">
                   Create an account
                 </Link>
               </p>

@@ -77,54 +77,54 @@ const UserProfile = () => {
 
   const getRoleBadge = (role) => {
     switch (role) {
-      case 'admin': return 'bg-primary-100 text-primary-700 border-primary-200';
-      case 'faculty': return 'bg-blue-50 text-blue-700 border-blue-200';
-      default: return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'admin': return 'bg-primary-100 dark:bg-primary-950/40 text-primary-700 dark:text-primary-400 border-primary-200 dark:border-primary-800/50';
+      case 'faculty': return 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/50';
+      default: return 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50';
     }
   };
 
   return (
-    <PageTransition className="py-8 md:py-12 bg-slate-50/80 pattern-dots">
+    <PageTransition className="py-8 md:py-12 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Profile Header */}
-        <MotionContainer className="relative overflow-hidden rounded-3xl bg-white border border-primary-500/10 shadow-card p-6 md:p-8">
-          <div className="absolute top-0 inset-x-0 h-1 bg-primary-500" />
-          <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-primary-500/5 rounded-full blur-3xl pointer-events-none" />
+        <MotionContainer className="relative overflow-hidden rounded-3xl bg-white dark:bg-slate-900/95 border border-primary-500/10 dark:border-primary-500/20 shadow-card dark:shadow-card-dark p-6 md:p-8 transition-all duration-300">
+          <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
+          <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
           
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10">
             <div className="relative group">
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-primary-500 p-1 shadow-lg shadow-primary-500/25">
-                <div className="w-full h-full rounded-[14px] bg-white flex items-center justify-center overflow-hidden">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-primary-500 p-1 shadow-lg shadow-primary-500/25 dark:shadow-primary-500/50">
+                <div className="w-full h-full rounded-[14px] bg-white dark:bg-slate-900 flex items-center justify-center overflow-hidden">
                   {formData.profileImage ? (
                     <img src={formData.profileImage} alt={formData.name} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-3xl font-display font-extrabold text-primary-500">
+                    <span className="text-3xl font-display font-extrabold text-primary-500 dark:text-primary-400">
                       {user?.name?.[0]?.toUpperCase() || 'U'}
                     </span>
                   )}
                 </div>
               </div>
-              <div className="absolute -bottom-2 -right-2 p-1.5 rounded-xl bg-white border border-primary-500/20 text-primary-500">
+              <div className="absolute -bottom-2 -right-2 p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-primary-500/20 dark:border-primary-500/30 text-primary-500 dark:text-primary-400">
                 <UserCheck className="w-4 h-4" />
               </div>
             </div>
 
             <div className="flex-1 text-center sm:text-left space-y-2">
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                <h1 className="text-2xl sm:text-3xl font-display font-bold text-slate-900 tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-display font-bold text-slate-900 dark:text-white tracking-tight">
                   {user?.name || 'User Profile'}
                 </h1>
                 <span className={`px-3 py-1 text-xs font-semibold rounded-full border capitalize ${getRoleBadge(user?.role)}`}>
                   {user?.role || 'Student'}
                 </span>
               </div>
-              <p className="text-slate-500 text-sm flex items-center justify-center sm:justify-start gap-2">
-                <Mail className="w-4 h-4 text-primary-500 shrink-0" />
+              <p className="text-slate-500 dark:text-slate-400 text-sm flex items-center justify-center sm:justify-start gap-2">
+                <Mail className="w-4 h-4 text-primary-500 dark:text-primary-400 shrink-0" />
                 <span>{user?.email}</span>
               </p>
               {user?.department && (
-                <p className="text-slate-500 text-xs flex items-center justify-center sm:justify-start gap-2 pt-1">
-                  <Building className="w-3.5 h-3.5 text-primary-500 shrink-0" />
+                <p className="text-slate-500 dark:text-slate-400 text-xs flex items-center justify-center sm:justify-start gap-2 pt-1">
+                  <Building className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400 shrink-0" />
                   <span>{user.department}</span>
                 </p>
               )}
@@ -132,13 +132,13 @@ const UserProfile = () => {
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center gap-2 mt-8 pt-6 border-t border-slate-200">
+          <div className="flex items-center gap-2 mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
             <button
               onClick={() => setActiveTab('details')}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                 activeTab === 'details'
-                  ? 'bg-primary-500 text-white shadow-md shadow-primary-500/25'
-                  : 'bg-slate-50 text-slate-600 hover:text-primary-600 hover:bg-primary-50'
+                  ? 'bg-primary-500 text-white shadow-md dark:shadow-primary-500/50'
+                  : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/30'
               }`}
             >
               <User className="w-4 h-4" />
@@ -148,8 +148,8 @@ const UserProfile = () => {
               onClick={() => setActiveTab('security')}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                 activeTab === 'security'
-                  ? 'bg-primary-500 text-white shadow-md shadow-primary-500/25'
-                  : 'bg-slate-50 text-slate-600 hover:text-primary-600 hover:bg-primary-50'
+                  ? 'bg-primary-500 text-white shadow-md dark:shadow-primary-500/50'
+                  : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/30'
               }`}
             >
               <Lock className="w-4 h-4" />
@@ -160,45 +160,45 @@ const UserProfile = () => {
 
         {/* Tab: Personal Details */}
         {activeTab === 'details' && (
-          <MotionContainer delay={0.1} className="bg-white rounded-3xl shadow-card border border-primary-500/10 p-6 sm:p-8 space-y-6">
-            <div className="absolute top-0 inset-x-0 h-1 bg-primary-500" />
-            <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+          <MotionContainer delay={0.1} className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 space-y-6 transition-all duration-300">
+            <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
               <div>
-                <h2 className="text-xl font-display font-bold text-slate-900 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-primary-500" />
+                <h2 className="text-xl font-display font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary-500 dark:text-primary-400" />
                   Edit Profile Information
                 </h2>
-                <p className="text-slate-500 text-xs mt-0.5">Update your personal account details</p>
+                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">Update your personal account details</p>
               </div>
             </div>
 
             <form onSubmit={handleSubmitProfile} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-primary-500" />
+                  <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                     Full Name
                   </label>
                   <input type="text" name="name" value={formData.name} onChange={handleChange} required className="input-field" placeholder="Enter your full name" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 text-primary-500" />
+                  <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                     Email Address
                   </label>
                   <input type="email" name="email" value={formData.email} onChange={handleChange} required className="input-field" placeholder="name@eastdelta.edu.bd" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                    <Building className="w-3.5 h-3.5 text-primary-500" />
+                  <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Building className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                     Department
                   </label>
                   <input type="text" name="department" value={formData.department} onChange={handleChange} className="input-field" placeholder="e.g. Computer Science & Engineering" />
                 </div>
                 {user?.role === 'student' && (
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                      <GraduationCap className="w-3.5 h-3.5 text-primary-500" />
+                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <GraduationCap className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                       Student ID
                     </label>
                     <input type="text" name="studentId" value={formData.studentId} onChange={handleChange} className="input-field" placeholder="e.g. 242021012" />
@@ -207,15 +207,15 @@ const UserProfile = () => {
                 {(user?.role === 'faculty' || user?.role === 'admin') && (
                   <>
                     <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <Briefcase className="w-3.5 h-3.5 text-primary-500" />
+                      <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <Briefcase className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                         Designation / Title
                       </label>
                       <input type="text" name="designation" value={formData.designation} onChange={handleChange} className="input-field" placeholder="e.g. Assistant Professor" />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-primary-500" />
+                      <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                         Office Room
                       </label>
                       <input type="text" name="officeRoom" value={formData.officeRoom} onChange={handleChange} className="input-field" placeholder="e.g. Room 402, Academic Building A" />
@@ -223,16 +223,16 @@ const UserProfile = () => {
                   </>
                 )}
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                    <FileText className="w-3.5 h-3.5 text-primary-500" />
+                  <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                     About / Bio
                   </label>
                   <textarea name="bio" value={formData.bio} onChange={handleChange} rows="3" className="input-field resize-none" placeholder="Write a brief intro about yourself..." />
                 </div>
               </div>
 
-              <div className="flex justify-end pt-4 border-t border-slate-200">
-                <MagneticButton type="submit" disabled={loading} variant="primary" className="px-6 py-3">
+              <div className="flex justify-end pt-4 border-t border-slate-200 dark:border-slate-700">
+                <MagneticButton type="submit" disabled={loading} variant="primary" className="px-6 py-3 shadow-md shadow-primary-500/25 dark:shadow-primary-500/50">
                   <Save className="w-4 h-4" />
                   <span>{loading ? 'Saving Changes...' : 'Save Profile Changes'}</span>
                 </MagneticButton>
@@ -243,43 +243,43 @@ const UserProfile = () => {
 
         {/* Tab: Security */}
         {activeTab === 'security' && (
-          <MotionContainer delay={0.1} className="bg-white rounded-3xl shadow-card border border-primary-500/10 p-6 sm:p-8 space-y-6">
-            <div className="absolute top-0 inset-x-0 h-1 bg-primary-500" />
-            <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+          <MotionContainer delay={0.1} className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 space-y-6 transition-all duration-300">
+            <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
               <div>
-                <h2 className="text-xl font-display font-bold text-slate-900 flex items-center gap-2">
-                  <KeyRound className="w-5 h-5 text-primary-500" />
+                <h2 className="text-xl font-display font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <KeyRound className="w-5 h-5 text-primary-500 dark:text-primary-400" />
                   Change Account Password
                 </h2>
-                <p className="text-slate-500 text-xs mt-0.5">Ensure your account is using a strong security password</p>
+                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">Ensure your account is using a strong security password</p>
               </div>
             </div>
 
             <form onSubmit={handleSubmitPassword} className="space-y-6 max-w-lg">
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-primary-500" />
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                   Current Password
                 </label>
                 <input type="password" name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} required className="input-field" placeholder="Enter current password" />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-primary-500" />
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                   New Password
                 </label>
                 <input type="password" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} required minLength={6} className="input-field" placeholder="At least 6 characters" />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-primary-500" />
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                   Confirm New Password
                 </label>
                 <input type="password" name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} required className="input-field" placeholder="Repeat new password" />
               </div>
 
-              <div className="pt-4 border-t border-slate-200">
-                <MagneticButton type="submit" disabled={loading} variant="primary" className="px-6 py-3">
+              <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                <MagneticButton type="submit" disabled={loading} variant="primary" className="px-6 py-3 shadow-md shadow-primary-500/25 dark:shadow-primary-500/50">
                   <Lock className="w-4 h-4" />
                   <span>{loading ? 'Updating Password...' : 'Update Password'}</span>
                 </MagneticButton>

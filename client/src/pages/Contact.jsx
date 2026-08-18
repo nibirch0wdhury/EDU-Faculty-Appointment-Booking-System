@@ -61,17 +61,17 @@ const Contact = () => {
   };
 
   return (
-    <PageTransition className="py-16 md:py-24 bg-slate-50/80 pattern-dots">
+    <PageTransition className="py-16 md:py-24 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <MotionContainer className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 border border-primary-500/20 text-primary-600 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5 text-primary-500" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-semibold">
+            <Sparkles className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
             <span>We're Here To Help</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-slate-900">
+          <h1 className="text-4xl md:text-5xl font-display font-bold text-slate-900 dark:text-white">
             Get In <span className="brand-text-gradient">Touch With Us</span>
           </h1>
-          <p className="text-slate-500 text-lg max-w-xl mx-auto">
+          <p className="text-slate-500 dark:text-slate-400 text-lg max-w-xl mx-auto">
             Have questions, feedback, or need system support? Drop us a message anytime.
           </p>
         </MotionContainer>
@@ -79,38 +79,38 @@ const Contact = () => {
         <div className="grid md:grid-cols-3 gap-6">
           {/* Info Cards */}
           <MotionContainer delay={0.2} className="md:col-span-1 space-y-4">
-            <SpotlightCard spotlightColor="rgba(153, 0, 0, 0.06)" className="p-6">
+            <SpotlightCard spotlightColor="rgba(153, 0, 0, 0.08)" className="p-6 bg-white dark:bg-slate-900/95 border-primary-500/10 dark:border-primary-500/20 hover:border-primary-500/30 dark:hover:border-primary-500/40 shadow-card dark:shadow-card-dark transition-all duration-300">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-primary-50 border border-primary-500/10 text-primary-500">
+                <div className="p-3 rounded-xl bg-primary-50 dark:bg-primary-950/30 border border-primary-500/10 dark:border-primary-500/20 text-primary-500 dark:text-primary-400">
                   <Mail className="w-6 h-6" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-xs uppercase font-bold tracking-wider text-slate-500">Email</h3>
-                  <p className="text-sm font-semibold text-slate-700 truncate">{contactInfo.email}</p>
+                  <h3 className="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">Email</h3>
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 truncate">{contactInfo.email}</p>
                 </div>
               </div>
             </SpotlightCard>
 
-            <SpotlightCard spotlightColor="rgba(153, 0, 0, 0.06)" className="p-6">
+            <SpotlightCard spotlightColor="rgba(16, 185, 129, 0.08)" className="p-6 bg-white dark:bg-slate-900/95 border-primary-500/10 dark:border-primary-500/20 hover:border-emerald-500/30 dark:hover:border-emerald-500/40 shadow-card dark:shadow-card-dark transition-all duration-300">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-500/10 text-emerald-500">
+                <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-500/10 dark:border-emerald-500/20 text-emerald-500 dark:text-emerald-400">
                   <Phone className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-xs uppercase font-bold tracking-wider text-slate-500">Phone</h3>
-                  <p className="text-sm font-semibold text-slate-700">{contactInfo.phone}</p>
+                  <h3 className="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">Phone</h3>
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{contactInfo.phone}</p>
                 </div>
               </div>
             </SpotlightCard>
 
-            <SpotlightCard spotlightColor="rgba(153, 0, 0, 0.06)" className="p-6">
+            <SpotlightCard spotlightColor="rgba(139, 92, 246, 0.08)" className="p-6 bg-white dark:bg-slate-900/95 border-primary-500/10 dark:border-primary-500/20 hover:border-purple-500/30 dark:hover:border-purple-500/40 shadow-card dark:shadow-card-dark transition-all duration-300">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-purple-50 border border-purple-500/10 text-purple-500">
+                <div className="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-500/10 dark:border-purple-500/20 text-purple-500 dark:text-purple-400">
                   <MapPin className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-xs uppercase font-bold tracking-wider text-slate-500">Location</h3>
-                  <p className="text-xs font-medium text-slate-600 leading-snug">East Delta University, Chittagong</p>
+                  <h3 className="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">Location</h3>
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-400 leading-snug">East Delta University, Chittagong</p>
                 </div>
               </div>
             </SpotlightCard>
@@ -118,7 +118,7 @@ const Contact = () => {
 
           {/* Form */}
           <MotionContainer delay={0.3} className="md:col-span-2">
-            <div className="bg-white rounded-3xl shadow-card border border-primary-500/10 p-8">
+            <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-8 transition-all duration-300">
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label className="input-label">
@@ -172,7 +172,7 @@ const Contact = () => {
                   type="submit"
                   disabled={loading}
                   variant="primary"
-                  className="w-full py-3.5"
+                  className="w-full py-3.5 shadow-lg shadow-primary-500/25 dark:shadow-primary-500/50 hover:shadow-primary-500/40 dark:hover:shadow-primary-500/70"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">

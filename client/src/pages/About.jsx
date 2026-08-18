@@ -64,23 +64,23 @@ const About = () => {
   };
 
   return (
-    <PageTransition className="py-12 md:py-20 bg-slate-50/80 pattern-dots">
+    <PageTransition className="py-12 md:py-20 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
         
         {/* Header */}
         <MotionContainer className="text-center space-y-4 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-50 border border-primary-500/20 text-primary-600 text-xs font-semibold tracking-wide">
-            <Users className="w-4 h-4 text-primary-500" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-semibold tracking-wide">
+            <Users className="w-4 h-4 text-primary-500 dark:text-primary-400" />
             <span>Meet The Engineering Team</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-extrabold text-slate-900 dark:text-white tracking-tight">
             About the <span className="brand-text-gradient">Developers</span>
           </h1>
 
-          <p className="text-slate-500 text-base sm:text-lg leading-relaxed">
+          <p className="text-slate-500 dark:text-slate-400 text-base sm:text-lg leading-relaxed">
             The talented team of East Delta University students behind the design, architecture, 
-            and deployment of the <strong className="text-slate-900">EDU Faculty Appointment Booking System</strong>.
+            and deployment of the <strong className="text-slate-900 dark:text-white">EDU Faculty Appointment Booking System</strong>.
           </p>
         </MotionContainer>
 
@@ -94,27 +94,27 @@ const About = () => {
               <MotionContainer
                 key={member.id}
                 delay={index * 0.15}
-                className={`bg-white rounded-2xl border border-primary-500/10 shadow-card p-6 sm:p-8 space-y-6 relative overflow-hidden group transition-all duration-300 hover:shadow-card-hover hover:border-primary-500/30 ${member.borderGradient}`}
+                className={`bg-white dark:bg-slate-900/95 rounded-2xl border border-primary-500/10 dark:border-primary-500/20 shadow-card dark:shadow-card-dark p-6 sm:p-8 space-y-6 relative overflow-hidden group transition-all duration-300 hover:shadow-card-hover dark:hover:shadow-card-hover-dark hover:border-primary-500/30 dark:hover:border-primary-500/40 ${member.borderGradient}`}
               >
                 {/* Background Accent */}
-                <div className={`absolute -right-16 -top-16 w-48 h-48 bg-gradient-to-br ${member.gradient} opacity-5 rounded-full blur-3xl group-hover:opacity-10 transition-opacity duration-500 pointer-events-none`} />
+                <div className={`absolute -right-16 -top-16 w-48 h-48 bg-gradient-to-br ${member.gradient} opacity-5 dark:opacity-10 rounded-full blur-3xl group-hover:opacity-10 dark:group-hover:opacity-20 transition-opacity duration-500 pointer-events-none`} />
 
                 <div className="flex items-start justify-between gap-4 relative z-10">
                   <div className="flex items-center gap-4">
-                    <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${member.gradient} p-0.5 shadow-lg shadow-primary-500/10 group-hover:scale-105 transition-transform duration-300`}>
-                      <div className="w-full h-full rounded-[14px] bg-white flex items-center justify-center">
-                        <IconComponent className="w-7 h-7 text-slate-700" />
+                    <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${member.gradient} p-0.5 shadow-lg shadow-primary-500/10 dark:shadow-primary-500/20 group-hover:scale-105 transition-transform duration-300`}>
+                      <div className="w-full h-full rounded-[14px] bg-white dark:bg-slate-950 flex items-center justify-center">
+                        <IconComponent className="w-7 h-7 text-slate-700 dark:text-slate-300" />
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-primary-500">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-primary-500 dark:text-primary-400">
                         Team Member 0{member.id}
                       </span>
-                      <h3 className="text-xl sm:text-2xl font-display font-bold text-slate-900 group-hover:text-primary-600 transition-colors">
+                      <h3 className="text-xl sm:text-2xl font-display font-bold text-slate-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                         {member.name}
                       </h3>
-                      <p className="text-xs font-medium text-slate-500">
+                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                         {member.role}
                       </p>
                     </div>
@@ -122,19 +122,19 @@ const About = () => {
                 </div>
 
                 {/* Email Section */}
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 text-xs">
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3 text-xs">
                   <a 
                     href={`mailto:${member.email}`}
-                    className="flex items-center gap-2 text-slate-600 hover:text-primary-500 truncate font-mono transition-colors"
+                    className="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-primary-500 dark:hover:text-primary-400 truncate font-mono transition-colors"
                     title="Send Email"
                   >
-                    <Mail className="w-4 h-4 text-primary-500 shrink-0" />
+                    <Mail className="w-4 h-4 text-primary-500 dark:text-primary-400 shrink-0" />
                     <span className="truncate">{member.email}</span>
                   </a>
 
                   <button
                     onClick={() => handleCopyEmail(member.email)}
-                    className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-primary-500 hover:border-primary-500 hover:bg-primary-50 transition-all shrink-0"
+                    className="p-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 hover:text-primary-500 dark:hover:text-primary-400 hover:border-primary-500 dark:hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-950/30 transition-all shrink-0"
                     title="Copy Email"
                   >
                     {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
@@ -143,17 +143,17 @@ const About = () => {
 
                 {/* Responsibilities */}
                 <div className="space-y-2.5">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                    <Terminal className="w-3.5 h-3.5 text-primary-500" />
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <Terminal className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                     Responsibilities
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {member.responsibilities.map((resp, idx) => (
                       <span 
                         key={idx}
-                        className="px-3 py-1 rounded-lg bg-primary-50 border border-primary-500/10 text-primary-600 text-xs font-semibold flex items-center gap-1.5"
+                        className="px-3 py-1 rounded-lg bg-primary-50 dark:bg-primary-950/30 border border-primary-500/10 dark:border-primary-500/20 text-primary-600 dark:text-primary-400 text-xs font-semibold flex items-center gap-1.5"
                       >
-                        <Sparkles className="w-3 h-3 text-primary-500" />
+                        <Sparkles className="w-3 h-3 text-primary-500 dark:text-primary-400" />
                         {resp}
                       </span>
                     ))}
@@ -161,11 +161,11 @@ const About = () => {
                 </div>
 
                 {/* Tech Stack Tags */}
-                <div className="pt-2 border-t border-slate-200 flex flex-wrap gap-1.5">
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex flex-wrap gap-1.5">
                   {member.tags.map((tag, idx) => (
                     <span 
                       key={idx}
-                      className="px-2.5 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-[11px] font-medium text-slate-500"
+                      className="px-2.5 py-0.5 rounded-md bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-[11px] font-medium text-slate-500 dark:text-slate-400"
                     >
                       {tag}
                     </span>
@@ -176,17 +176,20 @@ const About = () => {
           })}
         </div>
 
-        {/* Academic Mission Banner */}
-        <MotionContainer delay={0.6} className="bg-white rounded-3xl p-8 md:p-10 bg-gradient-to-r from-slate-50 via-primary-50/50 to-slate-50 border border-primary-500/20 text-center space-y-4 shadow-card">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-500 text-white shadow-lg shadow-primary-500/25 mx-auto">
+        {/* Academic Mission Banner - RED LINE CENTERED */}
+        <MotionContainer delay={0.6} className="bg-white dark:bg-slate-900/95 rounded-3xl p-8 md:p-10 bg-gradient-to-r from-slate-50 via-primary-50/50 to-slate-50 dark:from-slate-950/80 dark:via-primary-950/30 dark:to-slate-950/80 border border-primary-500/20 dark:border-primary-500/30 text-center space-y-4 shadow-card dark:shadow-card-dark">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-500 text-white shadow-lg shadow-primary-500/25 dark:shadow-primary-500/50 mx-auto">
             <GraduationCap className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-display font-bold text-slate-900">East Delta University Engineering Project</h2>
-          <p className="text-slate-500 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+          <h2 className="text-2xl font-display font-bold text-slate-900 dark:text-white">East Delta University Engineering Project</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
             Built as part of our academic excellence initiative to connect students and faculty through 
             real-time digital consultation booking, secure user authentication, and centralized administration.
           </p>
-          <div className="academic-divider mx-auto" />
+          {/* Centered Red Line */}
+          <div className="flex justify-center">
+            <div className="w-20 h-1 bg-gradient-to-r from-primary-500 to-primary-700 rounded-full shadow-[0_0_20px_rgba(153,0,0,0.3)] dark:shadow-[0_0_30px_rgba(153,0,0,0.5)]" />
+          </div>
         </MotionContainer>
 
       </div>

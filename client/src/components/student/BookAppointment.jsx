@@ -171,10 +171,10 @@ const BookAppointment = () => {
           disabled={disabled}
           className={`
             h-9 w-9 rounded-xl text-sm font-medium transition-all duration-200
-            ${disabled ? 'opacity-30 cursor-not-allowed text-slate-400 line-through' : 'hover:scale-105 cursor-pointer'}
-            ${selected ? 'bg-primary-500 text-white shadow-md shadow-primary-500/25' : ''}
-            ${today && !selected ? 'border-2 border-primary-500/50 text-primary-600' : ''}
-            ${!disabled && !selected ? 'hover:bg-primary-50 text-slate-700' : ''}
+            ${disabled ? 'opacity-30 cursor-not-allowed text-slate-400 dark:text-slate-600 line-through' : 'hover:scale-105 cursor-pointer'}
+            ${selected ? 'bg-primary-500 text-white shadow-md shadow-primary-500/25 dark:shadow-primary-500/50' : ''}
+            ${today && !selected ? 'border-2 border-primary-500/50 dark:border-primary-400/50 text-primary-600 dark:text-primary-400' : ''}
+            ${!disabled && !selected ? 'hover:bg-primary-50 dark:hover:bg-primary-950/30 text-slate-700 dark:text-slate-300' : ''}
           `}
         >
           {day}
@@ -202,36 +202,36 @@ const BookAppointment = () => {
   };
 
   return (
-    <PageTransition className="py-8 md:py-12 bg-slate-50/80 pattern-dots">
+    <PageTransition className="py-8 md:py-12 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <MotionContainer className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 border border-primary-500/20 text-primary-600 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5 text-primary-500" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-semibold">
+            <Sparkles className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
             <span>New Consultation Slot</span>
           </div>
-          <h1 className="text-3xl font-display font-bold text-slate-900">Book an Appointment</h1>
-          <p className="text-slate-500 text-sm">Select your faculty member, preferred date & time slot below.</p>
+          <h1 className="text-3xl font-display font-bold text-slate-900 dark:text-white">Book an Appointment</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Select your faculty member, preferred date & time slot below.</p>
         </MotionContainer>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <MotionContainer delay={0.1} className="lg:col-span-2">
-            <div className="bg-white rounded-3xl shadow-card border border-primary-500/10 p-6 sm:p-8">
-              <div className="absolute top-0 inset-x-0 h-1 bg-primary-500" />
+            <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 transition-all duration-300">
+              <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Faculty Selection */}
                 <div>
                   <label className="input-label">
-                    <User className="inline-block w-4 h-4 mr-2 text-primary-500" />
+                    <User className="inline-block w-4 h-4 mr-2 text-primary-500 dark:text-primary-400" />
                     Select Faculty Member <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={selectedFaculty}
                     onChange={handleFacultySelect}
-                    className="input-field bg-white"
+                    className="input-field bg-white dark:bg-slate-900"
                     required
                     disabled={facultiesLoading}
                   >
-                    <option value="" className="text-slate-400">
+                    <option value="" className="text-slate-400 dark:text-slate-500">
                       {facultiesLoading ? 'Loading faculties...' : 'Choose a faculty member...'}
                     </option>
                     {faculties.map((faculty) => (
@@ -244,10 +244,10 @@ const BookAppointment = () => {
 
                 {/* Faculty Details */}
                 {facultyDetails && (
-                  <div className="p-4 rounded-xl bg-primary-50 border border-primary-500/20 space-y-1">
-                    <h3 className="font-bold text-sm text-primary-700">Faculty Details</h3>
-                    <div className="text-xs text-slate-600 space-y-1">
-                      <p><MapPin className="inline-block w-3.5 h-3.5 mr-1 text-primary-500" /> Office: {facultyDetails.officeRoom || 'N/A'}</p>
+                  <div className="p-4 rounded-xl bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 space-y-1">
+                    <h3 className="font-bold text-sm text-primary-700 dark:text-primary-400">Faculty Details</h3>
+                    <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                      <p><MapPin className="inline-block w-3.5 h-3.5 mr-1 text-primary-500 dark:text-primary-400" /> Office: {facultyDetails.officeRoom || 'N/A'}</p>
                       <p>Department: {facultyDetails.department || 'N/A'}</p>
                       <p>Designation: {facultyDetails.designation || 'Faculty Member'}</p>
                     </div>
@@ -258,54 +258,54 @@ const BookAppointment = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label className="input-label">
-                      <CalendarIcon className="inline-block w-4 h-4 mr-2 text-primary-500" />
+                      <CalendarIcon className="inline-block w-4 h-4 mr-2 text-primary-500 dark:text-primary-400" />
                       Select Date <span className="text-red-500">*</span>
                     </label>
-                    <div className="bg-white rounded-2xl border border-slate-200 p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <button type="button" onClick={goToPreviousMonth} className="p-1.5 rounded-lg hover:bg-primary-50 text-slate-400 hover:text-primary-500 transition-colors">
+                        <button type="button" onClick={goToPreviousMonth} className="p-1.5 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-950/30 text-slate-400 dark:text-slate-500 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">
                           <ChevronLeft className="w-4 h-4" />
                         </button>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-slate-900">{months[currentMonth]} {currentYear}</span>
-                          <button type="button" onClick={goToToday} className="text-[10px] font-medium px-2 py-0.5 rounded-lg bg-primary-50 border border-primary-500/20 text-primary-600 hover:bg-primary-100 transition-colors">
+                          <span className="text-sm font-bold text-slate-900 dark:text-white">{months[currentMonth]} {currentYear}</span>
+                          <button type="button" onClick={goToToday} className="text-[10px] font-medium px-2 py-0.5 rounded-lg bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-950/50 transition-colors">
                             Today
                           </button>
                         </div>
-                        <button type="button" onClick={goToNextMonth} className="p-1.5 rounded-lg hover:bg-primary-50 text-slate-400 hover:text-primary-500 transition-colors">
+                        <button type="button" onClick={goToNextMonth} className="p-1.5 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-950/30 text-slate-400 dark:text-slate-500 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">
                           <ChevronRight className="w-4 h-4" />
                         </button>
                       </div>
                       <div className="grid grid-cols-7 gap-1 mb-2">
                         {days.map((day) => (
-                          <div key={day} className="h-7 flex items-center justify-center text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                          <div key={day} className="h-7 flex items-center justify-center text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                             {day}
                           </div>
                         ))}
                       </div>
                       <div className="grid grid-cols-7 gap-1">{renderCalendarDays()}</div>
-                      <div className="mt-3 pt-2 border-t border-slate-200 flex items-center justify-between">
-                        <span className="text-xs text-slate-500">Selected:</span>
-                        <span className="text-xs font-semibold text-primary-600">{formatDateDisplay(selectedDate)}</span>
+                      <div className="mt-3 pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                        <span className="text-xs text-slate-500 dark:text-slate-400">Selected:</span>
+                        <span className="text-xs font-semibold text-primary-600 dark:text-primary-400">{formatDateDisplay(selectedDate)}</span>
                       </div>
                     </div>
                   </div>
 
                   <div>
                     <label className="input-label">
-                      <Clock className="inline-block w-4 h-4 mr-2 text-primary-500" />
+                      <Clock className="inline-block w-4 h-4 mr-2 text-primary-500 dark:text-primary-400" />
                       Available Time Slots <span className="text-red-500">*</span>
                     </label>
                     
                     {!fetchingSlots && selectedFaculty && (
                       <div className="mb-3">
                         {availableSlots.length === 0 ? (
-                          <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-600 text-xs text-center flex items-center justify-center gap-2">
+                          <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl text-amber-600 dark:text-amber-400 text-xs text-center flex items-center justify-center gap-2">
                             <AlertCircle className="w-4 h-4 inline-block" />
                             No available slots for this date. Please select another date.
                           </div>
                         ) : (
-                          <div className="p-2 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-600 text-xs text-center">
+                          <div className="p-2 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-xl text-emerald-600 dark:text-emerald-400 text-xs text-center">
                             ✅ {availableSlots.length} slot{availableSlots.length !== 1 ? 's' : ''} available
                           </div>
                         )}
@@ -313,12 +313,12 @@ const BookAppointment = () => {
                     )}
                     
                     {fetchingSlots ? (
-                      <div className="py-8 text-center text-xs text-slate-500">
-                        <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-primary-500" />
+                      <div className="py-8 text-center text-xs text-slate-500 dark:text-slate-400">
+                        <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-primary-500 dark:text-primary-400" />
                         Loading available slots...
                       </div>
                     ) : availableSlots.length > 0 ? (
-                      <div className="grid grid-cols-2 gap-2 max-h-[250px] overflow-y-auto pr-1">
+                      <div className="grid grid-cols-2 gap-2 max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
                         {availableSlots.map((slot, index) => (
                           <button
                             key={index}
@@ -326,8 +326,8 @@ const BookAppointment = () => {
                             onClick={() => setSelectedTime(slot.startTime)}
                             className={`p-2.5 rounded-xl text-xs font-semibold border transition-all duration-200 ${
                               selectedTime === slot.startTime
-                                ? 'bg-primary-500 border-primary-500 text-white shadow-md shadow-primary-500/25 scale-[1.02]'
-                                : 'bg-white border-slate-200 text-slate-600 hover:border-primary-500 hover:bg-primary-50'
+                                ? 'bg-primary-500 border-primary-500 text-white shadow-md shadow-primary-500/25 dark:shadow-primary-500/50 scale-[1.02]'
+                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-primary-500 dark:hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-950/30'
                             }`}
                           >
                             {formatTimeDisplay(slot.startTime)} - {formatTimeDisplay(slot.endTime)}
@@ -335,14 +335,14 @@ const BookAppointment = () => {
                         ))}
                       </div>
                     ) : selectedFaculty ? (
-                      <div className="py-8 text-center text-slate-500 text-sm">
-                        <Clock className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                      <div className="py-8 text-center text-slate-500 dark:text-slate-400 text-sm">
+                        <Clock className="w-8 h-8 text-slate-400 dark:text-slate-600 mx-auto mb-2" />
                         <p>No available slots for this date.</p>
-                        <p className="text-xs text-amber-600 mt-1">Please select another date.</p>
+                        <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">Please select another date.</p>
                       </div>
                     ) : (
-                      <div className="py-8 text-center text-slate-500 text-sm">
-                        <User className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                      <div className="py-8 text-center text-slate-500 dark:text-slate-400 text-sm">
+                        <User className="w-8 h-8 text-slate-400 dark:text-slate-600 mx-auto mb-2" />
                         <p>Select a faculty to see available slots</p>
                       </div>
                     )}
@@ -352,7 +352,7 @@ const BookAppointment = () => {
                 {/* Purpose */}
                 <div>
                   <label className="input-label">
-                    <FileText className="inline-block w-4 h-4 mr-2 text-primary-500" />
+                    <FileText className="inline-block w-4 h-4 mr-2 text-primary-500 dark:text-primary-400" />
                     Purpose of Meeting <span className="text-red-500">*</span>
                   </label>
                   <textarea
@@ -369,7 +369,7 @@ const BookAppointment = () => {
                   type="submit"
                   disabled={loading || !selectedFaculty || !selectedTime || availableSlots.length === 0}
                   variant="primary"
-                  className="w-full py-3.5"
+                  className="w-full py-3.5 shadow-lg shadow-primary-500/25 dark:shadow-primary-500/50 hover:shadow-primary-500/40 dark:hover:shadow-primary-500/70"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -389,32 +389,32 @@ const BookAppointment = () => {
 
           {/* Sidebar */}
           <MotionContainer delay={0.2} className="space-y-6">
-            <SpotlightCard spotlightColor="rgba(153, 0, 0, 0.06)" className="p-6">
-              <h3 className="font-bold text-slate-900 text-base mb-3">Booking Guidelines</h3>
-              <ul className="space-y-2.5 text-xs text-slate-600">
+            <SpotlightCard spotlightColor="rgba(153, 0, 0, 0.08)" className="p-6 bg-white dark:bg-slate-900/95 border-primary-500/10 dark:border-primary-500/20 shadow-card dark:shadow-card-dark transition-all duration-300">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base mb-3">Booking Guidelines</h3>
+              <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-400">
                 <li className="flex items-start gap-2">
-                  <span className="text-primary-500 font-bold">•</span>
+                  <span className="text-primary-500 dark:text-primary-400 font-bold">•</span>
                   <span>Slots are date-specific. Faculty sets availability for specific dates.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary-500 font-bold">•</span>
+                  <span className="text-primary-500 dark:text-primary-400 font-bold">•</span>
                   <span>If no slots are shown, the faculty is not available on this date.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary-500 font-bold">•</span>
+                  <span className="text-primary-500 dark:text-primary-400 font-bold">•</span>
                   <span>Write a clear meeting purpose so faculty can prepare in advance.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary-500 font-bold">•</span>
+                  <span className="text-primary-500 dark:text-primary-400 font-bold">•</span>
                   <span>Arrive at the faculty office at least 5 minutes prior.</span>
                 </li>
               </ul>
             </SpotlightCard>
 
-            <SpotlightCard spotlightColor="rgba(153, 0, 0, 0.06)" className="p-6">
-              <h3 className="font-bold text-slate-900 text-base mb-2">Need Support?</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">If you experience issues booking or viewing faculty schedules, contact support:</p>
-              <div className="mt-3 text-xs text-slate-600 space-y-1">
+            <SpotlightCard spotlightColor="rgba(153, 0, 0, 0.08)" className="p-6 bg-white dark:bg-slate-900/95 border-primary-500/10 dark:border-primary-500/20 shadow-card dark:shadow-card-dark transition-all duration-300">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base mb-2">Need Support?</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">If you experience issues booking or viewing faculty schedules, contact support:</p>
+              <div className="mt-3 text-xs text-slate-600 dark:text-slate-400 space-y-1">
                 <p><strong>Email:</strong> support@eastdelta.edu.bd</p>
                 <p><strong>Phone:</strong> +880 1234 567890</p>
               </div>

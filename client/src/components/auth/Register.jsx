@@ -82,31 +82,35 @@ const Register = () => {
   };
 
   return (
-    <PageTransition className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50/80 pattern-dots">
+    <PageTransition className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
       <MotionContainer className="max-w-xl w-full">
-        <div className="bg-white rounded-3xl shadow-card border border-primary-500/10 p-8 sm:p-10 space-y-8 relative overflow-hidden">
+        <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-8 sm:p-10 space-y-8 relative overflow-hidden transition-all duration-300">
           {/* Top red accent */}
-          <div className="absolute top-0 inset-x-0 h-1 bg-primary-500" />
+          <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
+          
+          {/* Dark mode glow */}
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="text-center space-y-2">
+          <div className="text-center space-y-2 relative z-10">
             <div className="flex justify-center">
-              <div className="w-16 h-16 rounded-2xl bg-primary-500 text-white flex items-center justify-center shadow-lg shadow-primary-500/25">
+              <div className="w-16 h-16 rounded-2xl bg-primary-500 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 dark:shadow-primary-500/50">
                 <GraduationCap className="w-8 h-8" />
               </div>
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-50 border border-primary-500/20 text-primary-600 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-primary-500" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-semibold">
+              <Sparkles className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
               <span>Join EDU Portal</span>
             </div>
-            <h2 className="text-3xl font-display font-bold text-slate-900">Create Account</h2>
-            <p className="text-slate-500 text-sm">Fill in your details to register as Student or Faculty</p>
+            <h2 className="text-3xl font-display font-bold text-slate-900 dark:text-white">Create Account</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Fill in your details to register as Student or Faculty</p>
           </div>
 
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-5 relative z-10" onSubmit={handleSubmit}>
             {/* Role Switcher */}
             <div>
               <label className="input-label">Select Account Role</label>
-              <div className="grid grid-cols-3 gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
+              <div className="grid grid-cols-3 gap-2 bg-slate-50 dark:bg-slate-800/50 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
                 {[
                   { id: 'student', label: 'Student' },
                   { id: 'faculty', label: 'Faculty' },
@@ -121,8 +125,8 @@ const Register = () => {
                     }}
                     className={`py-2 text-xs font-bold rounded-lg transition-all duration-200 ${
                       formData.role === roleItem.id
-                        ? 'bg-primary-500 text-white shadow-md'
-                        : 'text-slate-500 hover:text-slate-700'
+                        ? 'bg-primary-500 text-white shadow-md dark:shadow-primary-500/50'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                     }`}
                   >
                     {roleItem.label}
@@ -136,7 +140,7 @@ const Register = () => {
               <div>
                 <label className="input-label">Full Name</label>
                 <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
                   <input
                     type="text"
                     name="name"
@@ -152,7 +156,7 @@ const Register = () => {
               <div>
                 <label className="input-label">Email Address</label>
                 <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
                   <input
                     type="email"
                     name="email"
@@ -171,14 +175,14 @@ const Register = () => {
               <div>
                 <label className="input-label">Academic Department</label>
                 <div className="relative">
-                  <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 pointer-events-none" />
+                  <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5 pointer-events-none" />
                   <select
                     name="department"
                     value={formData.department}
                     onChange={handleChange}
-                    className={`input-field pl-11 bg-white ${errors.department ? 'input-field-error' : ''}`}
+                    className={`input-field pl-11 bg-white dark:bg-slate-900 ${errors.department ? 'input-field-error' : ''}`}
                   >
-                    <option value="" className="text-slate-400">Select Department</option>
+                    <option value="" className="text-slate-400 dark:text-slate-500">Select Department</option>
                     <option value="Computer Science">Computer Science</option>
                     <option value="Business Administration">Business Administration</option>
                     <option value="Engineering">Engineering</option>
@@ -200,7 +204,7 @@ const Register = () => {
               <div>
                 <label className="input-label">Student ID</label>
                 <div className="relative">
-                  <BadgeCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <BadgeCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
                   <input
                     type="text"
                     name="studentId"
@@ -218,7 +222,7 @@ const Register = () => {
               <div>
                 <label className="input-label">Faculty ID</label>
                 <div className="relative">
-                  <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
                   <input
                     type="text"
                     name="facultyId"
@@ -237,7 +241,7 @@ const Register = () => {
               <div>
                 <label className="input-label">Password</label>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
@@ -249,7 +253,7 @@ const Register = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -260,7 +264,7 @@ const Register = () => {
               <div>
                 <label className="input-label">Confirm Password</label>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
                   <input
                     type={showPassword ? "text" : "password"}
                     name="confirmPassword"
@@ -278,7 +282,7 @@ const Register = () => {
               type="submit"
               disabled={loading}
               variant="primary"
-              className="w-full py-3.5 mt-2"
+              className="w-full py-3.5 mt-2 shadow-lg shadow-primary-500/25 dark:shadow-primary-500/50 hover:shadow-primary-500/40 dark:hover:shadow-primary-500/70"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -293,10 +297,10 @@ const Register = () => {
               )}
             </MagneticButton>
 
-            <div className="text-center pt-2 border-t border-slate-200 space-y-2">
-              <p className="text-sm text-slate-500">
+            <div className="text-center pt-2 border-t border-slate-200 dark:border-slate-700 space-y-2">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
                 Already have an account?{' '}
-                <Link to="/login" className="text-primary-500 hover:text-primary-600 font-semibold transition-colors">
+                <Link to="/login" className="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300 font-semibold transition-colors">
                   Sign in here
                 </Link>
               </p>
