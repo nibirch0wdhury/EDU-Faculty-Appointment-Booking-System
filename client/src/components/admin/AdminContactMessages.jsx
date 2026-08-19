@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Mail, 
-  Eye, 
-  Trash2, 
-  Reply, 
-  CheckCircle2, 
-  Search, 
-  RefreshCw,
-  AlertCircle,
-  User,
-  Calendar,
-  Sparkles,
-  X,
-  Send
+  Mail, Eye, Trash2, Reply, CheckCircle2, Search, RefreshCw,
+  AlertCircle, User, Calendar, Sparkles, X, Send
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../../utils/api';
@@ -72,7 +61,6 @@ const AdminContactMessages = () => {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this message?')) return;
-    
     try {
       await api.delete(`/contact/admin/messages/${id}`);
       toast.success('Message deleted successfully');
@@ -87,7 +75,6 @@ const AdminContactMessages = () => {
       toast.error('Please enter a reply message');
       return;
     }
-
     try {
       await api.put(`/contact/admin/messages/${id}/reply`, { replyMessage: replyText });
       toast.success('Reply sent successfully');
@@ -107,241 +94,234 @@ const AdminContactMessages = () => {
   });
 
   return (
-    <PageTransition className="py-8 md:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-      {/* Header */}
-      <MotionContainer className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Support Messaging Center</span>
+    <PageTransition className="py-8 md:py-12 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Header */}
+        <MotionContainer className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-semibold">
+              <Sparkles className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
+              <span>Support Messaging Center</span>
+            </div>
+            <h1 className="text-3xl font-display font-bold text-slate-900 dark:text-white">Contact Messages</h1>
           </div>
-          <h1 className="text-3xl font-extrabold text-white">Contact Messages</h1>
-        </div>
+          <MagneticButton variant="secondary" onClick={fetchMessages} className="py-2.5 px-4 text-xs">
+            <RefreshCw className="w-4 h-4" />
+            <span>Refresh List</span>
+          </MagneticButton>
+        </MotionContainer>
 
-        <MagneticButton
-          variant="secondary"
-          onClick={fetchMessages}
-          className="py-2.5 px-4 text-xs"
-        >
-          <RefreshCw className="w-4 h-4" />
-          <span>Refresh List</span>
-        </MagneticButton>
-      </MotionContainer>
-
-      {/* Stats Cards */}
-      <MotionContainer delay={0.1} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <SpotlightCard spotlightColor="rgba(99, 102, 241, 0.2)" className="p-5">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-indigo-600/20 border border-indigo-500/30 rounded-2xl text-indigo-400">
-              <Mail className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 font-medium">Total Messages</p>
-              <p className="text-2xl font-extrabold text-white">{stats.total}</p>
-            </div>
-          </div>
-        </SpotlightCard>
-
-        <SpotlightCard spotlightColor="rgba(244, 63, 94, 0.2)" className="p-5">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-rose-600/20 border border-rose-500/30 rounded-2xl text-rose-400">
-              <AlertCircle className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 font-medium">Unread</p>
-              <p className="text-2xl font-extrabold text-rose-400">{stats.unread}</p>
-            </div>
-          </div>
-        </SpotlightCard>
-
-        <SpotlightCard spotlightColor="rgba(59, 130, 246, 0.2)" className="p-5">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-sky-600/20 border border-sky-500/30 rounded-2xl text-sky-400">
-              <Eye className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 font-medium">Read</p>
-              <p className="text-2xl font-extrabold text-white">{stats.read}</p>
-            </div>
-          </div>
-        </SpotlightCard>
-
-        <SpotlightCard spotlightColor="rgba(16, 185, 129, 0.2)" className="p-5">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-emerald-600/20 border border-emerald-500/30 rounded-2xl text-emerald-400">
-              <CheckCircle2 className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 font-medium">Replied</p>
-              <p className="text-2xl font-extrabold text-emerald-400">{stats.replied}</p>
-            </div>
-          </div>
-        </SpotlightCard>
-      </MotionContainer>
-
-      {/* Filters */}
-      <MotionContainer delay={0.2} className="flex flex-col md:flex-row gap-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-          <input
-            type="text"
-            placeholder="Search by sender name, email or message content..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="glass-input pl-10 text-xs"
-          />
-        </div>
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="glass-input md:w-48 bg-slate-900 text-xs"
-        >
-          <option value="all" className="bg-slate-900">All Statuses</option>
-          <option value="unread" className="bg-slate-900">Unread</option>
-          <option value="read" className="bg-slate-900">Read</option>
-          <option value="replied" className="bg-slate-900">Replied</option>
-        </select>
-      </MotionContainer>
-
-      {/* List */}
-      {loading ? (
-        <div className="py-16 text-center text-slate-400 text-sm">Loading contact submissions...</div>
-      ) : filteredMessages.length > 0 ? (
-        <MotionContainer delay={0.3} className="space-y-4">
-          {filteredMessages.map((message) => (
-            <SpotlightCard 
-              key={message._id} 
-              spotlightColor="rgba(99, 102, 241, 0.2)"
-              className={`p-6 border-l-4 ${
-                message.status === 'unread' ? 'border-l-rose-500' :
-                message.status === 'replied' ? 'border-l-emerald-500' : 'border-l-slate-700'
-              }`}
-            >
-              <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-                <div className="space-y-3 flex-grow">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-indigo-600/20 border border-indigo-500/30 rounded-full text-indigo-400">
-                      <User className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-base text-white">{message.name}</h3>
-                        <Badge status={message.status} />
-                      </div>
-                      <p className="text-xs text-slate-400">{message.email}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-200 leading-relaxed">
-                    {message.message}
-                  </div>
-                  
-                  {message.replyMessage && (
-                    <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-1 text-xs">
-                      <p className="font-bold text-emerald-300 flex items-center gap-1.5">
-                        <Reply className="w-3.5 h-3.5" /> Admin Reply:
-                      </p>
-                      <p className="text-slate-300">{message.replyMessage}</p>
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center gap-4 text-[11px] text-slate-400">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                      Submitted: {new Date(message.createdAt).toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 border-t md:border-t-0 border-slate-800 pt-3 md:pt-0 shrink-0">
-                  {message.status === 'unread' && (
-                    <button
-                      onClick={() => handleMarkAsRead(message._id)}
-                      className="p-2 rounded-xl text-slate-400 hover:text-sky-300 hover:bg-sky-500/10 transition-colors"
-                      title="Mark as read"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                  )}
-                  <button
-                    onClick={() => {
-                      setSelectedMessage(message);
-                      setShowReplyModal(true);
-                    }}
-                    className="p-2 rounded-xl text-slate-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition-colors"
-                    title="Reply to message"
-                  >
-                    <Reply className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(message._id)}
-                    className="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-                    title="Delete message"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+        {/* Stats Cards */}
+        <MotionContainer delay={0.1} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <SpotlightCard spotlightColor="rgba(153, 0, 0, 0.08)" className="p-5 bg-white dark:bg-slate-900/95 border-primary-500/10 dark:border-primary-500/20 shadow-card dark:shadow-card-dark transition-all duration-300">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-primary-50 dark:bg-primary-950/30 border border-primary-500/10 dark:border-primary-500/20 rounded-2xl text-primary-500 dark:text-primary-400">
+                <Mail className="w-5 h-5" />
               </div>
-            </SpotlightCard>
-          ))}
-        </MotionContainer>
-      ) : (
-        <MotionContainer delay={0.3} className="glass-panel p-12 text-center space-y-3">
-          <Mail className="w-12 h-12 text-slate-600 mx-auto" />
-          <h3 className="text-lg font-bold text-white">No Messages Found</h3>
-          <p className="text-xs text-slate-400">No contact submissions match the current filter.</p>
-        </MotionContainer>
-      )}
-
-      {/* Reply Modal */}
-      {showReplyModal && selectedMessage && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="glass-panel max-w-lg w-full p-8 space-y-6 relative border border-slate-700/80">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h2 className="text-lg font-bold text-white">Reply to {selectedMessage.name}</h2>
-              <button onClick={() => setShowReplyModal(false)} className="text-slate-400 hover:text-white">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 text-xs space-y-1">
-              <p className="font-bold text-slate-400">Original Inquiry:</p>
-              <p className="text-slate-200">{selectedMessage.message}</p>
-              <p className="text-[11px] text-slate-400 pt-1">Sender: {selectedMessage.name} ({selectedMessage.email})</p>
-            </div>
-
-            <div className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-200 mb-1.5">Your Response</label>
-                <textarea
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  className="glass-input"
-                  rows="4"
-                  placeholder="Type your official response here..."
-                />
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Messages</p>
+                <p className="text-2xl font-extrabold text-slate-900 dark:text-white">{stats.total}</p>
               </div>
-              <div className="flex gap-3">
-                <MagneticButton
-                  variant="primary"
-                  className="flex-1 py-2.5"
-                  onClick={() => handleReply(selectedMessage._id)}
-                >
-                  <Send className="w-4 h-4" />
-                  <span>Send Response</span>
-                </MagneticButton>
-                <MagneticButton
-                  variant="secondary"
-                  className="flex-1 py-2.5"
-                  onClick={() => setShowReplyModal(false)}
-                >
-                  <span>Cancel</span>
-                </MagneticButton>
+            </div>
+          </SpotlightCard>
+
+          <SpotlightCard spotlightColor="rgba(245, 158, 11, 0.08)" className="p-5 bg-white dark:bg-slate-900/95 border-primary-500/10 dark:border-primary-500/20 shadow-card dark:shadow-card-dark transition-all duration-300">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-500/10 dark:border-amber-500/20 rounded-2xl text-amber-500 dark:text-amber-400">
+                <AlertCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Unread</p>
+                <p className="text-2xl font-extrabold text-amber-600 dark:text-amber-400">{stats.unread}</p>
+              </div>
+            </div>
+          </SpotlightCard>
+
+          <SpotlightCard spotlightColor="rgba(59, 130, 246, 0.08)" className="p-5 bg-white dark:bg-slate-900/95 border-primary-500/10 dark:border-primary-500/20 shadow-card dark:shadow-card-dark transition-all duration-300">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-500/10 dark:border-blue-500/20 rounded-2xl text-blue-500 dark:text-blue-400">
+                <Eye className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Read</p>
+                <p className="text-2xl font-extrabold text-slate-900 dark:text-white">{stats.read}</p>
+              </div>
+            </div>
+          </SpotlightCard>
+
+          <SpotlightCard spotlightColor="rgba(16, 185, 129, 0.08)" className="p-5 bg-white dark:bg-slate-900/95 border-primary-500/10 dark:border-primary-500/20 shadow-card dark:shadow-card-dark transition-all duration-300">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-500/10 dark:border-emerald-500/20 rounded-2xl text-emerald-500 dark:text-emerald-400">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Replied</p>
+                <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{stats.replied}</p>
+              </div>
+            </div>
+          </SpotlightCard>
+        </MotionContainer>
+
+        {/* Filters */}
+        <MotionContainer delay={0.2} className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search by sender name, email or message content..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="input-field pl-10 text-xs"
+            />
+          </div>
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="input-field md:w-48 bg-white dark:bg-slate-900 text-xs"
+          >
+            <option value="all" className="bg-white dark:bg-slate-900">All Statuses</option>
+            <option value="unread" className="bg-white dark:bg-slate-900">Unread</option>
+            <option value="read" className="bg-white dark:bg-slate-900">Read</option>
+            <option value="replied" className="bg-white dark:bg-slate-900">Replied</option>
+          </select>
+        </MotionContainer>
+
+        {/* List */}
+        {loading ? (
+          <div className="py-16 text-center text-slate-500 dark:text-slate-400 text-sm flex items-center justify-center gap-2">
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary-500 dark:border-primary-400 border-t-transparent"></div>
+            <span>Loading contact submissions...</span>
+          </div>
+        ) : filteredMessages.length > 0 ? (
+          <MotionContainer delay={0.3} className="space-y-4">
+            {filteredMessages.map((message) => (
+              <SpotlightCard 
+                key={message._id} 
+                spotlightColor="rgba(153, 0, 0, 0.08)"
+                className={`p-6 border-l-4 ${
+                  message.status === 'unread' ? 'border-l-amber-500' :
+                  message.status === 'replied' ? 'border-l-emerald-500' : 'border-l-slate-300 dark:border-l-slate-600'
+                } bg-white dark:bg-slate-900/95 border-r border-t border-b border-primary-500/10 dark:border-primary-500/20 shadow-card dark:shadow-card-dark transition-all duration-300`}
+              >
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                  <div className="space-y-3 flex-grow">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 bg-primary-50 dark:bg-primary-950/30 border border-primary-500/10 dark:border-primary-500/20 rounded-full text-primary-500 dark:text-primary-400">
+                        <User className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-base text-slate-900 dark:text-white">{message.name}</h3>
+                          <Badge status={message.status} />
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{message.email}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                      {message.message}
+                    </div>
+                    
+                    {message.replyMessage && (
+                      <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 space-y-1 text-xs">
+                        <p className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                          <Reply className="w-3.5 h-3.5" /> Admin Reply:
+                        </p>
+                        <p className="text-slate-700 dark:text-slate-300">{message.replyMessage}</p>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center gap-4 text-[11px] text-slate-500 dark:text-slate-400">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                        Submitted: {new Date(message.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 border-t md:border-t-0 border-slate-200 dark:border-slate-700 pt-3 md:pt-0 shrink-0">
+                    {message.status === 'unread' && (
+                      <button
+                        onClick={() => handleMarkAsRead(message._id)}
+                        className="p-2 rounded-xl text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
+                        title="Mark as read"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        setSelectedMessage(message);
+                        setShowReplyModal(true);
+                      }}
+                      className="p-2 rounded-xl text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors"
+                      title="Reply to message"
+                    >
+                      <Reply className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(message._id)}
+                      className="p-2 rounded-xl text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                      title="Delete message"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </SpotlightCard>
+            ))}
+          </MotionContainer>
+        ) : (
+          <MotionContainer delay={0.3} className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-12 text-center space-y-3 transition-all duration-300">
+            <Mail className="w-12 h-12 text-slate-400 dark:text-slate-600 mx-auto" />
+            <h3 className="text-lg font-display font-bold text-slate-900 dark:text-white">No Messages Found</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">No contact submissions match the current filter.</p>
+          </MotionContainer>
+        )}
+
+        {/* Reply Modal */}
+        {showReplyModal && selectedMessage && (
+          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-xl dark:shadow-2xl border border-primary-500/10 dark:border-primary-500/20 max-w-lg w-full p-8 space-y-6 relative transition-all duration-300">
+              <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
+                <h2 className="text-lg font-display font-bold text-slate-900 dark:text-white">Reply to {selectedMessage.name}</h2>
+                <button onClick={() => setShowReplyModal(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
+                <p className="font-bold text-slate-500 dark:text-slate-400">Original Inquiry:</p>
+                <p className="text-slate-700 dark:text-slate-300">{selectedMessage.message}</p>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500 pt-1">Sender: {selectedMessage.name} ({selectedMessage.email})</p>
+              </div>
+
+              <div className="space-y-4 text-xs">
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Your Response</label>
+                  <textarea
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    className="input-field"
+                    rows="4"
+                    placeholder="Type your official response here..."
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <MagneticButton variant="primary" className="flex-1 py-2.5 shadow-md shadow-primary-500/25 dark:shadow-primary-500/50" onClick={() => handleReply(selectedMessage._id)}>
+                    <Send className="w-4 h-4" />
+                    <span>Send Response</span>
+                  </MagneticButton>
+                  <MagneticButton variant="secondary" className="flex-1 py-2.5" onClick={() => setShowReplyModal(false)}>
+                    <span>Cancel</span>
+                  </MagneticButton>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </PageTransition>
   );
 };

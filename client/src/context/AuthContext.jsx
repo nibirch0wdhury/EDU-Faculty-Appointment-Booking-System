@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import api from '../utils/api';
 import { toast } from 'react-toastify';
@@ -24,6 +25,7 @@ export const AuthProvider = ({ children }) => {
       const response = await api.get('/auth/profile');
       setUser(response.data);
     } catch (error) {
+      console.error('Fetch profile error:', error);
       localStorage.removeItem('token');
       toast.error('Session expired. Please login again.');
     } finally {
@@ -33,16 +35,14 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await api.post('/auth/login', {
-        email,
-        password,
-      });
+      const response = await api.post('/auth/login', { email, password });
       const { token, ...userData } = response.data;
       localStorage.setItem('token', token);
       setUser(userData);
       toast.success('Login successful!');
       return { success: true };
     } catch (error) {
+      console.error('Login error:', error);
       toast.error(error.response?.data?.message || 'Login failed');
       return { success: false };
     }
@@ -57,6 +57,7 @@ export const AuthProvider = ({ children }) => {
       toast.success('Registration successful!');
       return { success: true };
     } catch (error) {
+      console.error('Registration error:', error);
       toast.error(error.response?.data?.message || 'Registration failed');
       return { success: false };
     }
@@ -79,6 +80,7 @@ export const AuthProvider = ({ children }) => {
       toast.success('Profile updated successfully!');
       return { success: true, data: updatedUserData };
     } catch (error) {
+      console.error('Update profile error:', error);
       const errorMsg = error.response?.data?.message || 'Failed to update profile';
       toast.error(errorMsg);
       return { success: false, error: errorMsg };

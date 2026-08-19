@@ -13,11 +13,12 @@ const MagneticButton = ({
   const baseStyles = "relative inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed select-none overflow-hidden";
   
   const variants = {
-    primary: "bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25 border border-indigo-400/30",
-    secondary: "bg-slate-800/80 text-slate-200 border border-slate-700/80 hover:border-slate-600 hover:text-white",
-    danger: "bg-gradient-to-r from-rose-600 to-red-600 text-white shadow-lg shadow-rose-500/25 border border-rose-400/30",
-    emerald: "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/25 border border-emerald-400/30",
-    ghost: "bg-transparent text-slate-300 hover:bg-slate-800/60 hover:text-white",
+    primary: "bg-primary-500 text-white shadow-md shadow-primary-500/25 border border-primary-500/30 hover:shadow-primary-500/40",
+    secondary: "bg-white text-primary-500 border-2 border-primary-500/30 hover:bg-primary-50 hover:border-primary-500/60",
+    danger: "bg-red-600 text-white shadow-md shadow-red-500/25 border border-red-500/30 hover:shadow-red-500/40",
+    emerald: "bg-emerald-600 text-white shadow-md shadow-emerald-500/25 border border-emerald-500/30 hover:shadow-emerald-500/40",
+    ghost: "bg-transparent text-slate-600 hover:bg-slate-100 hover:text-primary-500",
+    outline: "bg-transparent text-slate-700 border-2 border-slate-200 hover:border-primary-500 hover:text-primary-500 hover:bg-primary-50",
   };
 
   return (
@@ -34,8 +35,10 @@ const MagneticButton = ({
       <span className="relative z-10 flex items-center justify-center gap-2 px-5 py-2.5">
         {children}
       </span>
-      {/* Light sheen on hover */}
-      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full hover:animate-shimmer" />
+      {/* Shimmer effect for primary */}
+      {variant === 'primary' && (
+        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:animate-shimmer" />
+      )}
     </motion.button>
   );
 };

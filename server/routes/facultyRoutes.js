@@ -5,6 +5,37 @@ const Schedule = require('../models/Schedule');
 const User = require('../models/User');
 const Appointment = require('../models/Appointment');
 
+// ============================================
+// UTILITY: Check if date is in the past
+// ============================================
+const isPastDate = (date) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const checkDate = new Date(date);
+  checkDate.setHours(0, 0, 0, 0);
+  return checkDate < today;
+};
+
+// ============================================
+// UTILITY: Check if time is in the past for today
+// ============================================
+const isPastTimeForToday = (date, startTime) => {
+  const today = new Date();
+  const slotDate = new Date(date);
+  
+  const isToday = slotDate.getDate() === today.getDate() &&
+                  slotDate.getMonth() === today.getMonth() &&
+                  slotDate.getFullYear() === today.getFullYear();
+  
+  if (!isToday) return false;
+  
+  const [hours, minutes] = startTime.split(':').map(Number);
+  const slotStartTime = new Date(today);
+  slotStartTime.setHours(hours, minutes, 0, 0);
+  
+  return slotStartTime < today;
+};
+
 // ==================== PUBLIC ROUTES ====================
 
 // @desc    Get all faculties
@@ -80,8 +111,7 @@ router.get('/department/:department', async (req, res) => {
   }
 });
 
-// ==================== IMPORTANT: SPECIFIC ROUTES FIRST ====================
-// These must come BEFORE the /:id route to avoid conflicts
+// ==================== SPECIFIC ROUTES FIRST ====================
 
 // @desc    Get faculty's own schedule
 // @route   GET /api/faculty/my-schedule
@@ -154,6 +184,10 @@ router.get('/my-schedule/range', protect, faculty, async (req, res) => {
   }
 });
 
+// ============================================
+// ADD SCHEDULE SLOT WITH PAST DATE & TIME CHECK
+// ============================================
+
 // @desc    Add schedule slot (date-specific)
 // @route   POST /api/faculty/schedule
 // @access  Private (Faculty only)
@@ -168,6 +202,44 @@ router.post('/schedule', protect, faculty, async (req, res) => {
       return res.status(400).json({ 
         success: false,
         message: 'Please provide date, startTime, and endTime' 
+      });
+    }
+    
+    // CHECK 1: Date must not be in the past
+    const slotDate = new Date(date);
+    if (isNaN(slotDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid date format'
+      });
+    }
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selectedDate = new Date(date);
+    selectedDate.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+      console.warn(`⚠️ Blocked: Attempted to create slot on past date ${date}`);
+      return res.status(400).json({
+        success: false,
+        message: '❌ Cannot create slots for past dates. Please select today or a future date.'
+      });
+    }
+    
+    // CHECK 2: If date is today, time must be in the future
+    if (isPastTimeForToday(date, startTime)) {
+      const currentTime = new Date();
+      const currentTimeStr = currentTime.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+      
+      console.warn(`⚠️ Blocked: Attempted to create slot at ${startTime} which is in the past`);
+      return res.status(400).json({
+        success: false,
+        message: `❌ Cannot create slots for times that have already passed today. Current time is ${currentTimeStr}. Please select a future time.`
       });
     }
     
@@ -228,32 +300,10 @@ router.post('/schedule', protect, faculty, async (req, res) => {
       });
     }
     
-    // Parse date
-    const slotDate = new Date(date);
-    if (isNaN(slotDate.getTime())) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid date format'
-      });
-    }
-    
-    // Check if date is in the past (allow today)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const selectedDate = new Date(slotDate);
-    selectedDate.setHours(0, 0, 0, 0);
-    
-    if (selectedDate < today) {
-      return res.status(400).json({
-        success: false,
-        message: 'Cannot create slots for past dates'
-      });
-    }
-    
     // Check for duplicate slot on same date and time
-    const startOfDay = new Date(slotDate);
+    const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(slotDate);
+    const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
     
     const existingSlot = await Schedule.findOne({
@@ -309,7 +359,6 @@ router.post('/schedule', protect, faculty, async (req, res) => {
   } catch (error) {
     console.error('❌ Add schedule error:', error);
     
-    // Handle duplicate key error specifically
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
@@ -336,12 +385,44 @@ router.put('/schedule/:id', protect, faculty, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Slot not found' });
     }
     
-    // Check ownership
     if (slot.facultyId.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: 'Not authorized to update this slot' });
     }
     
-    // Validate time if provided
+    if (date) {
+      const newDate = new Date(date);
+      if (isNaN(newDate.getTime())) {
+        return res.status(400).json({ success: false, message: 'Invalid date format' });
+      }
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const selectedDate = new Date(date);
+      selectedDate.setHours(0, 0, 0, 0);
+      
+      if (selectedDate < today) {
+        return res.status(400).json({
+          success: false,
+          message: '❌ Cannot update to a past date. Please select today or a future date.'
+        });
+      }
+      
+      if (startTime && isPastTimeForToday(date, startTime)) {
+        const currentTime = new Date();
+        const currentTimeStr = currentTime.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+        return res.status(400).json({
+          success: false,
+          message: `❌ Cannot update to a time that has already passed today. Current time is ${currentTimeStr}.`
+        });
+      }
+      
+      slot.date = newDate;
+    }
+    
     if (startTime && endTime) {
       const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
       if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
@@ -370,18 +451,11 @@ router.put('/schedule/:id', protect, faculty, async (req, res) => {
           message: 'Slot duration must be at least 30 minutes'
         });
       }
+      
+      if (startTime) slot.startTime = startTime;
+      if (endTime) slot.endTime = endTime;
     }
     
-    // Update fields
-    if (date) {
-      const newDate = new Date(date);
-      if (isNaN(newDate.getTime())) {
-        return res.status(400).json({ success: false, message: 'Invalid date format' });
-      }
-      slot.date = newDate;
-    }
-    if (startTime) slot.startTime = startTime;
-    if (endTime) slot.endTime = endTime;
     if (isAvailable !== undefined) slot.isAvailable = isAvailable;
     slot.updatedAt = Date.now();
     
@@ -411,12 +485,10 @@ router.delete('/schedule/:id', protect, faculty, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Slot not found' });
     }
     
-    // Check ownership
     if (slot.facultyId.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: 'Not authorized to delete this slot' });
     }
     
-    // Check if there are any pending/confirmed appointments for this slot
     const startOfDay = new Date(slot.date);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(slot.date);
@@ -460,12 +532,10 @@ router.put('/schedule/:id/toggle', protect, faculty, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Slot not found' });
     }
     
-    // Check ownership
     if (slot.facultyId.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: 'Not authorized to update this slot' });
     }
     
-    // Check if there are any pending/confirmed appointments for this slot
     const startOfDay = new Date(slot.date);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(slot.date);
@@ -478,7 +548,6 @@ router.put('/schedule/:id/toggle', protect, faculty, async (req, res) => {
       status: { $in: ['pending', 'confirmed'] },
     });
     
-    // If trying to make unavailable, check for appointments
     if (slot.isAvailable && existingAppointments.length > 0) {
       return res.status(400).json({
         success: false,
@@ -486,7 +555,6 @@ router.put('/schedule/:id/toggle', protect, faculty, async (req, res) => {
       });
     }
     
-    // Toggle availability
     slot.isAvailable = !slot.isAvailable;
     slot.updatedAt = Date.now();
     await slot.save();
@@ -504,8 +572,7 @@ router.put('/schedule/:id/toggle', protect, faculty, async (req, res) => {
   }
 });
 
-// ==================== IMPORTANT: DYNAMIC ROUTES LAST ====================
-// These must come AFTER all specific routes
+// ==================== DYNAMIC ROUTES LAST ====================
 
 // @desc    Get faculty schedule for a specific date or date range
 // @route   GET /api/faculty/:id/schedule
@@ -538,6 +605,10 @@ router.get('/:id/schedule', async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
+// ============================================
+// ✅ UPDATED: Get available slots with past time filtering
+// ============================================
 
 // @desc    Get available slots for a specific date
 // @route   GET /api/faculty/:id/slots
@@ -573,7 +644,28 @@ router.get('/:id/slots', async (req, res) => {
     
     // Filter out slots that are already booked
     const bookedTimes = bookedAppointments.map(a => a.startTime);
-    const availableSlots = slots.filter(slot => !bookedTimes.includes(slot.startTime));
+    let availableSlots = slots.filter(slot => !bookedTimes.includes(slot.startTime));
+    
+    // ============================================
+    // ✅ FILTER OUT PAST TIMES IF DATE IS TODAY
+    // ============================================
+    const now = new Date();
+    const isToday = selectedDate.getDate() === now.getDate() &&
+                    selectedDate.getMonth() === now.getMonth() &&
+                    selectedDate.getFullYear() === now.getFullYear();
+    
+    if (isToday) {
+      const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
+      
+      availableSlots = availableSlots.filter(slot => {
+        const [hours, minutes] = slot.startTime.split(':').map(Number);
+        const slotTimeMinutes = hours * 60 + minutes;
+        // Only show slots that start at least 30 minutes from now
+        return slotTimeMinutes > currentTimeMinutes + 30;
+      });
+      
+      console.log(`✅ Filtered out past slots for today. ${availableSlots.length} slots remaining`);
+    }
     
     res.json({ success: true, data: availableSlots });
   } catch (error) {
@@ -606,7 +698,6 @@ router.get('/:id/availability', async (req, res) => {
       isAvailable: true,
     });
     
-    // Get booked appointments
     const bookedAppointments = await Appointment.find({
       facultyId,
       date: { $gte: startOfDay, $lte: endOfDay },
@@ -671,25 +762,47 @@ router.post('/schedule/bulk', protect, faculty, async (req, res) => {
     
     const createdSlots = [];
     const errors = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const now = new Date();
     
     for (const slotData of slots) {
       try {
         const { date, startTime, endTime } = slotData;
         
-        // Validate required fields
         if (!date || !startTime || !endTime) {
           errors.push({ slot: slotData, error: 'Missing required fields' });
           continue;
         }
         
-        // Validate time format
+        const slotDate = new Date(date);
+        const selectedDate = new Date(date);
+        selectedDate.setHours(0, 0, 0, 0);
+        
+        if (selectedDate < today) {
+          errors.push({ slot: slotData, error: 'Cannot create slots for past dates' });
+          continue;
+        }
+        
+        if (isPastTimeForToday(date, startTime)) {
+          const currentTimeStr = now.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          });
+          errors.push({ 
+            slot: slotData, 
+            error: `Cannot create slot at ${startTime} - time has already passed today (current time: ${currentTimeStr})` 
+          });
+          continue;
+        }
+        
         const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
         if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
           errors.push({ slot: slotData, error: 'Invalid time format' });
           continue;
         }
         
-        // Convert to minutes for comparison
         const [startHour, startMinute] = startTime.split(':').map(Number);
         const [endHour, endMinute] = endTime.split(':').map(Number);
         const startMinutes = startHour * 60 + startMinute;
@@ -705,14 +818,11 @@ router.post('/schedule/bulk', protect, faculty, async (req, res) => {
           continue;
         }
         
-        // Parse date
-        const slotDate = new Date(date);
         if (isNaN(slotDate.getTime())) {
           errors.push({ slot: slotData, error: 'Invalid date format' });
           continue;
         }
         
-        // Create slot
         const slot = await Schedule.create({
           facultyId: req.user._id,
           date: slotDate,
