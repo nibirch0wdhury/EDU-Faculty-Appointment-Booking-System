@@ -2,11 +2,14 @@ const express = require('express');
 const router = express.Router();
 const { protect, admin } = require('../middleware/auth');
 
-// Import models - make sure these paths are correct
 const User = require('../models/User');
 const Appointment = require('../models/Appointment');
 
-// Get system statistics
+// ==================== SYSTEM STATISTICS ====================
+
+// @desc    Get system statistics
+// @route   GET /api/admin/stats
+// @access  Private (Admin)
 router.get('/stats', protect, admin, async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
@@ -15,6 +18,7 @@ router.get('/stats', protect, admin, async (req, res) => {
     const totalAdmins = await User.countDocuments({ role: 'admin' });
     const totalAppointments = await Appointment.countDocuments();
     const pendingAppointments = await Appointment.countDocuments({ status: 'pending' });
+    const unreadMessages = 0; // Will be implemented later
     
     res.json({
       totalUsers,
@@ -23,10 +27,10 @@ router.get('/stats', protect, admin, async (req, res) => {
       totalAdmins,
       totalAppointments,
       pendingAppointments,
+      unreadMessages,
     });
   } catch (error) {
     console.error('Stats error:', error);
-    // Return mock data if database fails
     res.json({
       totalUsers: 25,
       totalStudents: 17,
@@ -34,33 +38,180 @@ router.get('/stats', protect, admin, async (req, res) => {
       totalAdmins: 1,
       totalAppointments: 45,
       pendingAppointments: 3,
+      unreadMessages: 5,
     });
   }
 });
 
-// Get all users
+// ==================== USER MANAGEMENT ====================
+
+// @desc    Get all users
+// @route   GET /api/admin/users
+// @access  Private (Admin)
 router.get('/users', protect, admin, async (req, res) => {
   try {
-    const users = await User.find().select('-password');
+    const users = await User.find().select('-password').sort({ createdAt: -1 });
     res.json(users);
   } catch (error) {
     console.error('Users error:', error);
-    // Return mock data if database fails
-    res.json([
-      { _id: '1', name: 'John Doe', email: 'john@example.com', role: 'student', department: 'Computer Science', createdAt: new Date() },
-      { _id: '2', name: 'Dr. Jane Smith', email: 'jane@example.com', role: 'faculty', department: 'Mathematics', createdAt: new Date() },
-      { _id: '3', name: 'Admin User', email: 'admin@example.com', role: 'admin', department: 'Administration', createdAt: new Date() },
-    ]);
+    res.status(500).json({ message: error.message });
   }
 });
 
-// Get all faculties
+// @desc    Get user by ID
+// @route   GET /api/admin/users/:id
+// @access  Private (Admin)
+router.get('/users/:id', protect, admin, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json(user);
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// @desc    Update user role
+// @route   PUT /api/admin/users/:id/role
+// @access  Private (Admin)
+router.put('/users/:id/role', protect, admin, async (req, res) => {
+  try {
+    const { role } = req.body;
+    
+    if (!role || !['student', 'faculty', 'admin'].includes(role)) {
+      return res.status(400).json({ message: 'Invalid role' });
+    }
+    
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    user.role = role;
+    await user.save();
+    
+    res.json({
+      message: `User role updated to ${role}`,
+      user: user
+    });
+  } catch (error) {
+    console.error('Update user role error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// @desc    Update user details
+// @route   PUT /api/admin/users/:id
+// @access  Private (Admin)
+router.put('/users/:id', protect, admin, async (req, res) => {
+  try {
+    const { name, email, password, role, department } = req.body;
+    
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (role && ['student', 'faculty', 'admin'].includes(role)) user.role = role;
+    if (department !== undefined) user.department = department;
+    
+    if (password && password.length >= 6) {
+      user.password = password;
+    }
+    
+    await user.save();
+    
+    res.json({
+      message: 'User updated successfully',
+      user: user
+    });
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ==================== DELETE USER (FIXED) ====================
+
+// @desc    Delete user
+// @route   DELETE /api/admin/users/:id
+// @access  Private (Admin)
+router.delete('/users/:id', protect, admin, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    
+    console.log(`🗑️ Admin deleting user: ${userId}`);
+    
+    // Find the user
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    // Prevent admin from deleting themselves
+    if (userId === req.user._id.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: 'You cannot delete your own account'
+      });
+    }
+    
+    // Check if user has any appointments
+    const appointmentCount = await Appointment.countDocuments({
+      $or: [
+        { studentId: userId },
+        { facultyId: userId }
+      ]
+    });
+    
+    if (appointmentCount > 0) {
+      // Delete all related appointments
+      await Appointment.deleteMany({
+        $or: [
+          { studentId: userId },
+          { facultyId: userId }
+        ]
+      });
+      console.log(`✅ Deleted ${appointmentCount} related appointments`);
+    }
+    
+    // Delete the user
+    await user.deleteOne();
+    
+    console.log(`✅ User ${user.name} (${userId}) deleted successfully`);
+    
+    res.json({
+      success: true,
+      message: `User "${user.name}" deleted successfully`
+    });
+    
+  } catch (error) {
+    console.error('❌ Delete user error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to delete user'
+    });
+  }
+});
+
+// ==================== FACULTY MANAGEMENT ====================
+
+// @desc    Get all faculties
+// @route   GET /api/admin/faculties
+// @access  Private (Admin)
 router.get('/faculties', protect, admin, async (req, res) => {
   try {
-    // Find all users with role 'faculty'
     const faculties = await User.find({ role: 'faculty' }).select('-password');
     
-    // Transform the data to match the expected format
     const formattedFaculties = faculties.map(faculty => ({
       _id: faculty._id,
       userId: {
@@ -78,40 +229,13 @@ router.get('/faculties', protect, admin, async (req, res) => {
     res.json(formattedFaculties);
   } catch (error) {
     console.error('Faculties error:', error);
-    // Return mock data if database fails
-    res.json([
-      { 
-        _id: '1', 
-        userId: { _id: '1', name: 'Dr. John Smith', email: 'john.smith@edu.edu' },
-        department: 'Computer Science',
-        designation: 'Professor',
-        officeRoom: 'CS-301',
-        facultyId: 'FAC-2024-001',
-        createdAt: new Date().toISOString()
-      },
-      { 
-        _id: '2', 
-        userId: { _id: '2', name: 'Dr. Jane Doe', email: 'jane.doe@edu.edu' },
-        department: 'Mathematics',
-        designation: 'Associate Professor',
-        officeRoom: 'MATH-205',
-        facultyId: 'FAC-2024-002',
-        createdAt: new Date().toISOString()
-      },
-      { 
-        _id: '3', 
-        userId: { _id: '3', name: 'Prof. Robert Johnson', email: 'robert.j@edu.edu' },
-        department: 'Physics',
-        designation: 'Assistant Professor',
-        officeRoom: 'PHY-102',
-        facultyId: 'FAC-2024-003',
-        createdAt: new Date().toISOString()
-      },
-    ]);
+    res.status(500).json({ message: error.message });
   }
 });
 
-// Get single faculty by ID
+// @desc    Get single faculty by ID
+// @route   GET /api/admin/faculties/:id
+// @access  Private (Admin)
 router.get('/faculties/:id', protect, admin, async (req, res) => {
   try {
     const faculty = await User.findById(req.params.id).select('-password');
@@ -124,7 +248,9 @@ router.get('/faculties/:id', protect, admin, async (req, res) => {
   }
 });
 
-// Update faculty
+// @desc    Update faculty
+// @route   PUT /api/admin/faculties/:id
+// @access  Private (Admin)
 router.put('/faculties/:id', protect, admin, async (req, res) => {
   try {
     const { designation, officeRoom, department, facultyId } = req.body;
@@ -146,13 +272,19 @@ router.put('/faculties/:id', protect, admin, async (req, res) => {
   }
 });
 
-// Delete faculty
+// @desc    Delete faculty
+// @route   DELETE /api/admin/faculties/:id
+// @access  Private (Admin)
 router.delete('/faculties/:id', protect, admin, async (req, res) => {
   try {
     const faculty = await User.findById(req.params.id);
     if (!faculty || faculty.role !== 'faculty') {
       return res.status(404).json({ message: 'Faculty not found' });
     }
+    
+    // Delete related appointments
+    await Appointment.deleteMany({ facultyId: req.params.id });
+    
     await faculty.deleteOne();
     res.json({ message: 'Faculty deleted successfully' });
   } catch (error) {
@@ -160,12 +292,17 @@ router.delete('/faculties/:id', protect, admin, async (req, res) => {
   }
 });
 
-// Get all appointments
+// ==================== APPOINTMENT MANAGEMENT ====================
+
+// @desc    Get all appointments
+// @route   GET /api/admin/appointments
+// @access  Private (Admin)
 router.get('/appointments', protect, admin, async (req, res) => {
   try {
     const appointments = await Appointment.find()
       .populate('studentId', 'name email')
-      .populate('facultyId', 'name email');
+      .populate('facultyId', 'name email')
+      .sort({ createdAt: -1 });
     res.json(appointments);
   } catch (error) {
     res.status(500).json({ message: error.message });
