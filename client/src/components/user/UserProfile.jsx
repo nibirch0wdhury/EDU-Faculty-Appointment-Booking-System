@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import PageTransition, { MotionContainer } from '../ui/PageTransition';
-import { User, Mail, Building, Briefcase, MapPin, GraduationCap, Lock, ShieldCheck, Save, Sparkles, KeyRound, FileText, UserCheck } from 'lucide-react';
+import { 
+  User, Mail, Building, Briefcase, MapPin, GraduationCap, 
+  Lock, ShieldCheck, Save, Sparkles, KeyRound, FileText, UserCheck 
+} from 'lucide-react';
 import { toast } from 'react-toastify';
 import MagneticButton from '../ui/MagneticButton';
 
@@ -11,12 +14,21 @@ const UserProfile = () => {
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: '', email: '', department: '', designation: '', officeRoom: '',
-    studentId: '', facultyId: '', bio: '', profileImage: ''
+    name: '',
+    email: '',
+    department: '',
+    designation: '',
+    officeRoom: '',
+    studentId: '',
+    facultyId: '',
+    bio: '',
+    profileImage: ''
   });
 
   const [passwordData, setPasswordData] = useState({
-    currentPassword: '', newPassword: '', confirmPassword: ''
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   });
 
   useEffect(() => {
@@ -25,7 +37,7 @@ const UserProfile = () => {
         name: user.name || '',
         email: user.email || '',
         department: user.department || '',
-        designation: user.designation || 'Faculty Member',
+        designation: user.designation || '',
         officeRoom: user.officeRoom || '',
         studentId: user.studentId || '',
         facultyId: user.facultyId || '',
@@ -77,17 +89,25 @@ const UserProfile = () => {
 
   const getRoleBadge = (role) => {
     switch (role) {
-      case 'admin': return 'bg-primary-100 dark:bg-primary-950/40 text-primary-700 dark:text-primary-400 border-primary-200 dark:border-primary-800/50';
-      case 'faculty': return 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/50';
-      default: return 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50';
+      case 'admin': 
+        return 'bg-primary-100 dark:bg-primary-950/40 text-primary-700 dark:text-primary-400 border-primary-200 dark:border-primary-800/50';
+      case 'faculty': 
+        return 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/50';
+      default: 
+        return 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50';
     }
   };
 
+  // Determine which fields to show based on user role
+  const isStudent = user?.role === 'student';
+  const isFaculty = user?.role === 'faculty';
+  const isAdmin = user?.role === 'admin';
+
   return (
-    <PageTransition className="py-8 md:py-12 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <PageTransition className="w-full py-8 md:py-12 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {/* Profile Header */}
-        <MotionContainer className="relative overflow-hidden rounded-3xl bg-white dark:bg-slate-900/95 border border-primary-500/10 dark:border-primary-500/20 shadow-card dark:shadow-card-dark p-6 md:p-8 transition-all duration-300">
+        <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-slate-900/95 border border-primary-500/10 dark:border-primary-500/20 shadow-card dark:shadow-card-dark p-6 md:p-8 transition-all duration-300 mb-8">
           <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
           <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
           
@@ -132,10 +152,10 @@ const UserProfile = () => {
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center gap-2 mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 mt-8 pt-6 border-t border-slate-200 dark:border-slate-700 overflow-x-auto">
             <button
               onClick={() => setActiveTab('details')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                 activeTab === 'details'
                   ? 'bg-primary-500 text-white shadow-md dark:shadow-primary-500/50'
                   : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/30'
@@ -146,7 +166,7 @@ const UserProfile = () => {
             </button>
             <button
               onClick={() => setActiveTab('security')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                 activeTab === 'security'
                   ? 'bg-primary-500 text-white shadow-md dark:shadow-primary-500/50'
                   : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/30'
@@ -156,12 +176,13 @@ const UserProfile = () => {
               <span>Password & Security</span>
             </button>
           </div>
-        </MotionContainer>
+        </div>
 
-        {/* Tab: Personal Details */}
+        {/* Tab Content - Personal Details */}
         {activeTab === 'details' && (
-          <MotionContainer delay={0.1} className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 space-y-6 transition-all duration-300">
+          <div className="relative bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 transition-all duration-300">
             <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
+            
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
               <div>
                 <h2 className="text-xl font-display font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -172,79 +193,201 @@ const UserProfile = () => {
               </div>
             </div>
 
-            <form onSubmit={handleSubmitProfile} className="space-y-6">
+            <form onSubmit={handleSubmitProfile} className="space-y-6 pt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Full Name - Visible to all */}
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                     <User className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                     Full Name
                   </label>
-                  <input type="text" name="name" value={formData.name} onChange={handleChange} required className="input-field" placeholder="Enter your full name" />
+                  <input 
+                    type="text" 
+                    name="name" 
+                    value={formData.name} 
+                    onChange={handleChange} 
+                    required 
+                    className="input-field" 
+                    placeholder="Enter your full name" 
+                  />
                 </div>
+
+                {/* Email Address - Visible to all */}
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                     <Mail className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                     Email Address
                   </label>
-                  <input type="email" name="email" value={formData.email} onChange={handleChange} required className="input-field" placeholder="name@eastdelta.edu.bd" />
+                  <input 
+                    type="email" 
+                    name="email" 
+                    value={formData.email} 
+                    onChange={handleChange} 
+                    required 
+                    className="input-field" 
+                    placeholder="name@eastdelta.edu.bd" 
+                  />
                 </div>
+
+                {/* Department - Visible to all */}
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                     <Building className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                     Department
                   </label>
-                  <input type="text" name="department" value={formData.department} onChange={handleChange} className="input-field" placeholder="e.g. Computer Science & Engineering" />
+                  <input 
+                    type="text" 
+                    name="department" 
+                    value={formData.department} 
+                    onChange={handleChange} 
+                    className="input-field" 
+                    placeholder="e.g. Computer Science & Engineering" 
+                  />
                 </div>
-                {user?.role === 'student' && (
+
+                {/* ============================================ */}
+                {/* STUDENT ONLY FIELDS */}
+                {/* ============================================ */}
+                {isStudent && (
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                       <GraduationCap className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                       Student ID
                     </label>
-                    <input type="text" name="studentId" value={formData.studentId} onChange={handleChange} className="input-field" placeholder="e.g. 242021012" />
+                    <input 
+                      type="text" 
+                      name="studentId" 
+                      value={formData.studentId} 
+                      onChange={handleChange} 
+                      className="input-field" 
+                      placeholder="e.g. 242021012" 
+                    />
                   </div>
                 )}
-                {(user?.role === 'faculty' || user?.role === 'admin') && (
+
+                {/* ============================================ */}
+                {/* FACULTY ONLY FIELDS */}
+                {/* ============================================ */}
+                {isFaculty && (
                   <>
                     <div className="space-y-2">
                       <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                         <Briefcase className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                         Designation / Title
                       </label>
-                      <input type="text" name="designation" value={formData.designation} onChange={handleChange} className="input-field" placeholder="e.g. Assistant Professor" />
+                      <input 
+                        type="text" 
+                        name="designation" 
+                        value={formData.designation} 
+                        onChange={handleChange} 
+                        className="input-field" 
+                        placeholder="e.g. Professor, Associate Professor, Assistant Professor" 
+                      />
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                         <MapPin className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                         Office Room
                       </label>
-                      <input type="text" name="officeRoom" value={formData.officeRoom} onChange={handleChange} className="input-field" placeholder="e.g. Room 402, Academic Building A" />
+                      <input 
+                        type="text" 
+                        name="officeRoom" 
+                        value={formData.officeRoom} 
+                        onChange={handleChange} 
+                        className="input-field" 
+                        placeholder="e.g. Room 402, Academic Building A" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <GraduationCap className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
+                        Faculty ID
+                      </label>
+                      <input 
+                        type="text" 
+                        name="facultyId" 
+                        value={formData.facultyId} 
+                        onChange={handleChange} 
+                        className="input-field" 
+                        placeholder="e.g. FAC-2024-001" 
+                      />
                     </div>
                   </>
                 )}
+
+                {/* ============================================ */}
+                {/* ADMIN ONLY FIELDS */}
+                {/* ============================================ */}
+                {isAdmin && (
+                  <>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <Briefcase className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
+                        Designation / Title
+                      </label>
+                      <input 
+                        type="text" 
+                        name="designation" 
+                        value={formData.designation} 
+                        onChange={handleChange} 
+                        className="input-field" 
+                        placeholder="e.g. System Administrator, IT Director" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
+                        Office Room
+                      </label>
+                      <input 
+                        type="text" 
+                        name="officeRoom" 
+                        value={formData.officeRoom} 
+                        onChange={handleChange} 
+                        className="input-field" 
+                        placeholder="e.g. Room 402, Academic Building A" 
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Bio - Full Width - Visible to all */}
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                     <FileText className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                     About / Bio
                   </label>
-                  <textarea name="bio" value={formData.bio} onChange={handleChange} rows="3" className="input-field resize-none" placeholder="Write a brief intro about yourself..." />
+                  <textarea 
+                    name="bio" 
+                    value={formData.bio} 
+                    onChange={handleChange} 
+                    rows="3" 
+                    className="input-field resize-none" 
+                    placeholder="Write a brief intro about yourself..." 
+                  />
                 </div>
               </div>
 
               <div className="flex justify-end pt-4 border-t border-slate-200 dark:border-slate-700">
-                <MagneticButton type="submit" disabled={loading} variant="primary" className="px-6 py-3 shadow-md shadow-primary-500/25 dark:shadow-primary-500/50">
+                <MagneticButton 
+                  type="submit" 
+                  disabled={loading} 
+                  variant="primary" 
+                  className="px-6 py-3 shadow-md shadow-primary-500/25 dark:shadow-primary-500/50"
+                >
                   <Save className="w-4 h-4" />
                   <span>{loading ? 'Saving Changes...' : 'Save Profile Changes'}</span>
                 </MagneticButton>
               </div>
             </form>
-          </MotionContainer>
+          </div>
         )}
 
-        {/* Tab: Security */}
+        {/* Tab Content - Security */}
         {activeTab === 'security' && (
-          <MotionContainer delay={0.1} className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 space-y-6 transition-all duration-300">
+          <div className="relative bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 transition-all duration-300">
             <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
+            
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
               <div>
                 <h2 className="text-xl font-display font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -255,37 +398,67 @@ const UserProfile = () => {
               </div>
             </div>
 
-            <form onSubmit={handleSubmitPassword} className="space-y-6 max-w-lg">
+            <form onSubmit={handleSubmitPassword} className="space-y-6 pt-6 max-w-lg">
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                   <Lock className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                   Current Password
                 </label>
-                <input type="password" name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} required className="input-field" placeholder="Enter current password" />
+                <input 
+                  type="password" 
+                  name="currentPassword" 
+                  value={passwordData.currentPassword} 
+                  onChange={handlePasswordChange} 
+                  required 
+                  className="input-field" 
+                  placeholder="Enter current password" 
+                />
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                   New Password
                 </label>
-                <input type="password" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} required minLength={6} className="input-field" placeholder="At least 6 characters" />
+                <input 
+                  type="password" 
+                  name="newPassword" 
+                  value={passwordData.newPassword} 
+                  onChange={handlePasswordChange} 
+                  required 
+                  minLength={6} 
+                  className="input-field" 
+                  placeholder="At least 6 characters" 
+                />
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                   Confirm New Password
                 </label>
-                <input type="password" name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} required className="input-field" placeholder="Repeat new password" />
+                <input 
+                  type="password" 
+                  name="confirmPassword" 
+                  value={passwordData.confirmPassword} 
+                  onChange={handlePasswordChange} 
+                  required 
+                  className="input-field" 
+                  placeholder="Repeat new password" 
+                />
               </div>
 
               <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
-                <MagneticButton type="submit" disabled={loading} variant="primary" className="px-6 py-3 shadow-md shadow-primary-500/25 dark:shadow-primary-500/50">
+                <MagneticButton 
+                  type="submit" 
+                  disabled={loading} 
+                  variant="primary" 
+                  className="px-6 py-3 shadow-md shadow-primary-500/25 dark:shadow-primary-500/50"
+                >
                   <Lock className="w-4 h-4" />
                   <span>{loading ? 'Updating Password...' : 'Update Password'}</span>
                 </MagneticButton>
               </div>
             </form>
-          </MotionContainer>
+          </div>
         )}
       </div>
     </PageTransition>

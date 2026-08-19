@@ -39,24 +39,42 @@ const ManageUsers = () => {
     }
   };
 
-  const handleDelete = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user account?')) return;
+  const handleDelete = async (userId, userName) => {
+    if (!window.confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
+      return;
+    }
+
     try {
+      console.log(`🗑️ Attempting to delete user: ${userId}`);
       await api.delete(`/admin/users/${userId}`);
-      toast.success('User deleted successfully');
-      fetchUsers();
+      toast.success(`✅ User "${userName}" deleted successfully!`);
+      await fetchUsers();
     } catch (error) {
-      toast.error('Failed to delete user');
+      console.error('❌ Delete user error:', error);
+      
+      if (error.response) {
+        const errorMsg = error.response.data?.message || 'Failed to delete user';
+        toast.error(`❌ ${errorMsg}`);
+        if (error.response.status === 400) {
+          toast.warning('⚠️ This user may have existing appointments or related data.');
+        }
+      } else if (error.request) {
+        toast.error('❌ Server not responding. Please check your connection.');
+      } else {
+        toast.error('❌ Failed to delete user. Please try again.');
+      }
     }
   };
 
   const handleRoleChange = async (userId, newRole) => {
     try {
       await api.put(`/admin/users/${userId}/role`, { role: newRole });
-      toast.success('User role updated successfully');
-      fetchUsers();
+      toast.success(`✅ User role updated to ${newRole} successfully!`);
+      await fetchUsers();
     } catch (error) {
-      toast.error('Failed to update user role');
+      console.error('❌ Role update error:', error);
+      const errorMsg = error.response?.data?.message || 'Failed to update user role';
+      toast.error(`❌ ${errorMsg}`);
     }
   };
 
@@ -64,12 +82,14 @@ const ManageUsers = () => {
     e.preventDefault();
     try {
       await api.post('/auth/register', formData);
-      toast.success('User added successfully');
+      toast.success('✅ User added successfully!');
       setShowAddModal(false);
       setFormData({ name: '', email: '', password: '', role: 'student', department: '' });
-      fetchUsers();
+      await fetchUsers();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to add user');
+      console.error('❌ Add user error:', error);
+      const errorMsg = error.response?.data?.message || 'Failed to add user';
+      toast.error(`❌ ${errorMsg}`);
     }
   };
 
@@ -88,12 +108,14 @@ const ManageUsers = () => {
     e.preventDefault();
     try {
       await api.put(`/admin/users/${editingUser._id}`, formData);
-      toast.success('User updated successfully');
+      toast.success('✅ User updated successfully!');
       setEditingUser(null);
       setFormData({ name: '', email: '', password: '', role: 'student', department: '' });
-      fetchUsers();
+      await fetchUsers();
     } catch (error) {
-      toast.error('Failed to update user');
+      console.error('❌ Update user error:', error);
+      const errorMsg = error.response?.data?.message || 'Failed to update user';
+      toast.error(`❌ ${errorMsg}`);
     }
   };
 
@@ -210,7 +232,7 @@ const ManageUsers = () => {
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDelete(userItem._id)}
+                            onClick={() => handleDelete(userItem._id, userItem.name)}
                             className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                             title="Delete user"
                           >

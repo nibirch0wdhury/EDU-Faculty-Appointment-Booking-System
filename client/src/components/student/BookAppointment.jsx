@@ -56,7 +56,32 @@ const BookAppointment = () => {
         params: { date: selectedDate.toISOString() }
       });
       const slotsData = Array.isArray(response.data) ? response.data : response.data?.data || [];
-      setAvailableSlots(slotsData);
+      
+      // ============================================
+      // ✅ FRONTEND FILTER: Double-check past times
+      // ============================================
+      const now = new Date();
+      const isToday = selectedDate.getDate() === now.getDate() &&
+                      selectedDate.getMonth() === now.getMonth() &&
+                      selectedDate.getFullYear() === now.getFullYear();
+      
+      let filteredSlots = slotsData;
+      
+      if (isToday) {
+        const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
+        filteredSlots = slotsData.filter(slot => {
+          const [hours, minutes] = slot.startTime.split(':').map(Number);
+          const slotTimeMinutes = hours * 60 + minutes;
+          // Only show slots that start at least 30 minutes from now
+          return slotTimeMinutes > currentTimeMinutes + 30;
+        });
+        
+        if (filteredSlots.length < slotsData.length) {
+          console.log(`🔍 Filtered out ${slotsData.length - filteredSlots.length} past slots for today`);
+        }
+      }
+      
+      setAvailableSlots(filteredSlots);
     } catch (error) {
       console.error('Error fetching slots:', error);
       setAvailableSlots([]);
@@ -201,6 +226,37 @@ const BookAppointment = () => {
     });
   };
 
+  // ============================================
+  // ✅ Check if a slot time is in the past for today
+  // ============================================
+  const isSlotTimePast = (startTime) => {
+    const now = new Date();
+    const isTodayDate = selectedDate.getDate() === now.getDate() &&
+                        selectedDate.getMonth() === now.getMonth() &&
+                        selectedDate.getFullYear() === now.getFullYear();
+    
+    if (!isTodayDate) return false;
+    
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const slotTimeMinutes = hours * 60 + minutes;
+    const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
+    
+    // Consider a slot "past" if it starts in less than 30 minutes from now
+    return slotTimeMinutes <= currentTimeMinutes + 30;
+  };
+
+  // ============================================
+  // ✅ Get current time for display
+  // ============================================
+  const getCurrentTimeStr = () => {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
   return (
     <PageTransition className="py-8 md:py-12 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -210,13 +266,25 @@ const BookAppointment = () => {
             <span>New Consultation Slot</span>
           </div>
           <h1 className="text-3xl font-display font-bold text-slate-900 dark:text-white">Book an Appointment</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">Select your faculty member, preferred date & time slot below.</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">
+            Select your faculty member, preferred date & time slot below.
+            <span className="text-red-500 dark:text-red-400 font-semibold ml-2">
+              * Past times for today are automatically hidden
+            </span>
+          </p>
         </MotionContainer>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <MotionContainer delay={0.1} className="lg:col-span-2">
-            <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 transition-all duration-300">
+            <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 transition-all duration-300 relative">
               <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
+              
+              {/* ⏰ Current Time Display */}
+              <div className="mb-4 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                <span>🕐 Current Time: <strong>{getCurrentTimeStr()}</strong></span>
+                <span className="text-emerald-600 dark:text-emerald-400">✅ Only showing available future slots</span>
+              </div>
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Faculty Selection */}
                 <div>
@@ -302,11 +370,20 @@ const BookAppointment = () => {
                         {availableSlots.length === 0 ? (
                           <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl text-amber-600 dark:text-amber-400 text-xs text-center flex items-center justify-center gap-2">
                             <AlertCircle className="w-4 h-4 inline-block" />
-                            No available slots for this date. Please select another date.
+                            {isToday(selectedDate) ? (
+                              <span>No available slots for today. Please select a future date or time.</span>
+                            ) : (
+                              <span>No available slots for this date. Please select another date.</span>
+                            )}
                           </div>
                         ) : (
                           <div className="p-2 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-xl text-emerald-600 dark:text-emerald-400 text-xs text-center">
                             ✅ {availableSlots.length} slot{availableSlots.length !== 1 ? 's' : ''} available
+                            {isToday(selectedDate) && (
+                              <span className="block text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                * Past times for today are hidden
+                              </span>
+                            )}
                           </div>
                         )}
                       </div>
@@ -319,26 +396,54 @@ const BookAppointment = () => {
                       </div>
                     ) : availableSlots.length > 0 ? (
                       <div className="grid grid-cols-2 gap-2 max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
-                        {availableSlots.map((slot, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => setSelectedTime(slot.startTime)}
-                            className={`p-2.5 rounded-xl text-xs font-semibold border transition-all duration-200 ${
-                              selectedTime === slot.startTime
-                                ? 'bg-primary-500 border-primary-500 text-white shadow-md shadow-primary-500/25 dark:shadow-primary-500/50 scale-[1.02]'
-                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-primary-500 dark:hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-950/30'
-                            }`}
-                          >
-                            {formatTimeDisplay(slot.startTime)} - {formatTimeDisplay(slot.endTime)}
-                          </button>
-                        ))}
+                        {availableSlots.map((slot, index) => {
+                          // ✅ Check if this slot time is past for today
+                          const isPastTime = isSlotTimePast(slot.startTime);
+                          return (
+                            <button
+                              key={index}
+                              type="button"
+                              onClick={() => {
+                                if (!isPastTime) {
+                                  setSelectedTime(slot.startTime);
+                                }
+                              }}
+                              disabled={isPastTime}
+                              className={`p-2.5 rounded-xl text-xs font-semibold border transition-all duration-200 ${
+                                isPastTime ? (
+                                  'opacity-40 cursor-not-allowed bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 line-through'
+                                ) : selectedTime === slot.startTime ? (
+                                  'bg-primary-500 border-primary-500 text-white shadow-md shadow-primary-500/25 dark:shadow-primary-500/50 scale-[1.02]'
+                                ) : (
+                                  'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-primary-500 dark:hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-950/30'
+                                )
+                              }`}
+                            >
+                              {formatTimeDisplay(slot.startTime)} - {formatTimeDisplay(slot.endTime)}
+                              {isPastTime && (
+                                <span className="block text-[8px] text-red-500 dark:text-red-400">(Passed)</span>
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                     ) : selectedFaculty ? (
                       <div className="py-8 text-center text-slate-500 dark:text-slate-400 text-sm">
                         <Clock className="w-8 h-8 text-slate-400 dark:text-slate-600 mx-auto mb-2" />
-                        <p>No available slots for this date.</p>
-                        <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">Please select another date.</p>
+                        {isToday(selectedDate) ? (
+                          <>
+                            <p>No available slots for today.</p>
+                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                              All slots have either passed or been booked for today.
+                              <br />Please select a future date.
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p>No available slots for this date.</p>
+                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">Please select another date.</p>
+                          </>
+                        )}
                       </div>
                     ) : (
                       <div className="py-8 text-center text-slate-500 dark:text-slate-400 text-sm">
@@ -395,6 +500,10 @@ const BookAppointment = () => {
                 <li className="flex items-start gap-2">
                   <span className="text-primary-500 dark:text-primary-400 font-bold">•</span>
                   <span>Slots are date-specific. Faculty sets availability for specific dates.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary-500 dark:text-primary-400 font-bold">•</span>
+                  <span><strong className="text-red-500">Past times for today are automatically hidden.</strong></span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-primary-500 dark:text-primary-400 font-bold">•</span>
