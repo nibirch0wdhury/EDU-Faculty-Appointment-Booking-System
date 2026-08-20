@@ -118,6 +118,7 @@ const Navbar = () => {
                   <span>Dashboard</span>
                 </Link>
                 
+                {/* ✅ FIXED: Message Icon redirects to contact messages */}
                 <Link 
                   to="/user/messages" 
                   className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/30 transition-all duration-200 relative"
@@ -247,9 +248,10 @@ const Navbar = () => {
                     <User className="w-4 h-4 text-primary-500" />
                     <span>My Profile</span>
                   </Link>
+                  {/* ✅ FIXED: Mobile message link */}
                   <Link 
                     to="/user/messages" 
-                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 font-medium text-sm border border-slate-200 dark:border-slate-700"
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 font-medium text-sm border border-slate-200 dark:border-slate-700 hover:border-primary-500 dark:hover:border-primary-500"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <MessageSquare className="w-4 h-4 text-primary-500" />

@@ -277,7 +277,6 @@ const BookAppointment = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <MotionContainer delay={0.1} className="lg:col-span-2">
             <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 transition-all duration-300 relative">
-              <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
               
               {/* ⏰ Current Time Display */}
               <div className="mb-4 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between">

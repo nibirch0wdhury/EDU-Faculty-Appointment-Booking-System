@@ -132,7 +132,6 @@ const FacultyAppointments = () => {
               variant="secondary"
               onClick={handleRefresh}
               disabled={refreshing}
-              className="py-2.5 px-4 text-xs"
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               <span>Refresh</span>

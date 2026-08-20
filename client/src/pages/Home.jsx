@@ -225,30 +225,96 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 relative bg-primary-500 dark:bg-primary-600 overflow-hidden">
-        <div className="absolute inset-0 pattern-dots opacity-10 pointer-events-none" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-black/5 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <GraduationCap className="w-16 h-16 text-white/80 mx-auto" />
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-white">
-            Ready to Transform Your Academic Journey?
-          </h2>
-          <p className="text-lg text-white/80 max-w-2xl mx-auto">
-            Join thousands of students and faculty members using EDUBook to streamline their academic appointments.
-          </p>
-          <div className="pt-4">
-            <Link to="/register">
-              <MagneticButton 
-                variant="secondary" 
-                className="px-8 py-3.5 text-base bg-white text-primary-500 hover:bg-slate-50 shadow-lg shadow-black/20 dark:shadow-black/40"
-              >
-                <span>Get Started Now</span>
-                <ArrowRight className="w-5 h-5" />
-              </MagneticButton>
-            </Link>
-          </div>
+      <section className="py-24 relative bg-white dark:bg-slate-950/90 overflow-hidden">
+        {/* Subtle background texture */}
+        <div className="absolute inset-0 pattern-dots opacity-20 dark:opacity-10 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary-500/[0.03] to-transparent dark:via-primary-500/[0.06] pointer-events-none" />
+
+        {/* Floating decorative orbs */}
+        <motion.div
+          animate={{ x: [0, 30, -20, 0], y: [0, -25, 15, 0], scale: [1, 1.1, 0.95, 1] }}
+          transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute -top-20 right-[15%] w-72 h-72 bg-primary-500/[0.06] dark:bg-primary-500/[0.12] rounded-full blur-[100px] pointer-events-none"
+        />
+        <motion.div
+          animate={{ x: [0, -25, 35, 0], y: [0, 20, -30, 0], scale: [1, 1.08, 0.92, 1] }}
+          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute -bottom-16 left-[10%] w-80 h-80 bg-primary-600/[0.05] dark:bg-primary-600/[0.10] rounded-full blur-[120px] pointer-events-none"
+        />
+
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="relative rounded-3xl p-10 md:p-14 bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-primary-500/15 dark:border-primary-500/25 shadow-xl shadow-primary-500/[0.04] dark:shadow-[0_0_80px_rgba(153,0,0,0.06)] text-center space-y-7 overflow-hidden"
+          >
+            {/* Card inner glow */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-500/[0.02] via-transparent to-primary-500/[0.03] dark:from-primary-500/[0.04] dark:to-primary-500/[0.06] pointer-events-none rounded-3xl" />
+
+
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="relative z-10"
+            >
+              <div className="w-16 h-16 rounded-2xl bg-primary-50 dark:bg-primary-950/40 border border-primary-500/15 dark:border-primary-500/25 flex items-center justify-center mx-auto shadow-sm dark:shadow-none">
+                <GraduationCap className="w-8 h-8 text-primary-500 dark:text-primary-400" />
+              </div>
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+              className="relative z-10 text-3xl sm:text-4xl md:text-5xl font-display font-bold text-slate-900 dark:text-white leading-tight"
+            >
+              Ready to Transform Your{' '}
+              <span className="brand-text-gradient">Academic Journey?</span>
+            </motion.h2>
+
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.35 }}
+              className="relative z-10 text-base sm:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed"
+            >
+              Join thousands of students and faculty members using EDUBook to streamline their academic appointments.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.45 }}
+              className="relative z-10 pt-2"
+            >
+              <Link to="/register">
+                <MagneticButton
+                  variant="primary"
+                  className="px-8 py-3.5 text-base shadow-lg shadow-primary-500/25 dark:shadow-primary-500/40 hover:shadow-primary-500/40 dark:hover:shadow-primary-500/60"
+                >
+                  <span>Get Started Now</span>
+                  <ArrowRight className="w-5 h-5" />
+                </MagneticButton>
+              </Link>
+            </motion.div>
+
+            {/* Bottom accent line */}
+            <motion.div
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-[2px] bg-gradient-to-r from-transparent via-primary-500/40 to-transparent dark:via-primary-400/30 origin-center"
+            />
+          </motion.div>
         </div>
       </section>
     </PageTransition>
