@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(userData);
       toast.success('Login successful!');
-      return { success: true };
+      return { success: true, user: userData };
     } catch (error) {
       console.error('Login error:', error);
       if (error.code === 'ERR_CONNECTION_REFUSED') {

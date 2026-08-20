@@ -18,8 +18,20 @@ const Login = () => {
     setLoading(true);
     const result = await login(email, password);
     setLoading(false);
-    if (result?.success) {
-      navigate('/');
+    if (result?.success && result?.user) {
+      switch (result.user.role) {
+        case 'student':
+          navigate('/student/dashboard');
+          break;
+        case 'faculty':
+          navigate('/faculty/dashboard');
+          break;
+        case 'admin':
+          navigate('/admin/dashboard');
+          break;
+        default:
+          navigate('/');
+      }
     }
   };
 
