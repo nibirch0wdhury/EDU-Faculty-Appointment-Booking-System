@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Mail, MapPin, Phone, Heart, ArrowUpRight } from 'lucide-react';
+import { BookOpen, Mail, MapPin, Phone, ArrowUpRight } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -31,12 +31,6 @@ const Footer = () => {
               Streamlining academic scheduling, student consultations, and campus 
               productivity with ease.
             </p>
-            <div className="flex items-center gap-2 pt-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 dark:border-emerald-500/30 text-emerald-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                Live System Operational
-              </span>
-            </div>
           </div>
 
           {/* Quick Links */}
@@ -77,8 +71,8 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-primary-400 shrink-0" />
-                <a href="mailto:242020612@eastdelta.edu.bd" className="hover:text-primary-300 transition-colors">
-                  242020612@eastdelta.edu.bd
+                <a href="mailto:edubook@eastdelta.edu.bd" className="hover:text-primary-300 transition-colors">
+                  edubook@eastdelta.edu.bd  
                 </a>
               </li>
               <li className="flex items-center gap-2.5">
@@ -89,14 +83,12 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Bar */}
+        {/* Bottom Bar - Removed "Crafted with heart" */}
         <div className="mt-12 pt-8 border-t border-slate-800 dark:border-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-600">
           <p>© {new Date().getFullYear()} EDU Faculty Appointment Booking System. All rights reserved.</p>
-          <div className="flex items-center gap-1">
-            <span>Crafted with</span>
-            <Heart className="w-3.5 h-3.5 text-primary-400 fill-primary-400 inline" />
-            <span>for East Delta University</span>
-          </div>
+          <p className="text-slate-500 dark:text-slate-600">
+            East Delta University
+          </p>
         </div>
       </div>
     </footer>

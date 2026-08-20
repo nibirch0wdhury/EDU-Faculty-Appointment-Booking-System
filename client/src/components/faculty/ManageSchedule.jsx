@@ -121,7 +121,7 @@ const isTodayString = (dateString) => {
 };
 
 // ============================================
-// ✅ NEW: Check if time is in the past for today
+// CHECK IF TIME IS IN THE PAST FOR TODAY
 // ============================================
 const isPastTimeForToday = (dateString, startTime) => {
   if (!dateString || !startTime) return false;
@@ -131,19 +131,16 @@ const isPastTimeForToday = (dateString, startTime) => {
   
   const today = new Date();
   
-  // Check if the date is today
   const isTodayDate = date.getDate() === today.getDate() &&
                       date.getMonth() === today.getMonth() &&
                       date.getFullYear() === today.getFullYear();
   
   if (!isTodayDate) return false;
   
-  // Parse the start time
   const [hours, minutes] = startTime.split(':').map(Number);
   const slotStartTime = new Date(today);
   slotStartTime.setHours(hours, minutes, 0, 0);
   
-  // Check if the slot start time is in the past
   return slotStartTime < today;
 };
 
@@ -157,14 +154,12 @@ const ManageSchedule = () => {
   const [submitting, setSubmitting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  // New slot form state - defaults to tomorrow
   const [newSlot, setNewSlot] = useState({
     date: getTomorrowString(),
     startTime: '09:00',
     endTime: '10:00',
   });
 
-  // Calendar navigation state
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedDate, setSelectedDate] = useState(() => {
@@ -173,13 +168,11 @@ const ManageSchedule = () => {
     return tomorrow;
   });
 
-  // Error state for date validation
   const [dateError, setDateError] = useState('');
 
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
-  // Fetch schedule from backend
   const fetchSchedule = useCallback(async (showToast = false) => {
     try {
       setLoading(true);
@@ -203,7 +196,6 @@ const ManageSchedule = () => {
     fetchSchedule();
   }, [fetchSchedule]);
 
-  // Calendar navigation
   const goToPreviousMonth = () => {
     if (currentMonth === 0) {
       setCurrentMonth(11);
@@ -238,11 +230,9 @@ const ManageSchedule = () => {
     setDateError('');
   };
 
-  // Handle date selection - COMPLETELY BLOCK PAST DATES
   const handleDateSelect = (day) => {
     const newDate = new Date(currentYear, currentMonth, day);
     
-    // CHECK: Prevent selecting past dates
     if (isPastDate(newDate)) {
       setDateError('❌ Cannot select a past date. Please choose today or a future date.');
       toast.error('Cannot select a past date');
@@ -255,7 +245,6 @@ const ManageSchedule = () => {
     setDateError('');
   };
 
-  // Get calendar days with past dates disabled
   const getDaysInMonth = () => new Date(currentYear, currentMonth + 1, 0).getDate();
   const getFirstDayOfMonth = () => new Date(currentYear, currentMonth, 1).getDay();
 
@@ -270,8 +259,6 @@ const ManageSchedule = () => {
 
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentYear, currentMonth, day);
-      
-      // CHECK: Disable past dates
       const disabled = isPastDate(date);
       const selected = isSelected(date);
       const today = isToday(date);
@@ -298,7 +285,6 @@ const ManageSchedule = () => {
     return daysArray;
   };
 
-  // Check if date is selected
   const isSelected = (date) => {
     if (!selectedDate) return false;
     return date.getDate() === selectedDate.getDate() &&
@@ -306,13 +292,11 @@ const ManageSchedule = () => {
            date.getFullYear() === selectedDate.getFullYear();
   };
 
-  // Handle refresh
   const handleRefresh = () => {
     setRefreshing(true);
     fetchSchedule(true);
   };
 
-  // Handle time change
   const handleTimeChange = (field, value) => {
     setNewSlot(prev => {
       const updated = { ...prev, [field]: value };
@@ -335,14 +319,10 @@ const ManageSchedule = () => {
     });
   };
 
-  // ============================================
-  // ✅ ADD NEW SLOT - WITH PAST DATE & TIME VALIDATION
-  // ============================================
   const handleAddSlot = async (e) => {
     e.preventDefault();
     setDateError('');
 
-    // ✅ CHECK 1: Validate date is not in the past
     if (!newSlot.date) {
       toast.error('Please select a date');
       return;
@@ -355,7 +335,6 @@ const ManageSchedule = () => {
       return;
     }
 
-    // ✅ CHECK 2: If today, time must be in the future
     if (isPastTimeForToday(newSlot.date, newSlot.startTime)) {
       const currentTime = new Date();
       const currentTimeStr = currentTime.toLocaleTimeString('en-US', {
@@ -369,7 +348,6 @@ const ManageSchedule = () => {
       return;
     }
 
-    // ✅ CHECK 3: Validate time
     if (!isTimeValid(newSlot.startTime, newSlot.endTime)) {
       toast.error('⚠️ End time must be after start time');
       return;
@@ -389,7 +367,6 @@ const ManageSchedule = () => {
       return;
     }
 
-    // Check for duplicate slots
     const duplicate = schedule.some(slot => {
       const slotDate = formatDateToLocalString(new Date(slot.date));
       return slotDate === newSlot.date && slot.startTime === newSlot.startTime;
@@ -417,7 +394,6 @@ const ManageSchedule = () => {
         setSchedule(prev => [slotData, ...prev]);
         toast.success('✅ Slot added successfully!');
 
-        // Reset form to tomorrow
         const tomorrowStr = getTomorrowString();
         setNewSlot({
           date: tomorrowStr,
@@ -434,7 +410,6 @@ const ManageSchedule = () => {
       console.error('❌ Add slot error:', error);
       const errorMsg = error.response?.data?.message || 'Failed to add slot';
       
-      // Check if error is about past date or time
       if (errorMsg.toLowerCase().includes('past') || 
           errorMsg.toLowerCase().includes('current time') ||
           errorMsg.toLowerCase().includes('already passed')) {
@@ -447,7 +422,6 @@ const ManageSchedule = () => {
     }
   };
 
-  // Delete slot
   const handleDeleteSlot = async (slotId) => {
     if (!window.confirm('Are you sure you want to delete this slot?')) return;
     try {
@@ -460,7 +434,6 @@ const ManageSchedule = () => {
     }
   };
 
-  // Toggle availability
   const toggleAvailability = async (slotId, currentStatus) => {
     try {
       const response = await api.put(`/faculty/schedule/${slotId}/toggle`);
@@ -476,7 +449,6 @@ const ManageSchedule = () => {
     }
   };
 
-  // Group schedule by date
   const groupedSchedule = schedule.reduce((acc, slot) => {
     if (!slot || !slot.date) return acc;
     const dateKey = formatDateToLocalString(new Date(slot.date));
@@ -487,14 +459,10 @@ const ManageSchedule = () => {
 
   const sortedDates = Object.keys(groupedSchedule).sort((a, b) => b.localeCompare(a));
 
-  // ============================================
-  // ✅ Check states for UI
-  // ============================================
   const isSelectedDatePast = newSlot.date && isPastDateString(newSlot.date);
   const isSelectedTimePast = newSlot.date && newSlot.startTime && isPastTimeForToday(newSlot.date, newSlot.startTime);
   const isFormInvalid = isSelectedDatePast || isSelectedTimePast;
 
-  // Get current time for display
   const getCurrentTimeStr = () => {
     const now = new Date();
     return now.toLocaleTimeString('en-US', {
@@ -503,10 +471,6 @@ const ManageSchedule = () => {
       hour12: true
     });
   };
-
-  // ============================================
-  // RENDER
-  // ============================================
 
   return (
     <PageTransition className="py-8 md:py-12 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
@@ -543,7 +507,6 @@ const ManageSchedule = () => {
                 </button>
               </div>
 
-              {/* ⚠️ Past Date/Time Warning Banner */}
               <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-400 text-xs flex items-center gap-2">
                 <span className="text-lg">⏰</span>
                 <span>
@@ -554,14 +517,12 @@ const ManageSchedule = () => {
               </div>
 
               <form onSubmit={handleAddSlot} className="space-y-5">
-                {/* Date Picker */}
                 <div>
                   <label className="input-label">
                     <CalendarIcon className="inline-block w-4 h-4 mr-1.5 text-primary-500 dark:text-primary-400" />
                     Select Date <span className="text-red-500">*</span>
                   </label>
                   <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-4">
-                    {/* Calendar Header */}
                     <div className="flex items-center justify-between mb-3">
                       <button
                         type="button"
@@ -584,7 +545,6 @@ const ManageSchedule = () => {
                       </button>
                     </div>
 
-                    {/* Day Headers */}
                     <div className="grid grid-cols-7 gap-1 mb-2">
                       {days.map((day) => (
                         <div key={day} className="h-7 flex items-center justify-center text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
@@ -593,10 +553,8 @@ const ManageSchedule = () => {
                       ))}
                     </div>
 
-                    {/* Calendar Days */}
                     <div className="grid grid-cols-7 gap-1">{renderCalendarDays()}</div>
 
-                    {/* Calendar Footer */}
                     <div className="mt-3 pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
                       <button
                         type="button"
@@ -615,7 +573,6 @@ const ManageSchedule = () => {
                     </div>
                   </div>
 
-                  {/* Selected Date Display */}
                   {newSlot.date && (
                     <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                       <p className="text-xs text-primary-600 dark:text-primary-400">
@@ -645,7 +602,6 @@ const ManageSchedule = () => {
                     </div>
                   )}
 
-                  {/* Date Error Message */}
                   {dateError && (
                     <p className="mt-2 text-xs text-red-600 dark:text-red-400 flex items-center gap-1.5">
                       <span className="text-lg">❌</span>
@@ -654,7 +610,6 @@ const ManageSchedule = () => {
                   )}
                 </div>
 
-                {/* Time Inputs */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="input-label">Start Time</label>
@@ -702,7 +657,6 @@ const ManageSchedule = () => {
                   </div>
                 </div>
 
-                {/* ✅ Submit Button - DISABLED FOR PAST DATES & TIMES */}
                 <MagneticButton
                   type="submit"
                   variant="primary"
@@ -726,7 +680,6 @@ const ManageSchedule = () => {
                   )}
                 </MagneticButton>
 
-                {/* Disabled reason helper */}
                 {isSelectedDatePast && (
                   <p className="text-center text-[11px] text-red-500 dark:text-red-400 font-semibold">
                     ⚠️ The selected date is in the past. Please choose today or a future date.
@@ -741,7 +694,7 @@ const ManageSchedule = () => {
             </div>
           </MotionContainer>
 
-          {/* Current Schedule */}
+          {/* Current Schedule - ✅ RED LINE REMOVED */}
           <MotionContainer delay={0.2}>
             <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 space-y-6 transition-all duration-300 relative">
               <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
@@ -789,42 +742,53 @@ const ManageSchedule = () => {
                           </span>
                         </h3>
                         {daySlots.map((slot) => {
-                          // Check if this specific slot time has passed (if today)
                           const isSlotTimePast = isTodayString(dateKey) && isPastTimeForToday(dateKey, slot.startTime);
+                          
                           return (
-                            <SpotlightCard key={slot._id} spotlightColor="rgba(153, 0, 0, 0.08)" className={`p-3 bg-white dark:bg-slate-900/95 border-primary-500/10 dark:border-primary-500/20 shadow-card dark:shadow-card-dark transition-all duration-300 ${
-                              isSlotTimePast ? 'opacity-50' : ''
-                            }`}>
+                            <div 
+                              key={slot._id} 
+                              className={`p-4 rounded-xl bg-white dark:bg-slate-900/95 border border-primary-500/10 dark:border-primary-500/20 shadow-card dark:shadow-card-dark transition-all duration-300 ${
+                                isSlotTimePast ? 'opacity-75 bg-red-50/30 dark:bg-red-950/20' : ''
+                              }`}
+                            >
                               <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
                                   <p className="text-sm font-medium text-slate-900 dark:text-white">
                                     {formatTimeDisplay(slot.startTime)} - {formatTimeDisplay(slot.endTime)}
                                     {isSlotTimePast && (
-                                      <span className="ml-2 text-[10px] text-red-500 dark:text-red-400 font-medium">
+                                      <span className="ml-2 text-[10px] text-red-500 dark:text-red-400 font-semibold">
                                         (Passed)
                                       </span>
                                     )}
                                   </p>
-                                  <span className={`text-xs font-medium ${
-                                    slot.isAvailable 
-                                      ? 'text-emerald-600 dark:text-emerald-400' 
-                                      : 'text-red-500 dark:text-red-400'
-                                  }`}>
-                                    {slot.isAvailable ? '● Available' : '● Unavailable'}
-                                  </span>
+                                  {isSlotTimePast ? (
+                                    <span className="text-xs font-semibold text-red-500 dark:text-red-400">
+                                      ⏰ Time Passed
+                                    </span>
+                                  ) : (
+                                    <span className={`text-xs font-medium ${
+                                      slot.isAvailable 
+                                        ? 'text-emerald-600 dark:text-emerald-400' 
+                                        : 'text-red-500 dark:text-red-400'
+                                    }`}>
+                                      {slot.isAvailable ? '● Available' : '● Unavailable'}
+                                    </span>
+                                  )}
                                 </div>
                                 <div className="flex items-center gap-1.5">
-                                  <button
-                                    type="button"
-                                    onClick={() => toggleAvailability(slot._id, slot.isAvailable)}
-                                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
-                                      slot.isAvailable
-                                        ? 'bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/50'
-                                        : 'bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/50 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50'
-                                    }`}
-                                  >
-                                    {slot.isAvailable ? 'Available' : 'Unavailable'}
-                                  </button>
+                                  {!isSlotTimePast && (
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleAvailability(slot._id, slot.isAvailable)}
+                                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                                        slot.isAvailable
+                                          ? 'bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/50'
+                                          : 'bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/50 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50'
+                                      }`}
+                                    >
+                                      {slot.isAvailable ? 'Available' : 'Unavailable'}
+                                    </button>
+                                  )}
                                   <button
                                     type="button"
                                     onClick={() => handleDeleteSlot(slot._id)}
@@ -835,7 +799,7 @@ const ManageSchedule = () => {
                                   </button>
                                 </div>
                               </div>
-                            </SpotlightCard>
+                            </div>
                           );
                         })}
                       </div>
