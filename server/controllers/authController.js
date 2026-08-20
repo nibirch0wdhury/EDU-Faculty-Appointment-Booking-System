@@ -21,6 +21,11 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'Please provide all required fields' });
     }
 
+    // Validate email domain
+    if (!email.toLowerCase().endsWith('@eastdelta.edu.bd')) {
+      return res.status(400).json({ message: 'Only institutional emails (@eastdelta.edu.bd) are allowed to register' });
+    }
+
     // Check if user exists
     const userExists = await User.findOne({ email });
     if (userExists) {
