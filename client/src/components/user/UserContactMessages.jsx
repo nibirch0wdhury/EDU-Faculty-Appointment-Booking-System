@@ -115,7 +115,6 @@ const UserContactMessages = () => {
             <MagneticButton 
               variant="secondary" 
               onClick={() => setShowNewMessageForm(!showNewMessageForm)} 
-              className="py-2.5 px-4 text-xs"
             >
               <PlusCircle className="w-4 h-4" />
               <span>New Message</span>
@@ -124,7 +123,6 @@ const UserContactMessages = () => {
               variant="secondary" 
               onClick={handleRefresh} 
               disabled={refreshing} 
-              className="py-2.5 px-4 text-xs"
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               <span>Refresh</span>

@@ -105,7 +105,7 @@ const AdminContactMessages = () => {
             </div>
             <h1 className="text-3xl font-display font-bold text-slate-900 dark:text-white">Contact Messages</h1>
           </div>
-          <MagneticButton variant="secondary" onClick={fetchMessages} className="py-2.5 px-4 text-xs">
+          <MagneticButton variant="secondary" onClick={fetchMessages}>
             <RefreshCw className="w-4 h-4" />
             <span>Refresh List</span>
           </MagneticButton>

@@ -85,14 +85,13 @@ const MyAppointments = () => {
               variant="secondary"
               onClick={handleRefresh}
               disabled={refreshing}
-              className="py-2.5 px-4 text-xs"
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               <span>Refresh</span>
             </MagneticButton>
 
             <Link to="/student/book-appointment">
-              <MagneticButton variant="primary" className="py-2.5 px-4 text-xs shadow-md shadow-primary-500/25 dark:shadow-primary-500/50">
+              <MagneticButton variant="primary" className="shadow-md shadow-primary-500/25 dark:shadow-primary-500/50">
                 <PlusCircle className="w-4 h-4" />
                 <span>Book New Slot</span>
               </MagneticButton>
