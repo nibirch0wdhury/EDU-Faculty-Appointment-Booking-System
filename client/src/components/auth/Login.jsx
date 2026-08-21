@@ -18,7 +18,7 @@ const Login = () => {
     setLoading(true);
     const result = await login(email, password);
     setLoading(false);
-    if (result?.success && result?.user) {
+    if (result?.success && result?.user && result?.user?.role) {
       switch (result.user.role) {
         case 'student':
           navigate('/student/dashboard');

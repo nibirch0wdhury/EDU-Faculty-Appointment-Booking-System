@@ -1,8 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { toast } from 'react-toastify';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const AuthContext = createContext();
 
@@ -15,7 +13,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       fetchUserProfile();
     } else {
       setLoading(false);
@@ -24,12 +21,15 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await axios.get(`${API_URL}/auth/profile`);
-      setUser(response.data);
+      const response = await api.get('/auth/profile');
+      if (response.data && typeof response.data === 'object' && response.data._id) {
+        setUser(response.data);
+      } else {
+        throw new Error('Invalid profile response');
+      }
     } catch (error) {
       console.error('Fetch profile error:', error);
       localStorage.removeItem('token');
-      delete axios.defaults.headers.common['Authorization'];
       if (error.code !== 'ERR_CONNECTION_REFUSED') {
         toast.error('Session expired. Please login again.');
       }
@@ -40,10 +40,16 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, { email, password });
+      const response = await api.post('/auth/login', { email, password });
+      
+      // Verify response data is a valid JSON object containing a token and user details
+      if (!response.data || typeof response.data !== 'object' || !response.data.token) {
+        toast.error('Invalid server response. Please verify VITE_API_URL environment variable.');
+        return { success: false };
+      }
+
       const { token, ...userData } = response.data;
       localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(userData);
       toast.success('Login successful!');
       return { success: true, user: userData };
@@ -52,7 +58,10 @@ export const AuthProvider = ({ children }) => {
       if (error.code === 'ERR_CONNECTION_REFUSED') {
         toast.error('Cannot connect to server. Please try again later.');
       } else {
-        toast.error(error.response?.data?.message || 'Login failed');
+        const errorMsg = typeof error.response?.data?.message === 'string'
+          ? error.response.data.message
+          : 'Invalid email or password';
+        toast.error(errorMsg);
       }
       return { success: false };
     }
@@ -60,19 +69,27 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/register`, userData);
+      const response = await api.post('/auth/register', userData);
+      
+      if (!response.data || typeof response.data !== 'object' || !response.data.token) {
+        toast.error('Invalid server response. Please verify VITE_API_URL environment variable.');
+        return { success: false };
+      }
+
       const { token, ...user } = response.data;
       localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(user);
       toast.success('Registration successful!');
-      return { success: true };
+      return { success: true, user };
     } catch (error) {
       console.error('Registration error:', error);
       if (error.code === 'ERR_CONNECTION_REFUSED') {
         toast.error('Cannot connect to server. Please try again later.');
       } else {
-        toast.error(error.response?.data?.message || 'Registration failed');
+        const errorMsg = typeof error.response?.data?.message === 'string'
+          ? error.response.data.message
+          : 'Registration failed';
+        toast.error(errorMsg);
       }
       return { success: false };
     }
@@ -80,25 +97,30 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
     setUser(null);
     toast.info('Logged out successfully');
   };
 
   const updateProfile = async (profileData) => {
     try {
-      const response = await axios.put(`${API_URL}/auth/profile`, profileData);
+      const response = await api.put('/auth/profile', profileData);
+      
+      if (!response.data || typeof response.data !== 'object') {
+        throw new Error('Invalid update response');
+      }
+
       const { token, ...updatedUserData } = response.data;
       if (token) {
         localStorage.setItem('token', token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       }
       setUser(updatedUserData);
       toast.success('Profile updated successfully!');
       return { success: true, data: updatedUserData };
     } catch (error) {
       console.error('Update profile error:', error);
-      const errorMsg = error.response?.data?.message || 'Failed to update profile';
+      const errorMsg = typeof error.response?.data?.message === 'string'
+        ? error.response.data.message
+        : 'Failed to update profile';
       toast.error(errorMsg);
       return { success: false, error: errorMsg };
     }
