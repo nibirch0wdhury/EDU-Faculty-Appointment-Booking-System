@@ -36,6 +36,18 @@ const isPastTimeForToday = (date, startTime) => {
   return slotStartTime < today;
 };
 
+// ============================================
+// UTILITY: Parse a YYYY-MM-DD string as a local date
+// Avoids UTC midnight interpretation of new Date("YYYY-MM-DD")
+// ============================================
+const parseLocalDateString = (dateStr) => {
+  if (!dateStr || typeof dateStr !== 'string') return null;
+  const parts = dateStr.split('T')[0].split('-').map(Number);
+  if (parts.length !== 3 || parts.some(p => isNaN(p))) return null;
+  const d = new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0, 0); // noon local to avoid DST edge
+  return isNaN(d.getTime()) ? null : d;
+};
+
 // ==================== PUBLIC ROUTES ====================
 
 // @desc    Get all faculties
@@ -206,8 +218,9 @@ router.post('/schedule', protect, faculty, async (req, res) => {
     }
     
     // CHECK 1: Date must not be in the past
-    const slotDate = new Date(date);
-    if (isNaN(slotDate.getTime())) {
+    // Parse as local date to avoid UTC midnight shift
+    const slotDate = parseLocalDateString(date);
+    if (!slotDate) {
       return res.status(400).json({
         success: false,
         message: 'Invalid date format'
@@ -216,7 +229,7 @@ router.post('/schedule', protect, faculty, async (req, res) => {
     
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const selectedDate = new Date(date);
+    const selectedDate = new Date(slotDate);
     selectedDate.setHours(0, 0, 0, 0);
     
     if (selectedDate < today) {
@@ -301,9 +314,9 @@ router.post('/schedule', protect, faculty, async (req, res) => {
     }
     
     // Check for duplicate slot on same date and time
-    const startOfDay = new Date(date);
+    const startOfDay = new Date(slotDate);
     startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(date);
+    const endOfDay = new Date(slotDate);
     endOfDay.setHours(23, 59, 59, 999);
     
     const existingSlot = await Schedule.findOne({
@@ -474,6 +487,126 @@ router.put('/schedule/:id', protect, faculty, async (req, res) => {
   }
 });
 
+// @desc    Bulk delete all schedule slots for a specific day of the week
+// @route   POST /api/faculty/schedule/delete-day
+// @access  Private (Faculty only)
+router.post('/schedule/delete-day', protect, faculty, async (req, res) => {
+  try {
+    const { dayOfWeek } = req.body;
+    const targetDay = Number(dayOfWeek);
+
+    if (isNaN(targetDay) || targetDay < 0 || targetDay > 6) {
+      return res.status(400).json({ success: false, message: 'Invalid day of week selection' });
+    }
+
+    const slots = await Schedule.find({ facultyId: req.user._id });
+    
+    const slotsToDelete = slots.filter(slot => {
+      const d = new Date(slot.date);
+      return d.getDay() === targetDay;
+    });
+
+    if (slotsToDelete.length === 0) {
+      return res.status(404).json({ success: false, message: 'No schedule slots found for the selected day' });
+    }
+
+    const slotIdsToDelete = [];
+    let skippedCount = 0;
+
+    for (const slot of slotsToDelete) {
+      const startOfDay = new Date(slot.date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(slot.date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const activeApps = await Appointment.find({
+        facultyId: req.user._id,
+        date: { $gte: startOfDay, $lte: endOfDay },
+        startTime: slot.startTime,
+        status: { $in: ['pending', 'confirmed'] },
+      });
+
+      if (activeApps.length === 0) {
+        slotIdsToDelete.push(slot._id);
+      } else {
+        skippedCount++;
+      }
+    }
+
+    if (slotIdsToDelete.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'All slots for this day have active student appointments and cannot be deleted.'
+      });
+    }
+
+    await Schedule.deleteMany({ _id: { $in: slotIdsToDelete } });
+
+    res.json({
+      success: true,
+      message: `Successfully deleted ${slotIdsToDelete.length} slots for this day! ${skippedCount > 0 ? `(${skippedCount} skipped due to active appointments)` : ''}`,
+      data: { deletedCount: slotIdsToDelete.length, skippedCount }
+    });
+  } catch (error) {
+    console.error('❌ Delete day schedule error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @desc    Bulk delete all schedule slots for the faculty
+// @route   POST /api/faculty/schedule/delete-all
+// @access  Private (Faculty only)
+router.post('/schedule/delete-all', protect, faculty, async (req, res) => {
+  try {
+    const slots = await Schedule.find({ facultyId: req.user._id });
+
+    if (slots.length === 0) {
+      return res.status(404).json({ success: false, message: 'No schedule slots found to delete' });
+    }
+
+    const slotIdsToDelete = [];
+    let skippedCount = 0;
+
+    for (const slot of slots) {
+      const startOfDay = new Date(slot.date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(slot.date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const activeApps = await Appointment.find({
+        facultyId: req.user._id,
+        date: { $gte: startOfDay, $lte: endOfDay },
+        startTime: slot.startTime,
+        status: { $in: ['pending', 'confirmed'] },
+      });
+
+      if (activeApps.length === 0) {
+        slotIdsToDelete.push(slot._id);
+      } else {
+        skippedCount++;
+      }
+    }
+
+    if (slotIdsToDelete.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'All schedule slots have active student appointments and cannot be deleted.'
+      });
+    }
+
+    await Schedule.deleteMany({ _id: { $in: slotIdsToDelete } });
+
+    res.json({
+      success: true,
+      message: `Successfully cleared ${slotIdsToDelete.length} schedule slots! ${skippedCount > 0 ? `(${skippedCount} skipped due to active appointments)` : ''}`,
+      data: { deletedCount: slotIdsToDelete.length, skippedCount }
+    });
+  } catch (error) {
+    console.error('❌ Delete all schedule error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // @desc    Delete schedule slot
 // @route   DELETE /api/faculty/schedule/:id
 // @access  Private (Faculty only)
@@ -485,7 +618,10 @@ router.delete('/schedule/:id', protect, faculty, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Slot not found' });
     }
     
-    if (slot.facultyId.toString() !== req.user._id.toString()) {
+    const slotFacultyId = (slot.facultyId._id || slot.facultyId).toString();
+    const userFacultyId = (req.user._id || req.user.id).toString();
+
+    if (slotFacultyId !== userFacultyId) {
       return res.status(403).json({ success: false, message: 'Not authorized to delete this slot' });
     }
     
@@ -508,7 +644,7 @@ router.delete('/schedule/:id', protect, faculty, async (req, res) => {
       });
     }
     
-    await slot.deleteOne();
+    await Schedule.findByIdAndDelete(req.params.id);
     console.log(`🗑️ Slot deleted successfully: ${req.params.id}`);
     
     res.json({
@@ -532,7 +668,10 @@ router.put('/schedule/:id/toggle', protect, faculty, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Slot not found' });
     }
     
-    if (slot.facultyId.toString() !== req.user._id.toString()) {
+    const slotFacultyId = (slot.facultyId._id || slot.facultyId).toString();
+    const userFacultyId = (req.user._id || req.user.id).toString();
+
+    if (slotFacultyId !== userFacultyId) {
       return res.status(403).json({ success: false, message: 'Not authorized to update this slot' });
     }
     
@@ -569,6 +708,170 @@ router.put('/schedule/:id/toggle', protect, faculty, async (req, res) => {
   } catch (error) {
     console.error('❌ Toggle schedule error:', error);
     res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ==================== RECURRING SCHEDULE ROUTE ====================
+
+// @desc    Add recurring schedule slots (e.g. Every Saturday 8-9am for X months)
+// @route   POST /api/faculty/schedule/recurring
+// @access  Private (Faculty only)
+router.post('/schedule/recurring', protect, faculty, async (req, res) => {
+  try {
+    const { daysOfWeek, startTime, endTime, months, startDate } = req.body;
+
+    if (!daysOfWeek || !Array.isArray(daysOfWeek) || daysOfWeek.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please select at least one day of the week'
+      });
+    }
+
+    if (!startTime || !endTime) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide startTime and endTime'
+      });
+    }
+
+    const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
+    if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid time format. Please use HH:MM'
+      });
+    }
+
+    const [sh, sm] = startTime.split(':').map(Number);
+    const [eh, em] = endTime.split(':').map(Number);
+    const startMinutes = sh * 60 + sm;
+    const endMinutes = eh * 60 + em;
+
+    if (startMinutes >= endMinutes) {
+      return res.status(400).json({
+        success: false,
+        message: 'End time must be after start time'
+      });
+    }
+
+    if (endMinutes - startMinutes < 30) {
+      return res.status(400).json({
+        success: false,
+        message: 'Slot duration must be at least 30 minutes'
+      });
+    }
+
+    const durationMonths = Math.min(Math.max(parseInt(months, 10) || 1, 1), 12);
+    
+    // Normalize daysOfWeek to numbers (0=Sun, 1=Mon, ..., 6=Sat)
+    const validDays = daysOfWeek.map(d => Number(d)).filter(d => !isNaN(d) && d >= 0 && d <= 6);
+    if (validDays.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid day of week selection'
+      });
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Parse startDate as local date components to avoid UTC midnight shift
+    let start;
+    if (startDate && typeof startDate === 'string') {
+      const parts = startDate.split('T')[0].split('-').map(Number);
+      if (parts.length === 3 && parts.every(p => !isNaN(p))) {
+        start = new Date(parts[0], parts[1] - 1, parts[2]);
+      } else {
+        start = new Date();
+      }
+    } else {
+      start = new Date();
+    }
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(start);
+    end.setMonth(end.getMonth() + durationMonths);
+
+    const createdSlots = [];
+    const skippedSlots = [];
+
+    const curr = new Date(start);
+    while (curr <= end) {
+      const dayIndex = curr.getDay(); // 0 = Sunday, ..., 6 = Saturday
+      if (validDays.includes(dayIndex)) {
+        const year = curr.getFullYear();
+        const month = String(curr.getMonth() + 1).padStart(2, '0');
+        const day = String(curr.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+        // Create slotDate from local components to avoid UTC shift
+        const slotDate = new Date(year, curr.getMonth(), curr.getDate());
+        slotDate.setHours(12, 0, 0, 0); // noon local to avoid any DST edge cases
+
+        // Check 1: Skip if date is in the past
+        if (slotDate < today) {
+          skippedSlots.push({ date: dateStr, reason: 'Past date' });
+        }
+        // Check 2: Skip if time has passed for today
+        else if (isPastTimeForToday(dateStr, startTime)) {
+          skippedSlots.push({ date: dateStr, reason: 'Time passed today' });
+        }
+        else {
+          // Check 3: Skip if duplicate or overlapping slot exists
+          const startOfDay = new Date(slotDate);
+          startOfDay.setHours(0, 0, 0, 0);
+          const endOfDay = new Date(slotDate);
+          endOfDay.setHours(23, 59, 59, 999);
+
+          const existingSlot = await Schedule.findOne({
+            facultyId: req.user._id,
+            date: { $gte: startOfDay, $lte: endOfDay },
+            $or: [
+              { startTime: startTime },
+              {
+                startTime: { $lt: endTime },
+                endTime: { $gt: startTime }
+              }
+            ]
+          });
+
+          if (existingSlot) {
+            skippedSlots.push({ date: dateStr, reason: 'Conflict / duplicate slot' });
+          } else {
+            const slot = new Schedule({
+              facultyId: req.user._id,
+              date: slotDate,
+              startTime,
+              endTime,
+              isAvailable: true,
+            });
+            await slot.save();
+            createdSlots.push(slot);
+          }
+        }
+      }
+      // Increment day by day
+      curr.setDate(curr.getDate() + 1);
+    }
+
+    console.log(`✅ Recurring schedule: Created ${createdSlots.length}, Skipped ${skippedSlots.length}`);
+
+    res.status(201).json({
+      success: true,
+      message: `Successfully created ${createdSlots.length} recurring slots! (${skippedSlots.length} skipped due to duplicates/past dates)`,
+      data: {
+        created: createdSlots,
+        createdCount: createdSlots.length,
+        skippedCount: skippedSlots.length,
+        totalEvaluated: createdSlots.length + skippedSlots.length
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Recurring schedule error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to create recurring slots'
+    });
   }
 });
 

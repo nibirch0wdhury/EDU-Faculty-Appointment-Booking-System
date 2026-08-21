@@ -14,7 +14,7 @@ const MagneticButton = ({
   
   const variants = {
     primary: "bg-primary-500 text-white shadow-md shadow-primary-500/25 border border-primary-500/30 hover:shadow-primary-500/40",
-    secondary: "bg-white text-primary-500 border-2 border-primary-500/30 hover:bg-primary-50 hover:border-primary-500/60",
+    secondary: "bg-white text-primary-500 border-2 border-primary-500/30 hover:bg-primary-50 hover:border-primary-500/60 dark:bg-slate-900/90 dark:text-primary-400 dark:border-primary-500/30 dark:hover:bg-primary-950/40",
     danger: "bg-red-600 text-white shadow-md shadow-red-500/25 border border-red-500/30 hover:shadow-red-500/40",
     emerald: "bg-emerald-600 text-white shadow-md shadow-emerald-500/25 border border-emerald-500/30 hover:shadow-emerald-500/40",
     ghost: "bg-transparent text-slate-600 hover:bg-slate-100 hover:text-primary-500",
@@ -32,7 +32,7 @@ const MagneticButton = ({
       className={`${baseStyles} ${variants[variant] || variants.primary} ${className}`}
       {...props}
     >
-      <span className="relative z-10 flex items-center justify-center gap-2 px-5 py-2.5">
+      <span className="relative z-10 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium">
         {children}
       </span>
       {/* Shimmer effect for primary */}
