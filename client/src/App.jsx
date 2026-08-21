@@ -26,6 +26,7 @@ import AdminContactMessages from './components/admin/AdminContactMessages';
 import UserContactMessages from './components/user/UserContactMessages';
 import UserProfile from './components/user/UserProfile';
 import AnimatedBackground from './components/ui/AnimatedBackground';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -45,63 +46,65 @@ function App() {
             <AnimatedBackground />
             <Navbar />
             <main className="flex-grow relative z-10 pt-16 md:pt-20">
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                
-                {/* Student Routes */}
-                <Route path="/student/dashboard" element={
-                  <PrivateRoute role="student"><StudentDashboard /></PrivateRoute>
-                } />
-                <Route path="/student/book-appointment" element={
-                  <PrivateRoute role="student"><BookAppointment /></PrivateRoute>
-                } />
-                <Route path="/student/my-appointments" element={
-                  <PrivateRoute role="student"><MyAppointments /></PrivateRoute>
-                } />
-                
-                {/* Faculty Routes */}
-                <Route path="/faculty/dashboard" element={
-                  <PrivateRoute role="faculty"><FacultyDashboard /></PrivateRoute>
-                } />
-                <Route path="/faculty/appointments" element={
-                  <PrivateRoute role="faculty"><FacultyAppointments /></PrivateRoute>
-                } />
-                <Route path="/faculty/manage-schedule" element={
-                  <PrivateRoute role="faculty"><ManageSchedule /></PrivateRoute>
-                } />
-                
-                {/* Admin Routes */}
-                <Route path="/admin/dashboard" element={
-                  <PrivateRoute role="admin"><AdminDashboard /></PrivateRoute>
-                } />
-                <Route path="/admin/manage-users" element={
-                  <PrivateRoute role="admin"><ManageUsers /></PrivateRoute>
-                } />
-                <Route path="/admin/manage-faculties" element={
-                  <PrivateRoute role="admin"><ManageFaculties /></PrivateRoute>
-                } />
-                <Route path="/admin/settings" element={
-                  <PrivateRoute role="admin"><SystemSettings /></PrivateRoute>
-                } />
-                <Route path="/admin/contact-messages" element={
-                  <PrivateRoute role="admin"><AdminContactMessages /></PrivateRoute>
-                } />
-                
-                {/* ✅ User Routes - Message icon redirects here */}
-                <Route path="/user/messages" element={
-                  <PrivateRoute><UserContactMessages /></PrivateRoute>
-                } />
-                <Route path="/user/profile" element={
-                  <PrivateRoute><UserProfile /></PrivateRoute>
-                } />
-                
-                <Route path="*" element={<Navigate to="/" />} />
-              </Routes>
+              <ErrorBoundary>
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<Home />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  
+                  {/* Student Routes */}
+                  <Route path="/student/dashboard" element={
+                    <PrivateRoute role="student"><StudentDashboard /></PrivateRoute>
+                  } />
+                  <Route path="/student/book-appointment" element={
+                    <PrivateRoute role="student"><BookAppointment /></PrivateRoute>
+                  } />
+                  <Route path="/student/my-appointments" element={
+                    <PrivateRoute role="student"><MyAppointments /></PrivateRoute>
+                  } />
+                  
+                  {/* Faculty Routes */}
+                  <Route path="/faculty/dashboard" element={
+                    <PrivateRoute role="faculty"><FacultyDashboard /></PrivateRoute>
+                  } />
+                  <Route path="/faculty/appointments" element={
+                    <PrivateRoute role="faculty"><FacultyAppointments /></PrivateRoute>
+                  } />
+                  <Route path="/faculty/manage-schedule" element={
+                    <PrivateRoute role="faculty"><ManageSchedule /></PrivateRoute>
+                  } />
+                  
+                  {/* Admin Routes */}
+                  <Route path="/admin/dashboard" element={
+                    <PrivateRoute role="admin"><AdminDashboard /></PrivateRoute>
+                  } />
+                  <Route path="/admin/manage-users" element={
+                    <PrivateRoute role="admin"><ManageUsers /></PrivateRoute>
+                  } />
+                  <Route path="/admin/manage-faculties" element={
+                    <PrivateRoute role="admin"><ManageFaculties /></PrivateRoute>
+                  } />
+                  <Route path="/admin/settings" element={
+                    <PrivateRoute role="admin"><SystemSettings /></PrivateRoute>
+                  } />
+                  <Route path="/admin/contact-messages" element={
+                    <PrivateRoute role="admin"><AdminContactMessages /></PrivateRoute>
+                  } />
+                  
+                  {/* ✅ User Routes - Message icon redirects here */}
+                  <Route path="/user/messages" element={
+                    <PrivateRoute><UserContactMessages /></PrivateRoute>
+                  } />
+                  <Route path="/user/profile" element={
+                    <PrivateRoute><UserProfile /></PrivateRoute>
+                  } />
+                  
+                  <Route path="*" element={<Navigate to="/" />} />
+                </Routes>
+              </ErrorBoundary>
             </main>
             <Footer />
             <ToastContainer 

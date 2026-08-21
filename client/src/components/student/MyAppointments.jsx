@@ -7,12 +7,18 @@ import SpotlightCard from '../ui/SpotlightCard';
 import MagneticButton from '../ui/MagneticButton';
 import Badge from '../ui/Badge';
 import PageTransition, { MotionContainer } from '../ui/PageTransition';
+import ConfirmModal from '../ui/ConfirmModal';
 
 const MyAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
+
+  // Cancel Modal State
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [appointmentToCancel, setAppointmentToCancel] = useState(null);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     fetchAppointments();
@@ -42,15 +48,26 @@ const MyAppointments = () => {
     fetchAppointments(true);
   };
 
-  const handleCancel = async (appointmentId) => {
-    if (!window.confirm('Are you sure you want to cancel this appointment?')) return;
+  const promptCancelAppointment = (appointment) => {
+    setAppointmentToCancel(appointment);
+    setCancelModalOpen(true);
+  };
+
+  const handleConfirmCancelAppointment = async () => {
+    if (!appointmentToCancel) return;
+    setCancelling(true);
     try {
-      await api.put(`/appointments/${appointmentId}/cancel`);
+      await api.put(`/appointments/${appointmentToCancel._id}/cancel`);
       toast.success('Appointment cancelled successfully');
+      setCancelModalOpen(false);
+      setAppointmentToCancel(null);
       fetchAppointments();
     } catch (error) {
       console.error('Error cancelling appointment:', error);
-      toast.error('Failed to cancel appointment');
+      const msg = error.response?.data?.message || 'Failed to cancel appointment';
+      toast.error(msg);
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -174,7 +191,7 @@ const MyAppointments = () => {
 
                     {appointment.status !== 'cancelled' && appointment.status !== 'completed' && (
                       <button
-                        onClick={() => handleCancel(appointment._id)}
+                        onClick={() => promptCancelAppointment(appointment)}
                         className="text-xs font-semibold text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 flex items-center gap-1 hover:underline transition-all"
                       >
                         <XCircle className="w-3.5 h-3.5" />
@@ -205,6 +222,33 @@ const MyAppointments = () => {
           </MotionContainer>
         )}
       </div>
+
+      {/* Glassmorphism Custom Confirm Modal */}
+      <ConfirmModal
+        isOpen={cancelModalOpen}
+        onClose={() => setCancelModalOpen(false)}
+        onConfirm={handleConfirmCancelAppointment}
+        title="Cancel Appointment"
+        message={
+          appointmentToCancel ? (
+            <span>
+              Are you sure you want to cancel your appointment with{' '}
+              <strong className="text-slate-900 dark:text-white">{appointmentToCancel.facultyId?.name || 'Faculty Member'}</strong> for{' '}
+              <strong className="text-slate-900 dark:text-white">
+                {new Date(appointmentToCancel.date).toLocaleDateString('en-US', {
+                  weekday: 'short',
+                  month: 'short',
+                  day: 'numeric'
+                })}
+              </strong>?
+            </span>
+          ) : (
+            'Are you sure you want to cancel this appointment?'
+          )
+        }
+        confirmText="Yes, Cancel Booking"
+        loading={cancelling}
+      />
     </PageTransition>
   );
 };
