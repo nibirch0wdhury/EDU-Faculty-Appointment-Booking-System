@@ -4,6 +4,7 @@ import { Save, Settings, Calendar, Clock, Bell, Shield, Sparkles } from 'lucide-
 import api from '../../utils/api';
 import MagneticButton from '../ui/MagneticButton';
 import PageTransition, { MotionContainer } from '../ui/PageTransition';
+import AdminNavTabs from './AdminNavTabs';
 
 const SystemSettings = () => {
   const [settings, setSettings] = useState({
@@ -90,6 +91,7 @@ const SystemSettings = () => {
   return (
     <PageTransition className="py-8 md:py-12 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <AdminNavTabs />
         <MotionContainer className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-semibold">
@@ -107,7 +109,6 @@ const SystemSettings = () => {
         <form onSubmit={handleSave} className="space-y-6">
           {/* General Settings */}
           <MotionContainer delay={0.1} className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 space-y-4 transition-all duration-300">
-            <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
             <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-3">
               <Settings className="w-5 h-5 text-primary-500 dark:text-primary-400" />
               <h2 className="text-lg font-display font-bold text-slate-900 dark:text-white">General Settings</h2>
@@ -126,7 +127,6 @@ const SystemSettings = () => {
 
           {/* Appointment Settings */}
           <MotionContainer delay={0.2} className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 space-y-4 transition-all duration-300">
-            <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
             <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-3">
               <Calendar className="w-5 h-5 text-primary-500 dark:text-primary-400" />
               <h2 className="text-lg font-display font-bold text-slate-900 dark:text-white">Appointment Rules</h2>
@@ -150,7 +150,6 @@ const SystemSettings = () => {
 
           {/* Hours */}
           <MotionContainer delay={0.3} className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 space-y-4 transition-all duration-300">
-            <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
             <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-3">
               <Clock className="w-5 h-5 text-primary-500 dark:text-primary-400" />
               <h2 className="text-lg font-display font-bold text-slate-900 dark:text-white">University Working Hours</h2>
@@ -178,7 +177,6 @@ const SystemSettings = () => {
           {/* Notifications & Status */}
           <MotionContainer delay={0.4} className="grid md:grid-cols-2 gap-6">
             <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 space-y-4 transition-all duration-300">
-              <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
               <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-3">
                 <Bell className="w-5 h-5 text-primary-500 dark:text-primary-400" />
                 <h2 className="text-lg font-display font-bold text-slate-900 dark:text-white">Notifications</h2>
@@ -196,7 +194,6 @@ const SystemSettings = () => {
             </div>
 
             <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 space-y-4 transition-all duration-300">
-              <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
               <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-3">
                 <Shield className="w-5 h-5 text-primary-500 dark:text-primary-400" />
                 <h2 className="text-lg font-display font-bold text-slate-900 dark:text-white">System Status</h2>

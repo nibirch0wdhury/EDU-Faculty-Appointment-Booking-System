@@ -5,6 +5,7 @@ import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import SpotlightCard from '../ui/SpotlightCard';
 import PageTransition, { MotionContainer } from '../ui/PageTransition';
+import AdminNavTabs from './AdminNavTabs';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -93,9 +94,9 @@ const AdminDashboard = () => {
   return (
     <PageTransition className="py-8 md:py-12 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <AdminNavTabs />
         {/* Header Banner */}
         <MotionContainer className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-8 relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6 transition-all duration-300">
-          <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
           <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
           <div className="space-y-2 z-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-semibold">
@@ -232,7 +233,6 @@ const AdminDashboard = () => {
         {/* System Overview */}
         <MotionContainer delay={0.3} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 space-y-4 transition-all duration-300">
-            <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
             <h2 className="text-xl font-display font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Users className="w-5 h-5 text-primary-500 dark:text-primary-400" />
               <span>User Distribution Overview</span>
@@ -254,7 +254,6 @@ const AdminDashboard = () => {
           </div>
 
           <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 space-y-4 transition-all duration-300">
-            <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
             <h2 className="text-xl font-display font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Calendar className="w-5 h-5 text-primary-500 dark:text-primary-400" />
               <span>Appointment System Metrics</span>

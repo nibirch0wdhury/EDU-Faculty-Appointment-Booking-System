@@ -5,6 +5,8 @@ import api from '../../utils/api';
 import MagneticButton from '../ui/MagneticButton';
 import PageTransition, { MotionContainer } from '../ui/PageTransition';
 import SpotlightCard from '../ui/SpotlightCard';
+import AdminNavTabs from './AdminNavTabs';
+import ModalPortal from '../ui/ModalPortal';
 
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
@@ -138,6 +140,7 @@ const ManageUsers = () => {
   return (
     <PageTransition className="py-8 md:py-12 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <AdminNavTabs />
         <MotionContainer className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-semibold">
@@ -178,7 +181,6 @@ const ManageUsers = () => {
 
         {/* Table */}
         <MotionContainer delay={0.2} className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 overflow-hidden p-0 transition-all duration-300">
-          <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
           {loading ? (
             <div className="text-center py-16 text-slate-500 dark:text-slate-400 text-sm flex items-center justify-center gap-2">
               <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary-500 dark:border-primary-400 border-t-transparent"></div>
@@ -254,10 +256,9 @@ const ManageUsers = () => {
         </MotionContainer>
 
         {/* Add Modal */}
-        {showAddModal && (
-          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-xl dark:shadow-2xl border border-primary-500/10 dark:border-primary-500/20 max-w-md w-full p-8 space-y-6 relative transition-all duration-300">
-              <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
+        <ModalPortal isOpen={showAddModal}>
+          <div className="fixed inset-0 bg-slate-950/80 dark:bg-slate-950/90 backdrop-blur-2xl flex items-center justify-center z-[9999] p-4 overflow-y-auto">
+            <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-2xl border border-primary-500/10 dark:border-primary-500/20 max-w-md w-full p-6 sm:p-8 space-y-6 relative transition-all duration-300 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
                 <h2 className="text-lg font-display font-bold text-slate-900 dark:text-white">Add New User</h2>
                 <button onClick={() => setShowAddModal(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
@@ -302,13 +303,12 @@ const ManageUsers = () => {
               </form>
             </div>
           </div>
-        )}
+        </ModalPortal>
 
         {/* Edit Modal */}
-        {editingUser && (
-          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-xl dark:shadow-2xl border border-primary-500/10 dark:border-primary-500/20 max-w-md w-full p-8 space-y-6 relative transition-all duration-300">
-              <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
+        <ModalPortal isOpen={Boolean(editingUser)}>
+          <div className="fixed inset-0 bg-slate-950/80 dark:bg-slate-950/90 backdrop-blur-2xl flex items-center justify-center z-[9999] p-4 overflow-y-auto">
+            <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-2xl border border-primary-500/10 dark:border-primary-500/20 max-w-md w-full p-6 sm:p-8 space-y-6 relative transition-all duration-300 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
                 <h2 className="text-lg font-display font-bold text-slate-900 dark:text-white">Edit User Profile</h2>
                 <button onClick={() => setEditingUser(null)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
@@ -349,7 +349,7 @@ const ManageUsers = () => {
               </form>
             </div>
           </div>
-        )}
+        </ModalPortal>
       </div>
     </PageTransition>
   );

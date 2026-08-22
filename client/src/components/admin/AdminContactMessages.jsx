@@ -9,6 +9,8 @@ import MagneticButton from '../ui/MagneticButton';
 import SpotlightCard from '../ui/SpotlightCard';
 import Badge from '../ui/Badge';
 import PageTransition, { MotionContainer } from '../ui/PageTransition';
+import AdminNavTabs from './AdminNavTabs';
+import ModalPortal from '../ui/ModalPortal';
 
 const AdminContactMessages = () => {
   const [messages, setMessages] = useState([]);
@@ -96,6 +98,7 @@ const AdminContactMessages = () => {
   return (
     <PageTransition className="py-8 md:py-12 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <AdminNavTabs />
         {/* Header */}
         <MotionContainer className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -280,12 +283,11 @@ const AdminContactMessages = () => {
         )}
 
         {/* Reply Modal */}
-        {showReplyModal && selectedMessage && (
-          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-xl dark:shadow-2xl border border-primary-500/10 dark:border-primary-500/20 max-w-lg w-full p-8 space-y-6 relative transition-all duration-300">
-              <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
+        <ModalPortal isOpen={Boolean(showReplyModal && selectedMessage)}>
+          <div className="fixed inset-0 bg-slate-950/80 dark:bg-slate-950/90 backdrop-blur-2xl flex items-center justify-center z-[9999] p-4 overflow-y-auto">
+            <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-2xl border border-primary-500/10 dark:border-primary-500/20 max-w-lg w-full p-6 sm:p-8 space-y-6 relative transition-all duration-300 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
-                <h2 className="text-lg font-display font-bold text-slate-900 dark:text-white">Reply to {selectedMessage.name}</h2>
+                <h2 className="text-lg font-display font-bold text-slate-900 dark:text-white">Reply to {selectedMessage?.name}</h2>
                 <button onClick={() => setShowReplyModal(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
                   <X className="w-5 h-5" />
                 </button>
@@ -293,8 +295,8 @@ const AdminContactMessages = () => {
               
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
                 <p className="font-bold text-slate-500 dark:text-slate-400">Original Inquiry:</p>
-                <p className="text-slate-700 dark:text-slate-300">{selectedMessage.message}</p>
-                <p className="text-[11px] text-slate-400 dark:text-slate-500 pt-1">Sender: {selectedMessage.name} ({selectedMessage.email})</p>
+                <p className="text-slate-700 dark:text-slate-300">{selectedMessage?.message}</p>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500 pt-1">Sender: {selectedMessage?.name} ({selectedMessage?.email})</p>
               </div>
 
               <div className="space-y-4 text-xs">
@@ -309,7 +311,7 @@ const AdminContactMessages = () => {
                   />
                 </div>
                 <div className="flex gap-3">
-                  <MagneticButton variant="primary" className="flex-1 py-2.5 shadow-md shadow-primary-500/25 dark:shadow-primary-500/50" onClick={() => handleReply(selectedMessage._id)}>
+                  <MagneticButton variant="primary" className="flex-1 py-2.5 shadow-md shadow-primary-500/25 dark:shadow-primary-500/50" onClick={() => handleReply(selectedMessage?._id)}>
                     <Send className="w-4 h-4" />
                     <span>Send Response</span>
                   </MagneticButton>
@@ -320,7 +322,7 @@ const AdminContactMessages = () => {
               </div>
             </div>
           </div>
-        )}
+        </ModalPortal>
       </div>
     </PageTransition>
   );

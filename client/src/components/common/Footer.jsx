@@ -4,7 +4,7 @@ import { BookOpen, Mail, MapPin, Phone, ArrowUpRight } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="relative mt-auto bg-slate-900 dark:bg-slate-950 text-slate-300 dark:text-slate-400 overflow-hidden z-10">
+    <footer className="relative mt-auto bg-slate-900 dark:bg-slate-950 text-slate-300 dark:text-slate-400 overflow-hidden z-0">
       {/* Top red accent line */}
       <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-primary-500 to-transparent dark:shadow-[0_0_30px_rgba(153,0,0,0.3)]" />
       
