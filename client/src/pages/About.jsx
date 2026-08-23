@@ -34,7 +34,7 @@ const teamMembers = [
     name: 'Yeaser Bin Osman Esmam',
     email: '242019112@eastdelta.edu.bd',
     role: 'Frontend UI/UX Architect',
-    responsibilities: ['Frontend Development'],
+    responsibilities: ['Frontend Development', 'Animation & Micro-interactions'],
     icon: Code2,
     gradient: 'from-indigo-500 via-purple-600 to-pink-600',
     borderGradient: 'hover:border-indigo-500/50',
