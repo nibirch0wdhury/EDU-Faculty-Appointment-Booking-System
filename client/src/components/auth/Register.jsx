@@ -1,9 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { User, Mail, Lock, Building, Briefcase, UserCircle, BadgeCheck, Eye, EyeOff, Sparkles, Loader2, ArrowRight, GraduationCap } from 'lucide-react';
+import { User, Mail, Lock, Building, Briefcase, UserCircle, BadgeCheck, Eye, EyeOff, Sparkles, Loader2, ArrowRight, GraduationCap, Info, AlertCircle } from 'lucide-react';
 import MagneticButton from '../ui/MagneticButton';
 import PageTransition, { MotionContainer } from '../ui/PageTransition';
+
+const DEPARTMENTS = [
+  'Business Administration',
+  'Computer Science & Engineering',
+  'Digitalization, Innovation and Entrepreneurship',
+  'Economics',
+  'Electrical & Electronic Engineering',
+  'Electronics & Telecommunication Engineering',
+  'English',
+  'Public Leadership, Management and Governance'
+];
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -25,21 +36,92 @@ const Register = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (name === 'studentId' && formData.role === 'student') {
+      const cleanId = value.trim();
+      if (cleanId) {
+        setFormData(prev => ({
+          ...prev,
+          studentId: cleanId,
+          email: `${cleanId}@eastdelta.edu.bd`
+        }));
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          studentId: '',
+          email: ''
+        }));
+      }
+    }
+    
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
+  };
+
+  const handleEmailChange = (e) => {
+    const { value } = e.target;
+    setFormData(prev => ({ ...prev, email: value }));
+    if (errors.email) {
+      setErrors(prev => ({ ...prev, email: '' }));
+    }
+  };
+
+  const validateEmail = (email, role) => {
+    const domainRegex = /@eastdelta\.edu\.bd$/;
+    
+    if (!domainRegex.test(email)) {
+      return 'Only institutional emails (@eastdelta.edu.bd) are allowed';
+    }
+    
+    if (role === 'student') {
+      if (!/^\d+@eastdelta\.edu\.bd$/.test(email)) {
+        return 'Student email must be your Student ID followed by @eastdelta.edu.bd';
+      }
+      const emailPrefix = email.split('@')[0];
+      if (emailPrefix !== formData.studentId.trim()) {
+        return `Email must match your Student ID: ${formData.studentId}@eastdelta.edu.bd`;
+      }
+    } else if (role === 'faculty' || role === 'admin') {
+      if (!/^[a-zA-Z]+\.[a-zA-Z]+@eastdelta\.edu\.bd$/.test(email)) {
+        return 'Faculty/Admin emails must be in format: firstname.lastname@eastdelta.edu.bd';
+      }
+    }
+    
+    return null;
   };
 
   const validateForm = () => {
     const newErrors = {};
     
     if (!formData.name.trim()) newErrors.name = 'Full name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
-    else if (!formData.email.toLowerCase().endsWith('@eastdelta.edu.bd')) newErrors.email = 'Only institutional emails (@eastdelta.edu.bd) are allowed';
+    
+    if (formData.role === 'student') {
+      if (!formData.studentId.trim()) {
+        newErrors.studentId = 'Student ID is required';
+      } else {
+        const autoEmail = `${formData.studentId.trim()}@eastdelta.edu.bd`;
+        if (!/^\d+@eastdelta\.edu\.bd$/.test(autoEmail)) {
+          newErrors.studentId = 'Student ID must contain only numbers';
+        }
+        setFormData(prev => ({
+          ...prev,
+          email: autoEmail
+        }));
+      }
+    } else {
+      if (!formData.email.trim()) {
+        newErrors.email = 'Email is required';
+      } else {
+        const emailError = validateEmail(formData.email, formData.role);
+        if (emailError) newErrors.email = emailError;
+      }
+    }
+    
     if (!formData.password) newErrors.password = 'Password is required';
     else if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
     if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
-    if (formData.role === 'student' && !formData.studentId) newErrors.studentId = 'Student ID is required';
+    
     if (formData.role === 'faculty' && !formData.facultyId) newErrors.facultyId = 'Faculty ID is required';
     if ((formData.role === 'student' || formData.role === 'faculty') && !formData.department) {
       newErrors.department = 'Department is required';
@@ -47,6 +129,22 @@ const Register = () => {
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const getEmailHint = (role) => {
+    if (role === 'student') {
+      return 'Your email will be automatically generated from your Student ID';
+    } else if (role === 'faculty' || role === 'admin') {
+      return 'Format: firstname.lastname@eastdelta.edu.bd';
+    }
+    return '';
+  };
+
+  const getEmailDisplay = (role) => {
+    if (role === 'student') {
+      return formData.studentId ? `${formData.studentId}@eastdelta.edu.bd` : 'Enter Student ID above to generate email';
+    }
+    return formData.email || '';
   };
 
   const handleSubmit = async (e) => {
@@ -85,10 +183,7 @@ const Register = () => {
     <PageTransition className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
       <MotionContainer className="max-w-xl w-full">
         <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-8 sm:p-10 space-y-8 relative overflow-hidden transition-all duration-300">
-          {/* Top red accent */}
           <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
-          
-          {/* Dark mode glow */}
           <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -107,7 +202,6 @@ const Register = () => {
           </div>
 
           <form className="space-y-5 relative z-10" onSubmit={handleSubmit}>
-            {/* Role Switcher */}
             <div>
               <label className="input-label">Select Account Role</label>
               <div className="grid grid-cols-3 gap-2 bg-slate-50 dark:bg-slate-800/50 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
@@ -120,7 +214,11 @@ const Register = () => {
                     key={roleItem.id}
                     type="button"
                     onClick={() => {
-                      setFormData(prev => ({ ...prev, role: roleItem.id }));
+                      setFormData(prev => ({ 
+                        ...prev, 
+                        role: roleItem.id,
+                        email: roleItem.id === 'student' ? '' : prev.email
+                      }));
                       setErrors({});
                     }}
                     className={`py-2 text-xs font-bold rounded-lg transition-all duration-200 ${
@@ -135,7 +233,6 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Name & Email */}
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="input-label">Full Name</label>
@@ -154,23 +251,34 @@ const Register = () => {
               </div>
 
               <div>
-                <label className="input-label">Email Address</label>
+                <label className="input-label">
+                  Email Address
+                  {formData.role === 'student' && (
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 ml-1 font-normal">
+                      (Auto-generated)
+                    </span>
+                  )}
+                </label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
                   <input
                     type="email"
                     name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className={`input-field pl-11 ${errors.email ? 'input-field-error' : ''}`}
-                    placeholder="you@eastdelta.edu.bd"
+                    value={formData.role === 'student' ? getEmailDisplay('student') : formData.email}
+                    onChange={handleEmailChange}
+                    disabled={formData.role === 'student'}
+                    className={`input-field pl-11 ${errors.email ? 'input-field-error' : ''} ${formData.role === 'student' ? 'bg-slate-100 dark:bg-slate-800/50 cursor-not-allowed' : ''}`}
+                    placeholder={formData.role === 'student' ? 'Auto-generated from Student ID' : 'john.doe@eastdelta.edu.bd'}
                   />
                 </div>
+                <p className="mt-1 text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                  <Info className="w-3 h-3" />
+                  <span>{getEmailHint(formData.role)}</span>
+                </p>
                 {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
               </div>
             </div>
 
-            {/* Department */}
             {(formData.role === 'student' || formData.role === 'faculty') && (
               <div>
                 <label className="input-label">Academic Department</label>
@@ -183,26 +291,26 @@ const Register = () => {
                     className={`input-field pl-11 bg-white dark:bg-slate-900 ${errors.department ? 'input-field-error' : ''}`}
                   >
                     <option value="" className="text-slate-400 dark:text-slate-500">Select Department</option>
-                    <option value="Computer Science">Computer Science</option>
-                    <option value="Business Administration">Business Administration</option>
-                    <option value="Engineering">Engineering</option>
-                    <option value="Mathematics">Mathematics</option>
-                    <option value="Physics">Physics</option>
-                    <option value="Chemistry">Chemistry</option>
-                    <option value="Biology">Biology</option>
-                    <option value="Economics">Economics</option>
-                    <option value="Psychology">Psychology</option>
-                    <option value="Sociology">Sociology</option>
+                    {DEPARTMENTS.map((dept) => (
+                      <option key={dept} value={dept} className="bg-white dark:bg-slate-900">
+                        {dept}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 {errors.department && <p className="mt-1 text-xs text-red-500">{errors.department}</p>}
               </div>
             )}
 
-            {/* ID Field */}
             {formData.role === 'student' && (
               <div>
-                <label className="input-label">Student ID</label>
+                <label className="input-label">
+                  <BadgeCheck className="inline-block w-4 h-4 mr-1.5 text-primary-500 dark:text-primary-400" />
+                  Student ID <span className="text-red-500">*</span>
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 ml-1 font-normal">
+                    (Your email will be: ID@eastdelta.edu.bd)
+                  </span>
+                </label>
                 <div className="relative">
                   <BadgeCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
                   <input
@@ -211,9 +319,15 @@ const Register = () => {
                     value={formData.studentId}
                     onChange={handleChange}
                     className={`input-field pl-11 ${errors.studentId ? 'input-field-error' : ''}`}
-                    placeholder="e.g. EDU-2024-001"
+                    placeholder="242021012"
                   />
                 </div>
+                {formData.studentId && (
+                  <p className="mt-1 text-[11px] text-primary-600 dark:text-primary-400 flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Your email will be: <strong>{formData.studentId}@eastdelta.edu.bd</strong></span>
+                  </p>
+                )}
                 {errors.studentId && <p className="mt-1 text-xs text-red-500">{errors.studentId}</p>}
               </div>
             )}
@@ -229,14 +343,13 @@ const Register = () => {
                     value={formData.facultyId}
                     onChange={handleChange}
                     className={`input-field pl-11 ${errors.facultyId ? 'input-field-error' : ''}`}
-                    placeholder="e.g. FAC-2024-001"
+                    placeholder="FAC-2024-001"
                   />
                 </div>
                 {errors.facultyId && <p className="mt-1 text-xs text-red-500">{errors.facultyId}</p>}
               </div>
             )}
 
-            {/* Passwords */}
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="input-label">Password</label>
@@ -276,6 +389,14 @@ const Register = () => {
                 </div>
                 {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
               </div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-[11px] text-slate-500 dark:text-slate-400">
+              <p className="font-semibold text-slate-700 dark:text-slate-300">Email Format Rules:</p>
+              <ul className="mt-1 space-y-0.5 list-disc list-inside">
+                <li><strong>Students:</strong> Your email is automatically generated from your Student ID: <code className="bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded text-[10px]">student-id@eastdelta.edu.bd</code></li>
+                <li><strong>Faculty/Admin:</strong> <code className="bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded text-[10px]">firstname.lastname@eastdelta.edu.bd</code></li>
+              </ul>
             </div>
 
             <MagneticButton

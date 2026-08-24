@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight, Loader2, GraduationCap } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight, Loader2, GraduationCap, Info } from 'lucide-react';
 import MagneticButton from '../ui/MagneticButton';
 import PageTransition, { MotionContainer } from '../ui/PageTransition';
 
@@ -72,9 +72,14 @@ const Login = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     className="input-field pl-11"
-                    placeholder="you@eastdelta.edu.bd"
+                    placeholder="242021012@eastdelta.edu.bd"
                   />
                 </div>
+                {/* ✅ Email format hint */}
+                <p className="mt-1 text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                  <Info className="w-3 h-3" />
+                  <span>Use your institutional email (@eastdelta.edu.bd)</span>
+                </p>
               </div>
 
               <div>

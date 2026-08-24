@@ -1,18 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import PageTransition, { MotionContainer } from '../ui/PageTransition';
 import { 
   User, Mail, Building, Briefcase, MapPin, GraduationCap, 
-  Lock, ShieldCheck, Save, Sparkles, KeyRound, FileText, UserCheck 
+  Lock, ShieldCheck, Save, Sparkles, KeyRound, FileText, UserCheck, Info, Loader2
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import MagneticButton from '../ui/MagneticButton';
 
+const DEPARTMENTS = [
+  'Business Administration',
+  'Computer Science & Engineering',
+  'Digitalization, Innovation and Entrepreneurship',
+  'Economics',
+  'Electrical & Electronic Engineering',
+  'Electronics & Telecommunication Engineering',
+  'English',
+  'Public Leadership, Management and Governance'
+];
+
 const UserProfile = () => {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, loading: authLoading, fetchUserProfile } = useAuth();
   const [activeTab, setActiveTab] = useState('details');
   const [loading, setLoading] = useState(false);
-
+  const [isPageLoading, setIsPageLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -24,15 +35,65 @@ const UserProfile = () => {
     bio: '',
     profileImage: ''
   });
-
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
 
+  const isStudent = user?.role === 'student';
+  const isFaculty = user?.role === 'faculty';
+  const isAdmin = user?.role === 'admin';
+
+  // ============================================
+  // ✅ FIX: Load user data when component mounts
+  // ============================================
   useEffect(() => {
-    if (user) {
+    const loadUserData = async () => {
+      console.log('🔄 UserProfile mounted, loading user data...');
+      setIsPageLoading(true);
+      
+      // If user is already loaded and has data, use it
+      if (user && user._id && user.studentId !== undefined && user.bio !== undefined) {
+        console.log('📝 User already loaded, using existing data:', user);
+        setFormData({
+          name: user.name || '',
+          email: user.email || '',
+          department: user.department || '',
+          designation: user.designation || '',
+          officeRoom: user.officeRoom || '',
+          studentId: user.studentId || '',
+          facultyId: user.facultyId || '',
+          bio: user.bio || '',
+          profileImage: user.profileImage || ''
+        });
+        setIsPageLoading(false);
+        return;
+      }
+      
+      // If we have a token but no user data, fetch it
+      if (localStorage.getItem('token')) {
+        try {
+          console.log('🔄 Fetching user profile on mount...');
+          await fetchUserProfile();
+          console.log('✅ User profile fetched successfully');
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+        }
+      }
+      
+      setIsPageLoading(false);
+    };
+    
+    loadUserData();
+  }, []); // ✅ Empty dependency array - runs once on mount
+
+  // ============================================
+  // ✅ FIX: Update form data whenever user changes
+  // ============================================
+  useEffect(() => {
+    if (user && user._id) {
+      console.log('📝 User data updated, refreshing form:', user);
       setFormData({
         name: user.name || '',
         email: user.email || '',
@@ -45,10 +106,11 @@ const UserProfile = () => {
         profileImage: user.profileImage || ''
       });
     }
-  }, [user]);
+  }, [user]); // ✅ Runs whenever user changes
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handlePasswordChange = (e) => {
@@ -57,8 +119,28 @@ const UserProfile = () => {
 
   const handleSubmitProfile = async (e) => {
     e.preventDefault();
+    
+    const updateData = {
+      name: formData.name,
+      department: formData.department,
+      bio: formData.bio,
+    };
+
+    if (isFaculty) {
+      updateData.designation = formData.designation;
+      updateData.officeRoom = formData.officeRoom;
+      updateData.facultyId = formData.facultyId;
+    }
+    
+    if (isAdmin) {
+      updateData.designation = formData.designation;
+      updateData.officeRoom = formData.officeRoom;
+    }
+
+    console.log('📤 Submitting profile update:', updateData);
+    
     setLoading(true);
-    const result = await updateProfile(formData);
+    await updateProfile(updateData);
     setLoading(false);
   };
 
@@ -98,10 +180,34 @@ const UserProfile = () => {
     }
   };
 
-  // Determine which fields to show based on user role
-  const isStudent = user?.role === 'student';
-  const isFaculty = user?.role === 'faculty';
-  const isAdmin = user?.role === 'admin';
+  // ✅ Show loading spinner while data is being loaded
+  if (isPageLoading || authLoading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center py-12 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
+        <Loader2 className="w-12 h-12 animate-spin text-primary-500 dark:text-primary-400" />
+        <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading your profile...</p>
+      </div>
+    );
+  }
+
+  // ✅ If no user after loading, show error
+  if (!user || !user._id) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center py-12 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
+        <div className="text-center">
+          <User className="w-16 h-16 text-slate-400 dark:text-slate-600 mx-auto mb-4" />
+          <h2 className="text-xl font-display font-bold text-slate-900 dark:text-white">No User Data</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Please log in again to view your profile.</p>
+          <button 
+            onClick={() => window.location.href = '/login'}
+            className="mt-4 px-6 py-2 rounded-xl bg-primary-500 text-white font-semibold hover:bg-primary-600 transition-colors"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <PageTransition className="w-full py-8 md:py-12 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
@@ -148,6 +254,12 @@ const UserProfile = () => {
                   <span>{user.department}</span>
                 </p>
               )}
+              {isStudent && user?.studentId && (
+                <p className="text-slate-500 dark:text-slate-400 text-xs flex items-center justify-center sm:justify-start gap-2 pt-1">
+                  <GraduationCap className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400 shrink-0" />
+                  <span>Student ID: <strong>{user.studentId}</strong></span>
+                </p>
+              )}
             </div>
           </div>
 
@@ -189,13 +301,17 @@ const UserProfile = () => {
                   <Sparkles className="w-5 h-5 text-primary-500 dark:text-primary-400" />
                   Edit Profile Information
                 </h2>
-                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">Update your personal account details</p>
+                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">
+                  Update your personal account details
+                  <span className="text-red-500 dark:text-red-400 ml-1">*</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500 ml-1">Email and ID are read-only</span>
+                </p>
               </div>
             </div>
 
             <form onSubmit={handleSubmitProfile} className="space-y-6 pt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Full Name - Visible to all */}
+                {/* Full Name */}
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                     <User className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
@@ -212,62 +328,76 @@ const UserProfile = () => {
                   />
                 </div>
 
-                {/* Email Address - Visible to all */}
+                {/* Email Address - READ-ONLY */}
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                     <Mail className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                     Email Address
+                    <span className="text-[10px] text-red-500 dark:text-red-400 ml-1 font-normal">
+                      (Read-only)
+                    </span>
                   </label>
                   <input 
                     type="email" 
                     name="email" 
                     value={formData.email} 
-                    onChange={handleChange} 
-                    required 
-                    className="input-field" 
-                    placeholder="name@eastdelta.edu.bd" 
+                    disabled
+                    className="input-field bg-slate-100 dark:bg-slate-800/50 cursor-not-allowed text-slate-500 dark:text-slate-400" 
+                    placeholder="Email is read-only" 
                   />
+                  <p className="mt-1 text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                    <Info className="w-3 h-3" />
+                    <span>Email cannot be changed after account creation</span>
+                  </p>
                 </div>
 
-                {/* Department - Visible to all */}
+                {/* Department */}
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                     <Building className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                     Department
                   </label>
-                  <input 
-                    type="text" 
+                  <select 
                     name="department" 
                     value={formData.department} 
-                    onChange={handleChange} 
-                    className="input-field" 
-                    placeholder="e.g. Computer Science & Engineering" 
-                  />
+                    onChange={handleChange}
+                    className="input-field bg-white dark:bg-slate-900"
+                  >
+                    <option value="" className="bg-white dark:bg-slate-900">Select Department...</option>
+                    {DEPARTMENTS.map((dept) => (
+                      <option key={dept} value={dept} className="bg-white dark:bg-slate-900">
+                        {dept}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                {/* ============================================ */}
-                {/* STUDENT ONLY FIELDS */}
-                {/* ============================================ */}
+                {/* Student ID - READ-ONLY */}
                 {isStudent && (
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                       <GraduationCap className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                       Student ID
+                      <span className="text-[10px] text-red-500 dark:text-red-400 ml-1 font-normal">
+                        (Read-only)
+                      </span>
                     </label>
                     <input 
                       type="text" 
                       name="studentId" 
                       value={formData.studentId} 
-                      onChange={handleChange} 
-                      className="input-field" 
-                      placeholder="e.g. 242021012" 
+                      disabled
+                      className="input-field bg-slate-100 dark:bg-slate-800/50 cursor-not-allowed text-slate-500 dark:text-slate-400" 
+                      placeholder="Student ID is read-only" 
                     />
+                    <p className="mt-1 text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                      <Info className="w-3 h-3" />
+                      <span>Student ID cannot be changed after account creation</span>
+                    </p>
                   </div>
                 )}
 
-                {/* ============================================ */}
-                {/* FACULTY ONLY FIELDS */}
-                {/* ============================================ */}
+                {/* Faculty Fields */}
                 {isFaculty && (
                   <>
                     <div className="space-y-2">
@@ -281,7 +411,7 @@ const UserProfile = () => {
                         value={formData.designation} 
                         onChange={handleChange} 
                         className="input-field" 
-                        placeholder="e.g. Professor, Associate Professor, Assistant Professor" 
+                        placeholder="Enter your designation" 
                       />
                     </div>
                     <div className="space-y-2">
@@ -295,7 +425,7 @@ const UserProfile = () => {
                         value={formData.officeRoom} 
                         onChange={handleChange} 
                         className="input-field" 
-                        placeholder="e.g. Room 402, Academic Building A" 
+                        placeholder="Enter office room" 
                       />
                     </div>
                     <div className="space-y-2">
@@ -309,15 +439,13 @@ const UserProfile = () => {
                         value={formData.facultyId} 
                         onChange={handleChange} 
                         className="input-field" 
-                        placeholder="e.g. FAC-2024-001" 
+                        placeholder="Enter faculty ID" 
                       />
                     </div>
                   </>
                 )}
 
-                {/* ============================================ */}
-                {/* ADMIN ONLY FIELDS */}
-                {/* ============================================ */}
+                {/* Admin Fields */}
                 {isAdmin && (
                   <>
                     <div className="space-y-2">
@@ -331,7 +459,7 @@ const UserProfile = () => {
                         value={formData.designation} 
                         onChange={handleChange} 
                         className="input-field" 
-                        placeholder="e.g. System Administrator, IT Director" 
+                        placeholder="Enter your designation" 
                       />
                     </div>
                     <div className="space-y-2">
@@ -345,13 +473,13 @@ const UserProfile = () => {
                         value={formData.officeRoom} 
                         onChange={handleChange} 
                         className="input-field" 
-                        placeholder="e.g. Room 402, Academic Building A" 
+                        placeholder="Enter office room" 
                       />
                     </div>
                   </>
                 )}
 
-                {/* Bio - Full Width - Visible to all */}
+                {/* Bio */}
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                     <FileText className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
@@ -427,7 +555,7 @@ const UserProfile = () => {
                   required 
                   minLength={6} 
                   className="input-field" 
-                  placeholder="At least 6 characters" 
+                  placeholder="Enter new password" 
                 />
               </div>
               <div className="space-y-2">
@@ -442,7 +570,7 @@ const UserProfile = () => {
                   onChange={handlePasswordChange} 
                   required 
                   className="input-field" 
-                  placeholder="Repeat new password" 
+                  placeholder="Confirm new password" 
                 />
               </div>
 

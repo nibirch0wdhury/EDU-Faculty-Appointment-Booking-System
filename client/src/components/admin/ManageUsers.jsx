@@ -8,6 +8,18 @@ import SpotlightCard from '../ui/SpotlightCard';
 import AdminNavTabs from './AdminNavTabs';
 import ModalPortal from '../ui/ModalPortal';
 
+// ✅ Updated Department List - Alphabetical Order
+const DEPARTMENTS = [
+  'Business Administration',
+  'Computer Science & Engineering',
+  'Digitalization, Innovation and Entrepreneurship',
+  'Economics',
+  'Electrical & Electronic Engineering',
+  'Electronics & Telecommunication Engineering',
+  'English',
+  'Public Leadership, Management and Governance'
+];
+
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -289,7 +301,18 @@ const ManageUsers = () => {
                 </div>
                 <div>
                   <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Department</label>
-                  <input type="text" value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} className="input-field" placeholder="e.g. Computer Science" />
+                  <select 
+                    value={formData.department} 
+                    onChange={(e) => setFormData({...formData, department: e.target.value})}
+                    className="input-field bg-white dark:bg-slate-900"
+                  >
+                    <option value="" className="bg-white dark:bg-slate-900">Select Department...</option>
+                    {DEPARTMENTS.map((dept) => (
+                      <option key={dept} value={dept} className="bg-white dark:bg-slate-900">
+                        {dept}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="flex gap-3 pt-2">
@@ -335,6 +358,21 @@ const ManageUsers = () => {
                     <option value="student" className="bg-white dark:bg-slate-900">Student</option>
                     <option value="faculty" className="bg-white dark:bg-slate-900">Faculty</option>
                     <option value="admin" className="bg-white dark:bg-slate-900">Admin</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Department</label>
+                  <select 
+                    value={formData.department} 
+                    onChange={(e) => setFormData({...formData, department: e.target.value})}
+                    className="input-field bg-white dark:bg-slate-900"
+                  >
+                    <option value="" className="bg-white dark:bg-slate-900">Select Department...</option>
+                    {DEPARTMENTS.map((dept) => (
+                      <option key={dept} value={dept} className="bg-white dark:bg-slate-900">
+                        {dept}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

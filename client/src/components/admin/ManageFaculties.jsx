@@ -8,6 +8,18 @@ import PageTransition, { MotionContainer } from '../ui/PageTransition';
 import AdminNavTabs from './AdminNavTabs';
 import ModalPortal from '../ui/ModalPortal';
 
+// ✅ Updated Department List - Alphabetical Order
+const DEPARTMENTS = [
+  'Business Administration',
+  'Computer Science & Engineering',
+  'Digitalization, Innovation and Entrepreneurship',
+  'Economics',
+  'Electrical & Electronic Engineering',
+  'Electronics & Telecommunication Engineering',
+  'English',
+  'Public Leadership, Management and Governance'
+];
+
 const ManageFaculties = () => {
   const [faculties, setFaculties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -254,14 +266,18 @@ const ManageFaculties = () => {
                 </div>
                 <div>
                   <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Department</label>
-                  <select value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} className="input-field bg-white dark:bg-slate-900" required>
+                  <select 
+                    value={formData.department} 
+                    onChange={(e) => setFormData({...formData, department: e.target.value})} 
+                    className="input-field bg-white dark:bg-slate-900" 
+                    required
+                  >
                     <option value="" className="bg-white dark:bg-slate-900">Select Department...</option>
-                    <option value="Computer Science">Computer Science</option>
-                    <option value="Mathematics">Mathematics</option>
-                    <option value="Physics">Physics</option>
-                    <option value="Chemistry">Chemistry</option>
-                    <option value="Business Administration">Business Administration</option>
-                    <option value="Economics">Economics</option>
+                    {DEPARTMENTS.map((dept) => (
+                      <option key={dept} value={dept} className="bg-white dark:bg-slate-900">
+                        {dept}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -313,6 +329,21 @@ const ManageFaculties = () => {
                 <div>
                   <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Designation</label>
                   <input type="text" value={formData.designation} onChange={(e) => setFormData({...formData, designation: e.target.value})} className="input-field" required />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Department</label>
+                  <select 
+                    value={formData.department} 
+                    onChange={(e) => setFormData({...formData, department: e.target.value})} 
+                    className="input-field bg-white dark:bg-slate-900"
+                  >
+                    <option value="" className="bg-white dark:bg-slate-900">Select Department...</option>
+                    {DEPARTMENTS.map((dept) => (
+                      <option key={dept} value={dept} className="bg-white dark:bg-slate-900">
+                        {dept}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="flex gap-3 pt-2">
                   <MagneticButton type="submit" variant="primary" className="flex-1 py-2.5 shadow-md shadow-primary-500/25 dark:shadow-primary-500/50">

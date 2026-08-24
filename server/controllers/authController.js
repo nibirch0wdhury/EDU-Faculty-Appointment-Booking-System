@@ -9,6 +9,20 @@ const generateToken = (id) => {
   });
 };
 
+// ============================================
+// ✅ EMAIL VALIDATION FUNCTIONS
+// ============================================
+
+// Check if email is a valid student email (starts with number)
+const isValidStudentEmail = (email) => {
+  return /^\d+@eastdelta\.edu\.bd$/.test(email);
+};
+
+// Check if email is a valid faculty/admin email (alphabet.number format)
+const isValidFacultyAdminEmail = (email) => {
+  return /^[a-zA-Z]+\.[a-zA-Z]+@eastdelta\.edu\.bd$/.test(email);
+};
+
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
@@ -21,9 +35,36 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'Please provide all required fields' });
     }
 
-    // Validate email domain
-    if (!email.toLowerCase().endsWith('@eastdelta.edu.bd')) {
-      return res.status(400).json({ message: 'Only institutional emails (@eastdelta.edu.bd) are allowed to register' });
+    // ============================================
+    // ✅ ROLE-BASED EMAIL VALIDATION
+    // ============================================
+    const emailDomainRegex = /@eastdelta\.edu\.bd$/;
+    if (!emailDomainRegex.test(email)) {
+      return res.status(400).json({ 
+        message: 'Only institutional emails (@eastdelta.edu.bd) are allowed' 
+      });
+    }
+
+    // Validate email format based on role
+    if (role === 'student') {
+      if (!isValidStudentEmail(email)) {
+        return res.status(400).json({ 
+          message: 'Student email must be your Student ID followed by @eastdelta.edu.bd' 
+        });
+      }
+      // Verify email matches studentId
+      const emailPrefix = email.split('@')[0];
+      if (studentId && emailPrefix !== studentId.trim()) {
+        return res.status(400).json({ 
+          message: `Your email must match your Student ID: ${studentId}@eastdelta.edu.bd` 
+        });
+      }
+    } else if (role === 'faculty' || role === 'admin') {
+      if (!isValidFacultyAdminEmail(email)) {
+        return res.status(400).json({ 
+          message: 'Faculty/Admin emails must be in format: firstname.lastname@eastdelta.edu.bd' 
+        });
+      }
     }
 
     // Check if user exists
@@ -32,24 +73,43 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Create user
-    const user = await User.create({
+    // ============================================
+    // ✅ CREATE USER WITH ALL FIELDS
+    // ============================================
+    const userData = {
       name,
       email,
       password,
       role: role || 'student',
       department: department || '',
-      studentId: role === 'student' ? studentId : undefined,
-      facultyId: role === 'faculty' ? facultyId : undefined,
-    });
+    };
+
+    // ✅ Store studentId for students
+    if (role === 'student' && studentId) {
+      userData.studentId = studentId.trim();
+    }
+
+    // ✅ Store facultyId for faculty
+    if (role === 'faculty' && facultyId) {
+      userData.facultyId = facultyId.trim();
+    }
+
+    const user = await User.create(userData);
 
     if (user) {
+      // ✅ Return ALL user fields including studentId and bio
       res.status(201).json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
         department: user.department,
+        studentId: user.studentId || '',
+        facultyId: user.facultyId || '',
+        designation: user.designation || '',
+        officeRoom: user.officeRoom || '',
+        bio: user.bio || '',
+        profileImage: user.profileImage || '',
         token: generateToken(user._id),
       });
     } else {
@@ -84,12 +144,19 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
+    // ✅ Return ALL user fields
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
       department: user.department,
+      studentId: user.studentId || '',
+      facultyId: user.facultyId || '',
+      designation: user.designation || '',
+      officeRoom: user.officeRoom || '',
+      bio: user.bio || '',
+      profileImage: user.profileImage || '',
       token: generateToken(user._id),
     });
   } catch (error) {
@@ -107,7 +174,24 @@ const getUserProfile = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    res.json(user);
+    
+    // ✅ Return ALL user fields
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      department: user.department,
+      studentId: user.studentId || '',
+      facultyId: user.facultyId || '',
+      designation: user.designation || '',
+      officeRoom: user.officeRoom || '',
+      bio: user.bio || '',
+      profileImage: user.profileImage || '',
+      isActive: user.isActive,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    });
   } catch (error) {
     console.error('Profile error:', error);
     res.status(500).json({ message: error.message });
@@ -124,17 +208,40 @@ const updateUserProfile = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // ============================================
+    // ✅ UPDATE ONLY EDITABLE FIELDS
+    // ============================================
+    
     if (req.body.name) user.name = req.body.name;
-    if (req.body.email) user.email = req.body.email;
     if (req.body.department !== undefined) user.department = req.body.department;
     if (req.body.designation !== undefined) user.designation = req.body.designation;
     if (req.body.officeRoom !== undefined) user.officeRoom = req.body.officeRoom;
-    if (req.body.studentId !== undefined) user.studentId = req.body.studentId;
-    if (req.body.facultyId !== undefined) user.facultyId = req.body.facultyId;
-    if (req.body.bio !== undefined) user.bio = req.body.bio;
+    
+    // ✅ Bio - CRITICAL FIX
+    if (req.body.bio !== undefined) {
+      user.bio = req.body.bio;
+      console.log(`📝 Bio updated for ${user.email}: "${user.bio}"`);
+    }
+    
     if (req.body.profileImage !== undefined) user.profileImage = req.body.profileImage;
     
-    // Password update check
+    // ✅ Faculty ID is editable for faculty
+    if (req.body.facultyId !== undefined && user.role === 'faculty') {
+      user.facultyId = req.body.facultyId.trim();
+    }
+
+    // ============================================
+    // ❌ READ-ONLY FIELDS - IGNORE EVEN IF SENT
+    // ============================================
+    // Email and Student ID are READ-ONLY after account creation
+    if (req.body.email) {
+      console.log(`⚠️ Email update attempt ignored for ${user.email} (read-only)`);
+    }
+    if (req.body.studentId && user.role === 'student') {
+      console.log(`⚠️ Student ID update attempt ignored for ${user.email} (read-only)`);
+    }
+    
+    // Password update
     if (req.body.newPassword) {
       if (req.body.currentPassword) {
         const isMatch = await user.matchPassword(req.body.currentPassword);
@@ -148,6 +255,12 @@ const updateUserProfile = async (req, res) => {
     }
 
     const updatedUser = await user.save();
+    
+    console.log(`✅ Profile updated for ${updatedUser.email}`);
+    console.log(`📝 Bio: "${updatedUser.bio}"`);
+    console.log(`🆔 Student ID: "${updatedUser.studentId}"`);
+
+    // ✅ Return ALL updated fields
     res.json({
       _id: updatedUser._id,
       name: updatedUser.name,
@@ -156,10 +269,10 @@ const updateUserProfile = async (req, res) => {
       department: updatedUser.department,
       designation: updatedUser.designation,
       officeRoom: updatedUser.officeRoom,
-      studentId: updatedUser.studentId,
-      facultyId: updatedUser.facultyId,
-      bio: updatedUser.bio,
-      profileImage: updatedUser.profileImage,
+      studentId: updatedUser.studentId || '',
+      facultyId: updatedUser.facultyId || '',
+      bio: updatedUser.bio || '',
+      profileImage: updatedUser.profileImage || '',
       token: generateToken(updatedUser._id),
     });
   } catch (error) {

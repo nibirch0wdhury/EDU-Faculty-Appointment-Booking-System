@@ -94,7 +94,7 @@ function App() {
                     <PrivateRoute role="admin"><AdminContactMessages /></PrivateRoute>
                   } />
                   
-                  {/* ✅ User Routes - Message icon redirects here */}
+                  {/* User Routes */}
                   <Route path="/user/messages" element={
                     <PrivateRoute><UserContactMessages /></PrivateRoute>
                   } />
