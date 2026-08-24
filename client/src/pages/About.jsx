@@ -80,7 +80,7 @@ const About = () => {
 
           <p className="text-slate-500 dark:text-slate-400 text-base sm:text-lg leading-relaxed">
             The talented team of East Delta University students behind the design, architecture, 
-            and deployment of the <strong className="text-slate-900 dark:text-white">EDU Faculty Appointment Booking System</strong>.
+            and deployment of <strong className="text-slate-900 dark:text-white">EDU Meet</strong>.
           </p>
         </MotionContainer>
 

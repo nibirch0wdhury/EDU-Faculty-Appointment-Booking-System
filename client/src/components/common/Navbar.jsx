@@ -57,7 +57,7 @@ const Navbar = () => {
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-display font-bold tracking-tight text-slate-900 dark:text-white">
-                EDU<span className="text-primary-500">Book</span>
+                EDU<span className="text-primary-500">Meet</span>
               </span>
               <span className="text-[10px] font-medium tracking-[0.2em] text-slate-400 dark:text-slate-500 uppercase">
                 Appointment Portal

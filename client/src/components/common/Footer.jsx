@@ -23,7 +23,7 @@ const Footer = () => {
                 <BookOpen className="w-5 h-5" />
               </div>
               <span className="text-xl font-display font-bold text-white">
-                EDU<span className="text-primary-400">Book</span>
+                EDU<span className="text-primary-400">Meet</span>
               </span>
             </Link>
             <p className="text-slate-400 dark:text-slate-500 text-sm max-w-md leading-relaxed">
@@ -99,7 +99,7 @@ const Footer = () => {
 
         {/* Bottom Bar - Removed "Crafted with heart" */}
         <div className="mt-12 pt-8 border-t border-slate-800 dark:border-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-600">
-          <p>© {new Date().getFullYear()} EDU Faculty Appointment Booking System. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} EDU Meet. All rights reserved.</p>
           <p className="text-slate-500 dark:text-slate-600">
             East Delta University
           </p>

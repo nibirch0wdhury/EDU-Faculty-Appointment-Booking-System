@@ -215,7 +215,6 @@ const UserProfile = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {/* Profile Header */}
         <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-slate-900/95 border border-primary-500/10 dark:border-primary-500/20 shadow-card dark:shadow-card-dark p-6 md:p-8 transition-all duration-300 mb-8">
-          <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
           <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
           
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10">
@@ -294,7 +293,6 @@ const UserProfile = () => {
         {/* Tab Content - Personal Details */}
         {activeTab === 'details' && (
           <div className="relative bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 transition-all duration-300">
-            <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
             
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
               <div>
@@ -535,7 +533,6 @@ const UserProfile = () => {
         {/* Tab Content - Security */}
         {activeTab === 'security' && (
           <div className="relative bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 transition-all duration-300">
-            <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
             
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
               <div>

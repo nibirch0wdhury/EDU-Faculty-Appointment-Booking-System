@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Mail, Building, MapPin, Briefcase, Calendar, Sparkles, X, Filter, User, GraduationCap } from 'lucide-react';
+import { Search, Mail, Building, MapPin, Briefcase, Calendar, X, Filter, User, GraduationCap } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../../utils/api';
 import MagneticButton from '../ui/MagneticButton';
@@ -56,10 +56,6 @@ const StudentFacultyMembers = () => {
         {/* Header */}
         <MotionContainer className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
-              <span>Academic Staff Directory</span>
-            </div>
             <h1 className="text-3xl font-display font-bold text-slate-900 dark:text-white">Faculty Members</h1>
             <p className="text-slate-500 dark:text-slate-400 text-sm">
               Explore faculty members by department and book an appointment for academic consultation.
