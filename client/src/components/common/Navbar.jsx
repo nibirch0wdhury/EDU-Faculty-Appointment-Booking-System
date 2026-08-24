@@ -72,6 +72,11 @@ const Navbar = () => {
               { path: '/admin/manage-faculties', label: 'Faculty Members' },
               { path: '/admin/manage-users', label: 'Users' },
               { path: '/about', label: 'About' },
+            ] : user?.role === 'student' ? [
+              { path: '/', label: 'Home' },
+              { path: '/student/faculty-members', label: 'Faculty Members' },
+              { path: '/about', label: 'About' },
+              { path: '/contact', label: 'Contact' },
             ] : [
               { path: '/', label: 'Home' },
               { path: '/about', label: 'About' },
@@ -224,6 +229,15 @@ const Navbar = () => {
                     Manage Users
                   </Link>
                 </>
+              )}
+              {user?.role === 'student' && (
+                <Link 
+                  to="/student/faculty-members" 
+                  className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive('/student/faculty-members') ? 'bg-primary-500/10 text-primary-500 border border-primary-500/20 dark:bg-primary-500/20 dark:text-primary-400' : 'text-slate-600 dark:text-slate-300 hover:bg-primary-50 dark:hover:bg-primary-950/30 hover:text-primary-500 dark:hover:text-primary-400'}`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Faculty Members
+                </Link>
               )}
               <Link 
                 to="/about" 

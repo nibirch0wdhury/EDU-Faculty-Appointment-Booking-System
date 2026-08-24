@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Calendar as CalendarIcon, Clock, User, MapPin, FileText, Sparkles, Send, Loader2, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../../utils/api';
@@ -9,6 +9,8 @@ import PageTransition, { MotionContainer } from '../ui/PageTransition';
 
 const BookAppointment = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [faculties, setFaculties] = useState([]);
   const [selectedFaculty, setSelectedFaculty] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -38,6 +40,11 @@ const BookAppointment = () => {
       const response = await api.get('/faculty/all');
       const facultiesData = Array.isArray(response.data) ? response.data : response.data?.data || [];
       setFaculties(facultiesData);
+
+      const targetFacultyId = searchParams.get('facultyId') || location.state?.facultyId;
+      if (targetFacultyId) {
+        selectFacultyById(targetFacultyId, facultiesData);
+      }
     } catch (error) {
       console.error('Error fetching faculties:', error);
       toast.error('Failed to load faculty list');
@@ -90,8 +97,7 @@ const BookAppointment = () => {
     }
   };
 
-  const handleFacultySelect = async (e) => {
-    const facultyId = e.target.value;
+  const selectFacultyById = async (facultyId, facultyList = faculties) => {
     setSelectedFaculty(facultyId);
     setSelectedTime('');
     setAvailableSlots([]);
@@ -102,10 +108,14 @@ const BookAppointment = () => {
         const facultyData = response.data?.data || response.data;
         setFacultyDetails(facultyData);
       } catch (error) {
-        const faculty = faculties.find(f => f._id === facultyId);
+        const faculty = facultyList.find(f => f._id === facultyId);
         if (faculty) setFacultyDetails(faculty);
       }
     }
+  };
+
+  const handleFacultySelect = (e) => {
+    selectFacultyById(e.target.value);
   };
 
   const handleSubmit = async (e) => {

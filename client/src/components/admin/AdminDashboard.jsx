@@ -5,7 +5,6 @@ import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import SpotlightCard from '../ui/SpotlightCard';
 import PageTransition, { MotionContainer } from '../ui/PageTransition';
-import AdminNavTabs from './AdminNavTabs';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -94,7 +93,6 @@ const AdminDashboard = () => {
   return (
     <PageTransition className="py-8 md:py-12 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <AdminNavTabs />
         {/* Header Banner */}
         <MotionContainer className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-8 relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6 transition-all duration-300">
           <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Edit, Trash2, UserPlus, User, Mail, Building, MapPin, Briefcase, Calendar, Sparkles, X } from 'lucide-react';
+import { Search, Edit, Trash2, UserPlus, User, Mail, Building, MapPin, Briefcase, Calendar, Sparkles, X, Filter } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../../utils/api';
 import MagneticButton from '../ui/MagneticButton';
@@ -24,6 +24,7 @@ const ManageFaculties = () => {
   const [faculties, setFaculties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDepartment, setSelectedDepartment] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingFaculty, setEditingFaculty] = useState(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -139,9 +140,15 @@ const ManageFaculties = () => {
     const department = faculty.department || '';
     const email = faculty.userId?.email || '';
     const searchLower = searchTerm.toLowerCase();
-    return name.toLowerCase().includes(searchLower) ||
-           department.toLowerCase().includes(searchLower) ||
-           email.toLowerCase().includes(searchLower);
+
+    const matchesSearch = name.toLowerCase().includes(searchLower) ||
+                          department.toLowerCase().includes(searchLower) ||
+                          email.toLowerCase().includes(searchLower);
+
+    const matchesDepartment = !selectedDepartment ||
+                              department.toLowerCase() === selectedDepartment.toLowerCase();
+
+    return matchesSearch && matchesDepartment;
   });
 
   return (
@@ -162,18 +169,71 @@ const ManageFaculties = () => {
           </MagneticButton>
         </MotionContainer>
 
-        {/* Search */}
-        <MotionContainer delay={0.1}>
-          <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search faculties by name, department, or email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-field pl-10 text-xs"
-            />
+        {/* Search & Department Filter */}
+        <MotionContainer delay={0.1} className="space-y-3">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search faculties by name, department, or email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="input-field pl-10 text-xs"
+              />
+            </div>
+            <div className="relative sm:w-72">
+              <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4 pointer-events-none z-10" />
+              <select
+                value={selectedDepartment}
+                onChange={(e) => setSelectedDepartment(e.target.value)}
+                className="input-field pl-10 text-xs bg-white dark:bg-slate-900 cursor-pointer"
+              >
+                <option value="" className="bg-white dark:bg-slate-900">All Departments</option>
+                {DEPARTMENTS.map((dept) => (
+                  <option key={dept} value={dept} className="bg-white dark:bg-slate-900">
+                    {dept}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
+
+          {(searchTerm || selectedDepartment) && (
+            <div className="flex items-center flex-wrap gap-2 text-xs text-slate-500 dark:text-slate-400 pt-1">
+              <span>Active filters:</span>
+              {selectedDepartment && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400 font-medium border border-primary-500/20">
+                  Department: {selectedDepartment}
+                  <button
+                    onClick={() => setSelectedDepartment('')}
+                    className="hover:text-primary-800 dark:hover:text-primary-200"
+                    title="Clear department filter"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {searchTerm && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium border border-slate-200 dark:border-slate-700">
+                  Search: "{searchTerm}"
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="hover:text-slate-900 dark:hover:text-white"
+                    title="Clear search term"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              <button
+                onClick={() => { setSearchTerm(''); setSelectedDepartment(''); }}
+                className="text-primary-600 dark:text-primary-400 hover:underline font-semibold ml-1"
+              >
+                Clear all filters
+              </button>
+            </div>
+          )}
         </MotionContainer>
 
         {/* Grid */}
@@ -237,7 +297,7 @@ const ManageFaculties = () => {
           <MotionContainer delay={0.2} className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-12 text-center space-y-3 transition-all duration-300">
             <User className="w-12 h-12 text-slate-400 dark:text-slate-600 mx-auto" />
             <h3 className="text-lg font-display font-bold text-slate-900 dark:text-white">No Faculty Members Found</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Try adjusting your search criteria.</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Try adjusting your search or department filter criteria.</p>
           </MotionContainer>
         )}
 
