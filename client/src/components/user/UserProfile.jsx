@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import PageTransition, { MotionContainer } from '../ui/PageTransition';
 import { 
   User, Mail, Building, Briefcase, MapPin, GraduationCap, 
-  Lock, ShieldCheck, Save, Sparkles, KeyRound, FileText, UserCheck, Info, Loader2
+  Lock, ShieldCheck, Save, Sparkles, KeyRound, FileText, UserCheck, Info, Loader2, Image
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import MagneticButton from '../ui/MagneticButton';
@@ -124,6 +124,7 @@ const UserProfile = () => {
       name: formData.name,
       department: formData.department,
       bio: formData.bio,
+      profileImage: formData.profileImage,
     };
 
     if (isFaculty) {
@@ -493,6 +494,26 @@ const UserProfile = () => {
                     className="input-field resize-none" 
                     placeholder="Write a brief intro about yourself..." 
                   />
+                </div>
+
+                {/* Profile Image URL */}
+                <div className="space-y-2 md:col-span-2 pt-2">
+                  <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Image className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
+                    Profile Image URL
+                  </label>
+                  <input 
+                    type="url" 
+                    name="profileImage" 
+                    value={formData.profileImage} 
+                    onChange={handleChange} 
+                    className="input-field" 
+                    placeholder="Paste an image URL (e.g., https://example.com/photo.jpg)" 
+                  />
+                  <p className="mt-1 text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                    <Info className="w-3 h-3" />
+                    <span>Copy and paste an image address from the web</span>
+                  </p>
                 </div>
               </div>
 

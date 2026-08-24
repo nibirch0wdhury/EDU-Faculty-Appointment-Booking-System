@@ -215,8 +215,12 @@ const ManageUsers = () => {
                   {filteredUsers.map((userItem) => (
                     <tr key={userItem._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                       <td className="py-4 px-6 font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-primary-50 dark:bg-primary-950/30 border border-primary-500/10 dark:border-primary-500/20 text-primary-500 dark:text-primary-400 flex items-center justify-center font-bold text-xs">
-                          {userItem.name?.[0]?.toUpperCase() || 'U'}
+                        <div className="w-7 h-7 rounded-lg bg-primary-50 dark:bg-primary-950/30 border border-primary-500/10 dark:border-primary-500/20 flex items-center justify-center font-bold text-xs overflow-hidden shrink-0">
+                          {userItem.profileImage ? (
+                            <img src={userItem.profileImage} alt={userItem.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-primary-500 dark:text-primary-400">{userItem.name?.[0]?.toUpperCase() || 'U'}</span>
+                          )}
                         </div>
                         <span>{userItem.name}</span>
                       </td>

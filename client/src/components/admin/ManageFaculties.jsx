@@ -248,8 +248,12 @@ const ManageFaculties = () => {
               <SpotlightCard key={faculty._id} spotlightColor="rgba(153, 0, 0, 0.08)" className="p-6 bg-white dark:bg-slate-900/95 border-primary-500/10 dark:border-primary-500/20 shadow-card dark:shadow-card-dark transition-all duration-300">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-primary-50 dark:bg-primary-950/30 border border-primary-500/10 dark:border-primary-500/20 text-primary-500 dark:text-primary-400 flex items-center justify-center font-bold text-base">
-                      {faculty.userId?.name?.[0]?.toUpperCase() || 'F'}
+                    <div className="w-10 h-10 rounded-2xl bg-primary-50 dark:bg-primary-950/30 border border-primary-500/10 dark:border-primary-500/20 flex items-center justify-center font-bold text-base overflow-hidden shrink-0">
+                      {faculty.userId?.profileImage ? (
+                        <img src={faculty.userId.profileImage} alt={faculty.userId?.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-primary-500 dark:text-primary-400">{faculty.userId?.name?.[0]?.toUpperCase() || 'F'}</span>
+                      )}
                     </div>
                     <div>
                       <h3 className="font-bold text-base text-slate-900 dark:text-white">{faculty.userId?.name || 'Unknown'}</h3>

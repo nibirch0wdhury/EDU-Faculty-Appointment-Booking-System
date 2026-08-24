@@ -81,8 +81,8 @@ const bookAppointment = async (req, res) => {
     
     // Populate the appointment with user details
     const populatedAppointment = await Appointment.findById(appointment._id)
-      .populate('studentId', 'name email studentId')
-      .populate('facultyId', 'name email department');
+      .populate('studentId', 'name email studentId profileImage')
+      .populate('facultyId', 'name email department profileImage');
     
     res.status(201).json({
       success: true,
@@ -108,7 +108,7 @@ const getStudentAppointments = async (req, res) => {
     
     // GET APPOINTMENTS FROM DATABASE
     const appointments = await Appointment.find({ studentId: req.user._id })
-      .populate('facultyId', 'name email department designation')
+      .populate('facultyId', 'name email department designation profileImage')
       .sort({ date: -1, startTime: 1 });
     
     console.log(`✅ Found ${appointments.length} appointments in database`);
@@ -131,7 +131,7 @@ const getFacultyAppointments = async (req, res) => {
     console.log('📋 Fetching appointments for faculty:', req.user._id);
     
     const appointments = await Appointment.find({ facultyId: req.user._id })
-      .populate('studentId', 'name email studentId')
+      .populate('studentId', 'name email studentId profileImage')
       .sort({ date: -1, startTime: 1 });
     
     console.log(`✅ Found ${appointments.length} appointments`);

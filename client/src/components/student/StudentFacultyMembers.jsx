@@ -149,8 +149,12 @@ const StudentFacultyMembers = () => {
                 <SpotlightCard key={faculty._id} spotlightColor="rgba(153, 0, 0, 0.08)" className="p-6 bg-white dark:bg-slate-900/95 border-primary-500/10 dark:border-primary-500/20 shadow-card dark:shadow-card-dark transition-all duration-300 flex flex-col justify-between">
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-primary-50 dark:bg-primary-950/30 border border-primary-500/10 dark:border-primary-500/20 text-primary-500 dark:text-primary-400 flex items-center justify-center font-bold text-lg shrink-0">
-                        {facultyName[0]?.toUpperCase() || 'F'}
+                      <div className="w-12 h-12 rounded-2xl bg-primary-50 dark:bg-primary-950/30 border border-primary-500/10 dark:border-primary-500/20 flex items-center justify-center font-bold text-lg shrink-0 overflow-hidden">
+                        {faculty.profileImage ? (
+                          <img src={faculty.profileImage} alt={facultyName} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-primary-500 dark:text-primary-400">{facultyName[0]?.toUpperCase() || 'F'}</span>
+                        )}
                       </div>
                       <div className="min-w-0">
                         <h3 className="font-bold text-base text-slate-900 dark:text-white truncate">{facultyName}</h3>

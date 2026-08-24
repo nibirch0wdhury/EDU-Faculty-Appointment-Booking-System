@@ -108,7 +108,7 @@ router.put('/users/:id/role', protect, admin, async (req, res) => {
 // @access  Private (Admin)
 router.put('/users/:id', protect, admin, async (req, res) => {
   try {
-    const { name, email, password, role, department } = req.body;
+    const { name, email, password, role, department, profileImage } = req.body;
     
     const user = await User.findById(req.params.id);
     if (!user) {
@@ -119,6 +119,7 @@ router.put('/users/:id', protect, admin, async (req, res) => {
     if (email) user.email = email;
     if (role && ['student', 'faculty', 'admin'].includes(role)) user.role = role;
     if (department !== undefined) user.department = department;
+    if (profileImage !== undefined) user.profileImage = profileImage;
     
     if (password && password.length >= 6) {
       user.password = password;
@@ -218,6 +219,7 @@ router.get('/faculties', protect, admin, async (req, res) => {
         _id: faculty._id,
         name: faculty.name,
         email: faculty.email,
+        profileImage: faculty.profileImage || '',
       },
       department: faculty.department || 'Not specified',
       designation: faculty.designation || 'Faculty Member',

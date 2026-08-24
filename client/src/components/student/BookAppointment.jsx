@@ -321,12 +321,23 @@ const BookAppointment = () => {
 
                 {/* Faculty Details */}
                 {facultyDetails && (
-                  <div className="p-4 rounded-xl bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 space-y-1">
-                    <h3 className="font-bold text-sm text-primary-700 dark:text-primary-400">Faculty Details</h3>
-                    <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                  <div className="p-4 rounded-xl bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 rounded-2xl bg-primary-500 flex items-center justify-center text-white font-bold text-base shadow-md shadow-primary-500/25 overflow-hidden shrink-0">
+                        {facultyDetails.profileImage ? (
+                          <img src={facultyDetails.profileImage} alt={facultyDetails.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span>{facultyDetails.name?.[0]?.toUpperCase() || 'F'}</span>
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-sm text-primary-700 dark:text-primary-400">{facultyDetails.name || 'Faculty Member'}</h3>
+                        <p className="text-xs text-primary-600 dark:text-primary-500">{facultyDetails.designation || 'Faculty Member'}</p>
+                      </div>
+                    </div>
+                    <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1 border-t border-primary-500/10 pt-3">
                       <p><MapPin className="inline-block w-3.5 h-3.5 mr-1 text-primary-500 dark:text-primary-400" /> Office: {facultyDetails.officeRoom || 'N/A'}</p>
                       <p>Department: {facultyDetails.department || 'N/A'}</p>
-                      <p>Designation: {facultyDetails.designation || 'Faculty Member'}</p>
                     </div>
                   </div>
                 )}

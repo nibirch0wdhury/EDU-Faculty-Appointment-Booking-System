@@ -341,17 +341,26 @@ const FacultyDashboard = () => {
             <div className="space-y-4">
               {pendingAppointments.map((appointment) => (
                 <div key={appointment._id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 gap-4 hover:border-primary-500/30 dark:hover:border-primary-500/40 transition-colors">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-slate-900 dark:text-white text-base">{appointment.studentId?.name || 'Student'}</p>
-                      <span className="text-xs font-mono text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
-                        {appointment.studentId?.studentId || 'ID'}
-                      </span>
+                  <div className="flex items-center gap-3 flex-grow min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-950/30 border border-primary-500/10 dark:border-primary-500/20 flex items-center justify-center font-bold text-base shrink-0 overflow-hidden">
+                      {appointment.studentId?.profileImage ? (
+                        <img src={appointment.studentId.profileImage} alt={appointment.studentId?.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-primary-500 dark:text-primary-400">{appointment.studentId?.name?.[0]?.toUpperCase() || 'S'}</span>
+                      )}
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      📅 {formatDateDisplay(appointment.date)} at {formatTimeDisplay(appointment.startTime)} - {formatTimeDisplay(appointment.endTime)}
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 italic">Purpose: "{appointment.purpose}"</p>
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-slate-900 dark:text-white text-base">{appointment.studentId?.name || 'Student'}</p>
+                        <span className="text-xs font-mono text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                          {appointment.studentId?.studentId || 'ID'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        📅 {formatDateDisplay(appointment.date)} at {formatTimeDisplay(appointment.startTime)} - {formatTimeDisplay(appointment.endTime)}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 italic">Purpose: "{appointment.purpose}"</p>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
                     <MagneticButton
