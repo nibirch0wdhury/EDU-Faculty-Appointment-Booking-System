@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, Users, CheckCircle2, PlusCircle, List, Mail, ArrowRight, Sparkles, Check, X, Calendar as CalendarIcon, RefreshCw, GraduationCap } from 'lucide-react';
+import { Calendar, Clock, Users, CheckCircle2, PlusCircle, List, Mail, ArrowRight, Check, X, Calendar as CalendarIcon, RefreshCw, GraduationCap } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
@@ -152,10 +152,6 @@ const FacultyDashboard = () => {
           <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
           <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
           <div className="space-y-2 z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
-              <span>Faculty Workspace</span>
-            </div>
             <h1 className="text-3xl sm:text-4xl font-display font-bold text-slate-900 dark:text-white">
               Welcome Back, <span className="brand-text-gradient">Prof. {user?.name}</span>!
             </h1>

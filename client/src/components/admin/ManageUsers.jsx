@@ -121,7 +121,8 @@ const ManageUsers = () => {
   const handleUpdateUser = async (e) => {
     e.preventDefault();
     try {
-      await api.put(`/admin/users/${editingUser._id}`, formData);
+      const { password, ...userData } = formData;
+      await api.put(`/admin/users/${editingUser._id}`, userData);
       toast.success('✅ User updated successfully!');
       setEditingUser(null);
       setFormData({ name: '', email: '', password: '', role: 'student', department: '' });
@@ -351,10 +352,6 @@ const ManageUsers = () => {
                 <div>
                   <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
                   <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="input-field" required />
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Password (Leave blank to keep unchanged)</label>
-                  <input type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="input-field" placeholder="New password (optional)" />
                 </div>
                 <div>
                   <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Role</label>
