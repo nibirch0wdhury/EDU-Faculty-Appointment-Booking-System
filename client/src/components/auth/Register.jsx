@@ -83,8 +83,9 @@ const Register = () => {
         return `Email must match your Student ID: ${formData.studentId}@eastdelta.edu.bd`;
       }
     } else if (role === 'faculty' || role === 'admin') {
-      if (!/^[a-zA-Z]+\.[a-zA-Z]+@eastdelta\.edu\.bd$/.test(email)) {
-        return 'Faculty/Admin emails must be in format: firstname.lastname@eastdelta.edu.bd';
+      const emailPrefix = email.split('@')[0];
+      if (!/[a-zA-Z]/.test(emailPrefix)) {
+        return 'Faculty/Admin email cannot be numbers-only before @; it must include at least one letter';
       }
     }
     
@@ -135,7 +136,7 @@ const Register = () => {
     if (role === 'student') {
       return 'Your email will be automatically generated from your Student ID';
     } else if (role === 'faculty' || role === 'admin') {
-      return 'Format: firstname.lastname@eastdelta.edu.bd';
+      return 'Use any @eastdelta.edu.bd email with at least one letter before @';
     }
     return '';
   };
@@ -268,7 +269,7 @@ const Register = () => {
                     onChange={handleEmailChange}
                     disabled={formData.role === 'student'}
                     className={`input-field pl-11 ${errors.email ? 'input-field-error' : ''} ${formData.role === 'student' ? 'bg-slate-100 dark:bg-slate-800/50 cursor-not-allowed' : ''}`}
-                    placeholder={formData.role === 'student' ? 'Auto-generated from Student ID' : 'john.doe@eastdelta.edu.bd'}
+                    placeholder={formData.role === 'student' ? 'Auto-generated from Student ID' : 'john12@eastdelta.edu.bd'}
                   />
                 </div>
                 <p className="mt-1 text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
@@ -389,14 +390,6 @@ const Register = () => {
                 </div>
                 {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
               </div>
-            </div>
-
-            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-[11px] text-slate-500 dark:text-slate-400">
-              <p className="font-semibold text-slate-700 dark:text-slate-300">Email Format Rules:</p>
-              <ul className="mt-1 space-y-0.5 list-disc list-inside">
-                <li><strong>Students:</strong> Your email is automatically generated from your Student ID: <code className="bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded text-[10px]">student-id@eastdelta.edu.bd</code></li>
-                <li><strong>Faculty/Admin:</strong> <code className="bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded text-[10px]">firstname.lastname@eastdelta.edu.bd</code></li>
-              </ul>
             </div>
 
             <MagneticButton

@@ -18,9 +18,12 @@ const isValidStudentEmail = (email) => {
   return /^\d+@eastdelta\.edu\.bd$/.test(email);
 };
 
-// Check if email is a valid faculty/admin email (alphabet.number format)
+// Check if faculty/admin email has at least one letter before @ and institutional domain
 const isValidFacultyAdminEmail = (email) => {
-  return /^[a-zA-Z]+\.[a-zA-Z]+@eastdelta\.edu\.bd$/.test(email);
+  const parts = email.split('@');
+  if (parts.length !== 2) return false;
+  const localPart = parts[0];
+  return /@eastdelta\.edu\.bd$/.test(email) && /[a-zA-Z]/.test(localPart);
 };
 
 // @desc    Register a new user
@@ -62,7 +65,7 @@ const registerUser = async (req, res) => {
     } else if (role === 'faculty' || role === 'admin') {
       if (!isValidFacultyAdminEmail(email)) {
         return res.status(400).json({ 
-          message: 'Faculty/Admin emails must be in format: firstname.lastname@eastdelta.edu.bd' 
+          message: 'Faculty/Admin email must end with @eastdelta.edu.bd and include at least one letter before @ (numbers-only is not allowed)'
         });
       }
     }
