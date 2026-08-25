@@ -153,7 +153,7 @@ const FacultyDashboard = () => {
           <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
           <div className="space-y-2 z-10">
             <h1 className="text-3xl sm:text-4xl font-display font-bold text-slate-900 dark:text-white">
-              Welcome Back, <span className="brand-text-gradient">Prof. {user?.name}</span>!
+              Welcome Back, <span className="brand-text-gradient">{user?.name}</span>!
             </h1>
             <p className="text-slate-500 dark:text-slate-400 text-sm">
               {user?.department ? `${user.department} Department` : 'East Delta University Faculty'} • ID: {user?.facultyId || 'FAC-Member'}
