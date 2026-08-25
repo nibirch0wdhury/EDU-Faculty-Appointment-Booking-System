@@ -67,23 +67,34 @@ export const AuthProvider = ({ children }) => {
 
       const { token, ...userData } = response.data;
       localStorage.setItem('token', token);
-      
+
+      // Hydrate from profile endpoint so fields like profileImage are always up-to-date on first login render.
+      let hydratedUserData = userData;
+      try {
+        const profileResponse = await api.get('/auth/profile');
+        if (profileResponse.data && typeof profileResponse.data === 'object' && profileResponse.data._id) {
+          hydratedUserData = profileResponse.data;
+        }
+      } catch (profileError) {
+        console.warn('⚠️ Could not hydrate profile after login, using login payload:', profileError?.message || profileError);
+      }
+
       setUser({
-        _id: userData._id,
-        name: userData.name || '',
-        email: userData.email || '',
-        role: userData.role || 'student',
-        department: userData.department || '',
-        studentId: userData.studentId || '',
-        facultyId: userData.facultyId || '',
-        designation: userData.designation || '',
-        officeRoom: userData.officeRoom || '',
-        bio: userData.bio || '',
-        profileImage: userData.profileImage || '',
+        _id: hydratedUserData._id,
+        name: hydratedUserData.name || '',
+        email: hydratedUserData.email || '',
+        role: hydratedUserData.role || 'student',
+        department: hydratedUserData.department || '',
+        studentId: hydratedUserData.studentId || '',
+        facultyId: hydratedUserData.facultyId || '',
+        designation: hydratedUserData.designation || '',
+        officeRoom: hydratedUserData.officeRoom || '',
+        bio: hydratedUserData.bio || '',
+        profileImage: hydratedUserData.profileImage || '',
       });
       
       toast.success('Login successful!');
-      return { success: true, user: userData };
+      return { success: true, user: hydratedUserData };
     } catch (error) {
       console.error('Login error:', error);
       if (error.code === 'ERR_CONNECTION_REFUSED') {
