@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, Trash2, X, Loader2 } from 'lucide-react';
 import MagneticButton from './MagneticButton';
+import ModalPortal from './ModalPortal';
 
 const ConfirmModal = ({
   isOpen,
@@ -17,18 +18,19 @@ const ConfirmModal = ({
   if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-          {/* Backdrop with Glassmorphism Blur */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={loading ? undefined : onClose}
-            className="fixed inset-0 bg-slate-950/40 dark:bg-slate-950/70 backdrop-blur-md"
-          />
+    <ModalPortal isOpen={isOpen}>
+      <AnimatePresence>
+        {isOpen && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto">
+            {/* Backdrop with Glassmorphism Blur */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={loading ? undefined : onClose}
+              className="fixed inset-0 bg-slate-950/80 dark:bg-slate-950/90 backdrop-blur-2xl"
+            />
 
           {/* Modal Container */}
           <motion.div
@@ -116,9 +118,10 @@ const ConfirmModal = ({
               </MagneticButton>
             </div>
           </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
+          </div>
+        )}
+      </AnimatePresence>
+    </ModalPortal>
   );
 };
 

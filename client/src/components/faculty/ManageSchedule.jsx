@@ -176,6 +176,24 @@ const isPastTimeForToday = (dateString, startTime) => {
 };
 
 // ============================================
+// ✅ NEW: Sort function - closest first
+// ============================================
+const sortSlotsByClosest = (slots) => {
+    return [...slots].sort((a, b) => {
+        // First compare by date
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        
+        if (dateA.getTime() !== dateB.getTime()) {
+            return dateA.getTime() - dateB.getTime(); // Closest date first
+        }
+        
+        // If same date, compare by start time
+        return a.startTime.localeCompare(b.startTime);
+    });
+};
+
+// ============================================
 // DAY NAMES HELPER
 // ============================================
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -663,10 +681,14 @@ const ManageSchedule = () => {
     };
 
     // ============================================
-    // GROUPED SCHEDULE
+    // ✅ GROUPED AND SORTED SCHEDULE - CLOSEST FIRST
     // ============================================
 
-    const groupedSchedule = schedule.reduce((acc, slot) => {
+    // First, sort all slots by date and time (closest first)
+    const sortedSlots = sortSlotsByClosest(schedule);
+    
+    // Then group by date
+    const groupedSchedule = sortedSlots.reduce((acc, slot) => {
         if (!slot || !slot.date) return acc;
         const dateKey = formatDateToLocalString(new Date(slot.date));
         if (!acc[dateKey]) acc[dateKey] = [];
@@ -674,7 +696,8 @@ const ManageSchedule = () => {
         return acc;
     }, {});
 
-    const sortedDates = Object.keys(groupedSchedule).sort((a, b) => b.localeCompare(a));
+    // ✅ FIXED: Sort dates in ascending order (closest first)
+    const sortedDates = Object.keys(groupedSchedule).sort((a, b) => a.localeCompare(b));
 
     const isSelectedDatePast = newSlot.date && isPastDateString(newSlot.date);
     const isSelectedTimePast = newSlot.date && newSlot.startTime && isPastTimeForToday(newSlot.date, newSlot.startTime);
@@ -1168,7 +1191,7 @@ const ManageSchedule = () => {
                         </div>
                     </MotionContainer>
 
-                    {/* Right Column - Current Schedule */}
+                    {/* Right Column - Current Schedule - SORTED CLOSEST FIRST */}
                     <MotionContainer delay={0.2}>
                         <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 space-y-6 transition-all duration-300 relative">
 
@@ -1177,6 +1200,9 @@ const ManageSchedule = () => {
                                 <span>Configured Schedule Slots</span>
                                 <span className="ml-auto text-xs text-slate-500 dark:text-slate-400 font-normal">
                                     {schedule.length} slot{schedule.length !== 1 ? 's' : ''}
+                                    <span className="block text-[10px] text-emerald-600 dark:text-emerald-400">
+                                        📅 Sorted: Closest first
+                                    </span>
                                 </span>
                             </h2>
 

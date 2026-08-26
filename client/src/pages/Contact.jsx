@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import api from '../utils/api';
-import { Mail, Phone, MapPin, Send, MessageSquare, Sparkles, Loader2, GraduationCap } from 'lucide-react';
+import { Mail, MapPin, Send, MessageSquare, Sparkles, Loader2, GraduationCap } from 'lucide-react';
 import SpotlightCard from '../components/ui/SpotlightCard';
 import MagneticButton from '../components/ui/MagneticButton';
 import PageTransition, { MotionContainer } from '../components/ui/PageTransition';
@@ -15,8 +15,7 @@ const Contact = () => {
   const [loading, setLoading] = useState(false);
 
   const contactInfo = {
-    email: '242020612@eastdelta.edu.bd',
-    phone: '+880XXXXXXXXXXX',
+    email: 'edumeet@eastdelta.edu.bd',
     address: 'East Delta University, Chittagong, Bangladesh'
   };
 
@@ -86,19 +85,7 @@ const Contact = () => {
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">Email</h3>
-                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 truncate">{contactInfo.email}</p>
-                </div>
-              </div>
-            </SpotlightCard>
-
-            <SpotlightCard spotlightColor="rgba(16, 185, 129, 0.08)" className="p-6 bg-white dark:bg-slate-900/95 border-primary-500/10 dark:border-primary-500/20 hover:border-emerald-500/30 dark:hover:border-emerald-500/40 shadow-card dark:shadow-card-dark transition-all duration-300">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-500/10 dark:border-emerald-500/20 text-emerald-500 dark:text-emerald-400">
-                  <Phone className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">Phone</h3>
-                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{contactInfo.phone}</p>
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 break-all">{contactInfo.email}</p>
                 </div>
               </div>
             </SpotlightCard>
@@ -110,7 +97,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">Location</h3>
-                  <p className="text-xs font-medium text-slate-600 dark:text-slate-400 leading-snug">East Delta University, Chittagong</p>
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-400 leading-snug">{contactInfo.address}</p>
                 </div>
               </div>
             </SpotlightCard>

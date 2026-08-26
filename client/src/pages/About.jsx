@@ -34,7 +34,7 @@ const teamMembers = [
     name: 'Yeaser Bin Osman Esmam',
     email: '242019112@eastdelta.edu.bd',
     role: 'Frontend UI/UX Architect',
-    responsibilities: ['Frontend Development'],
+    responsibilities: ['Frontend Development', 'Animation & Micro-interactions'],
     icon: Code2,
     gradient: 'from-indigo-500 via-purple-600 to-pink-600',
     borderGradient: 'hover:border-indigo-500/50',
@@ -80,7 +80,7 @@ const About = () => {
 
           <p className="text-slate-500 dark:text-slate-400 text-base sm:text-lg leading-relaxed">
             The talented team of East Delta University students behind the design, architecture, 
-            and deployment of the <strong className="text-slate-900 dark:text-white">EDU Faculty Appointment Booking System</strong>.
+            and deployment of <strong className="text-slate-900 dark:text-white">EDU Meet</strong>.
           </p>
         </MotionContainer>
 

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { Save, Settings, Calendar, Clock, Bell, Shield, Sparkles } from 'lucide-react';
+import { Save, Settings, Calendar, Clock, Bell, Shield, Sparkles, RefreshCw, AlertCircle } from 'lucide-react';
 import api from '../../utils/api';
 import MagneticButton from '../ui/MagneticButton';
 import PageTransition, { MotionContainer } from '../ui/PageTransition';
+import AdminNavTabs from './AdminNavTabs';
 
 const SystemSettings = () => {
   const [settings, setSettings] = useState({
@@ -23,8 +24,10 @@ const SystemSettings = () => {
     smsNotifications: false,
     maintenanceMode: false,
   });
-  const [loading, setLoading] = useState(false);
+  
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchSettings();
@@ -33,12 +36,30 @@ const SystemSettings = () => {
   const fetchSettings = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
+      console.log('📡 Fetching settings...');
       const response = await api.get('/admin/settings');
-      if (response.data) {
+      
+      console.log('✅ Settings response:', response.data);
+      
+      if (response.data?.success && response.data?.data) {
+        setSettings(response.data.data);
+      } else if (response.data) {
         setSettings(response.data);
       }
     } catch (error) {
-      console.error('Error fetching settings:', error);
+      console.error('❌ Error fetching settings:', error);
+      
+      if (error.response?.status === 404) {
+        toast.info('Using default settings. You can save to create settings.');
+      } else if (error.code === 'ERR_CONNECTION_REFUSED') {
+        setError('Cannot connect to server. Please make sure the backend is running.');
+        toast.error('Cannot connect to server.');
+      } else {
+        setError(error.response?.data?.message || 'Failed to load settings');
+        toast.error('Failed to load settings. Using default values.');
+      }
     } finally {
       setLoading(false);
     }
@@ -47,12 +68,30 @@ const SystemSettings = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
+    setError(null);
+    
     try {
-      await api.put('/admin/settings', settings);
-      toast.success('Settings saved successfully!');
+      console.log('📤 Saving settings:', settings);
+      
+      const response = await api.put('/admin/settings', settings);
+      
+      console.log('✅ Settings saved:', response.data);
+      
+      if (response.data?.success && response.data?.data) {
+        setSettings(response.data.data);
+        toast.success('Settings saved successfully!');
+      } else {
+        toast.success('Settings saved successfully!');
+      }
     } catch (error) {
-      console.error('Error saving settings:', error);
-      toast.success('Settings saved successfully!');
+      console.error('❌ Error saving settings:', error);
+      
+      if (error.code === 'ERR_CONNECTION_REFUSED') {
+        toast.error('Cannot connect to server. Please make sure the backend is running.');
+      } else {
+        const errorMsg = error.response?.data?.message || 'Failed to save settings';
+        toast.error(errorMsg);
+      }
     } finally {
       setSaving(false);
     }
@@ -90,6 +129,8 @@ const SystemSettings = () => {
   return (
     <PageTransition className="py-8 md:py-12 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <AdminNavTabs />
+        
         <MotionContainer className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-semibold">
@@ -97,17 +138,43 @@ const SystemSettings = () => {
               <span>Platform Configuration</span>
             </div>
             <h1 className="text-3xl font-display font-bold text-slate-900 dark:text-white">System Settings</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Configure and manage system-wide preferences
+            </p>
           </div>
-          <MagneticButton variant="primary" onClick={handleSave} disabled={saving} className="py-2.5 px-6 text-xs shadow-md shadow-primary-500/25 dark:shadow-primary-500/50">
-            <Save className="w-4 h-4" />
-            <span>{saving ? 'Saving...' : 'Save Settings'}</span>
-          </MagneticButton>
+          <div className="flex items-center gap-3">
+            <MagneticButton 
+              variant="secondary" 
+              onClick={fetchSettings} 
+              className="py-2.5 px-4 text-xs"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>Refresh</span>
+            </MagneticButton>
+            <MagneticButton 
+              variant="primary" 
+              onClick={handleSave} 
+              disabled={saving} 
+              className="py-2.5 px-6 text-xs shadow-md shadow-primary-500/25 dark:shadow-primary-500/50"
+            >
+              <Save className="w-4 h-4" />
+              <span>{saving ? 'Saving...' : 'Save Settings'}</span>
+            </MagneticButton>
+          </div>
         </MotionContainer>
+
+        {error && (
+          <MotionContainer>
+            <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/50 rounded-2xl text-red-600 dark:text-red-400 text-sm flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 shrink-0 text-red-500 dark:text-red-400" />
+              <span>{error}</span>
+            </div>
+          </MotionContainer>
+        )}
 
         <form onSubmit={handleSave} className="space-y-6">
           {/* General Settings */}
           <MotionContainer delay={0.1} className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 space-y-4 transition-all duration-300">
-            <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
             <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-3">
               <Settings className="w-5 h-5 text-primary-500 dark:text-primary-400" />
               <h2 className="text-lg font-display font-bold text-slate-900 dark:text-white">General Settings</h2>
@@ -115,18 +182,31 @@ const SystemSettings = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 text-xs">
               <div>
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Site Name</label>
-                <input type="text" name="siteName" value={settings.siteName} onChange={handleChange} className="input-field" />
+                <input 
+                  type="text" 
+                  name="siteName" 
+                  value={settings.siteName} 
+                  onChange={handleChange} 
+                  className="input-field" 
+                  placeholder="EDU Appointment System"
+                />
               </div>
               <div>
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Site Description</label>
-                <input type="text" name="siteDescription" value={settings.siteDescription} onChange={handleChange} className="input-field" />
+                <input 
+                  type="text" 
+                  name="siteDescription" 
+                  value={settings.siteDescription} 
+                  onChange={handleChange} 
+                  className="input-field" 
+                  placeholder="Description of your system"
+                />
               </div>
             </div>
           </MotionContainer>
 
           {/* Appointment Settings */}
           <MotionContainer delay={0.2} className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 space-y-4 transition-all duration-300">
-            <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
             <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-3">
               <Calendar className="w-5 h-5 text-primary-500 dark:text-primary-400" />
               <h2 className="text-lg font-display font-bold text-slate-900 dark:text-white">Appointment Rules</h2>
@@ -134,11 +214,24 @@ const SystemSettings = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 text-xs">
               <div>
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Max Appointments Per Day</label>
-                <input type="number" name="maxAppointmentsPerDay" value={settings.maxAppointmentsPerDay} onChange={handleChange} className="input-field" min="1" max="50" />
+                <input 
+                  type="number" 
+                  name="maxAppointmentsPerDay" 
+                  value={settings.maxAppointmentsPerDay} 
+                  onChange={handleChange} 
+                  className="input-field" 
+                  min="1" 
+                  max="50" 
+                />
               </div>
               <div>
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Slot Duration (Minutes)</label>
-                <select name="appointmentDuration" value={settings.appointmentDuration} onChange={handleChange} className="input-field bg-white dark:bg-slate-900">
+                <select 
+                  name="appointmentDuration" 
+                  value={settings.appointmentDuration} 
+                  onChange={handleChange} 
+                  className="input-field bg-white dark:bg-slate-900"
+                >
                   <option value="15" className="bg-white dark:bg-slate-900">15 Minutes</option>
                   <option value="30" className="bg-white dark:bg-slate-900">30 Minutes</option>
                   <option value="45" className="bg-white dark:bg-slate-900">45 Minutes</option>
@@ -150,27 +243,50 @@ const SystemSettings = () => {
 
           {/* Hours */}
           <MotionContainer delay={0.3} className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 sm:p-8 space-y-4 transition-all duration-300">
-            <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
             <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-3">
               <Clock className="w-5 h-5 text-primary-500 dark:text-primary-400" />
-              <h2 className="text-lg font-display font-bold text-slate-900 dark:text-white">University Working Hours</h2>
+              <h2 className="text-lg font-display font-bold text-slate-900 dark:text-white">Working Hours</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-2 text-xs">
               <div>
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Working Start</label>
-                <input type="time" name="workingHours.start" value={settings.workingHours.start} onChange={handleNestedChange} className="input-field" />
+                <input 
+                  type="time" 
+                  name="workingHours.start" 
+                  value={settings.workingHours.start} 
+                  onChange={handleNestedChange} 
+                  className="input-field" 
+                />
               </div>
               <div>
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Working End</label>
-                <input type="time" name="workingHours.end" value={settings.workingHours.end} onChange={handleNestedChange} className="input-field" />
+                <input 
+                  type="time" 
+                  name="workingHours.end" 
+                  value={settings.workingHours.end} 
+                  onChange={handleNestedChange} 
+                  className="input-field" 
+                />
               </div>
               <div>
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Break Start</label>
-                <input type="time" name="breakHours.start" value={settings.breakHours.start} onChange={handleNestedChange} className="input-field" />
+                <input 
+                  type="time" 
+                  name="breakHours.start" 
+                  value={settings.breakHours.start} 
+                  onChange={handleNestedChange} 
+                  className="input-field" 
+                />
               </div>
               <div>
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Break End</label>
-                <input type="time" name="breakHours.end" value={settings.breakHours.end} onChange={handleNestedChange} className="input-field" />
+                <input 
+                  type="time" 
+                  name="breakHours.end" 
+                  value={settings.breakHours.end} 
+                  onChange={handleNestedChange} 
+                  className="input-field" 
+                />
               </div>
             </div>
           </MotionContainer>
@@ -178,32 +294,48 @@ const SystemSettings = () => {
           {/* Notifications & Status */}
           <MotionContainer delay={0.4} className="grid md:grid-cols-2 gap-6">
             <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 space-y-4 transition-all duration-300">
-              <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
               <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-3">
                 <Bell className="w-5 h-5 text-primary-500 dark:text-primary-400" />
                 <h2 className="text-lg font-display font-bold text-slate-900 dark:text-white">Notifications</h2>
               </div>
               <div className="space-y-3 pt-1 text-xs">
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" name="emailNotifications" checked={settings.emailNotifications} onChange={handleChange} className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-primary-500 focus:ring-primary-500 dark:bg-slate-800" />
+                  <input 
+                    type="checkbox" 
+                    name="emailNotifications" 
+                    checked={settings.emailNotifications} 
+                    onChange={handleChange} 
+                    className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-primary-500 focus:ring-primary-500 dark:bg-slate-800" 
+                  />
                   <span className="text-slate-700 dark:text-slate-300 font-medium">Enable Email Notifications</span>
                 </label>
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" name="smsNotifications" checked={settings.smsNotifications} onChange={handleChange} className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-primary-500 focus:ring-primary-500 dark:bg-slate-800" />
+                  <input 
+                    type="checkbox" 
+                    name="smsNotifications" 
+                    checked={settings.smsNotifications} 
+                    onChange={handleChange} 
+                    className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-primary-500 focus:ring-primary-500 dark:bg-slate-800" 
+                  />
                   <span className="text-slate-700 dark:text-slate-300 font-medium">Enable SMS Notifications</span>
                 </label>
               </div>
             </div>
 
             <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-6 space-y-4 transition-all duration-300">
-              <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
               <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-3">
                 <Shield className="w-5 h-5 text-primary-500 dark:text-primary-400" />
                 <h2 className="text-lg font-display font-bold text-slate-900 dark:text-white">System Status</h2>
               </div>
               <div className="space-y-3 pt-1 text-xs">
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" name="maintenanceMode" checked={settings.maintenanceMode} onChange={handleChange} className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-red-500 focus:ring-red-500 dark:bg-slate-800" />
+                  <input 
+                    type="checkbox" 
+                    name="maintenanceMode" 
+                    checked={settings.maintenanceMode} 
+                    onChange={handleChange} 
+                    className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-red-500 focus:ring-red-500 dark:bg-slate-800" 
+                  />
                   <span className="text-slate-700 dark:text-slate-300 font-medium">Enable Maintenance Mode</span>
                 </label>
                 {settings.maintenanceMode && (
@@ -215,8 +347,13 @@ const SystemSettings = () => {
             </div>
           </MotionContainer>
 
-          <div className="flex justify-end pt-4">
-            <MagneticButton type="submit" disabled={saving} variant="primary" className="py-3 px-8 text-xs shadow-md shadow-primary-500/25 dark:shadow-primary-500/50">
+          <div className="flex justify-end pt-4 border-t border-slate-200 dark:border-slate-700">
+            <MagneticButton 
+              type="submit" 
+              disabled={saving} 
+              variant="primary" 
+              className="py-3 px-8 text-xs shadow-md shadow-primary-500/25 dark:shadow-primary-500/50"
+            >
               <Save className="w-4 h-4" />
               <span>{saving ? 'Saving Preferences...' : 'Save All Settings'}</span>
             </MagneticButton>
@@ -227,4 +364,4 @@ const SystemSettings = () => {
   );
 };
 
-export default SystemSettings;
+export default SystemSettings;  

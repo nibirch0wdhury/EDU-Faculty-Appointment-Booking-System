@@ -4,7 +4,7 @@ import { BookOpen, Mail, MapPin, Phone, ArrowUpRight } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="relative mt-auto bg-slate-900 dark:bg-slate-950 text-slate-300 dark:text-slate-400 overflow-hidden z-10">
+    <footer className="relative mt-auto bg-slate-900 dark:bg-slate-950 text-slate-300 dark:text-slate-400 overflow-hidden z-0">
       {/* Top red accent line */}
       <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-primary-500 to-transparent dark:shadow-[0_0_30px_rgba(153,0,0,0.3)]" />
       
@@ -23,7 +23,7 @@ const Footer = () => {
                 <BookOpen className="w-5 h-5" />
               </div>
               <span className="text-xl font-display font-bold text-white">
-                EDU<span className="text-primary-400">Book</span>
+                EDU<span className="text-primary-400">Meet</span>
               </span>
             </Link>
             <p className="text-slate-400 dark:text-slate-500 text-sm max-w-md leading-relaxed">
@@ -86,12 +86,8 @@ const Footer = () => {
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-primary-400 shrink-0" />
                 <a href="mailto:edubook@eastdelta.edu.bd" className="hover:text-primary-300 transition-colors">
-                  edubook@eastdelta.edu.bd  
+                  edumeet@eastdelta.edu.bd  
                 </a>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-primary-400 shrink-0" />
-                <span>+8801XXXXXXXXX</span>
               </li>
             </ul>
           </div>
@@ -99,7 +95,7 @@ const Footer = () => {
 
         {/* Bottom Bar - Removed "Crafted with heart" */}
         <div className="mt-12 pt-8 border-t border-slate-800 dark:border-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-600">
-          <p>© {new Date().getFullYear()} EDU Faculty Appointment Booking System. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} EDU Meet. All rights reserved.</p>
           <p className="text-slate-500 dark:text-slate-600">
             East Delta University
           </p>

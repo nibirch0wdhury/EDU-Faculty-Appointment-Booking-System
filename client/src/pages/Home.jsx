@@ -5,8 +5,11 @@ import { motion } from 'framer-motion';
 import SpotlightCard from '../components/ui/SpotlightCard';
 import MagneticButton from '../components/ui/MagneticButton';
 import PageTransition, { MotionContainer } from '../components/ui/PageTransition';
+import { useAuth } from '../context/AuthContext';
 
 const Home = () => {
+  const { isAuthenticated } = useAuth();
+
   const features = [
     {
       icon: <Calendar className="w-8 h-8 text-primary-500" />,
@@ -113,9 +116,9 @@ const Home = () => {
 
             {/* CTAs - Enhanced for dark mode */}
             <MotionContainer delay={0.4} className="flex flex-wrap justify-center items-center gap-4 pt-4">
-              <Link to="/register">
+              <Link to={isAuthenticated ? '/student/book-appointment' : '/register'}>
                 <MagneticButton variant="primary" className="px-8 py-3.5 text-base shadow-lg shadow-primary-500/30 dark:shadow-primary-500/50 hover:shadow-primary-500/50 dark:hover:shadow-primary-500/70">
-                  <span>Get Started Now</span>
+                  <span>{isAuthenticated ? 'Book Appointment' : 'Get Started Now'}</span>
                   <ArrowRight className="w-5 h-5" />
                 </MagneticButton>
               </Link>
@@ -152,7 +155,7 @@ const Home = () => {
               Why Choose Us
             </span>
             <h2 className="text-3xl sm:text-4xl font-display font-bold text-slate-900 dark:text-white">
-              Why Choose EDU Appointment System?
+              Why Choose EDU Meet?
             </h2>
             <p className="text-slate-500 dark:text-slate-400">
               Designed with precision to enhance campus communication between students and faculty.
@@ -285,7 +288,7 @@ const Home = () => {
               transition={{ duration: 0.5, delay: 0.35 }}
               className="relative z-10 text-base sm:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed"
             >
-              Join thousands of students and faculty members using EDUBook to streamline their academic appointments.
+              Join thousands of students and faculty members using EDU Meet to streamline their academic appointments.
             </motion.p>
 
             <motion.div
@@ -295,12 +298,12 @@ const Home = () => {
               transition={{ duration: 0.5, delay: 0.45 }}
               className="relative z-10 pt-2"
             >
-              <Link to="/register">
+              <Link to={isAuthenticated ? '/student/book-appointment' : '/register'}>
                 <MagneticButton
                   variant="primary"
                   className="px-8 py-3.5 text-base shadow-lg shadow-primary-500/25 dark:shadow-primary-500/40 hover:shadow-primary-500/40 dark:hover:shadow-primary-500/60"
                 >
-                  <span>Get Started Now</span>
+                  <span>{isAuthenticated ? 'Book Appointment' : 'Get Started Now'}</span>
                   <ArrowRight className="w-5 h-5" />
                 </MagneticButton>
               </Link>

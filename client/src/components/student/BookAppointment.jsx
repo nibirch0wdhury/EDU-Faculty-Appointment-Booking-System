@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Calendar as CalendarIcon, Clock, User, MapPin, FileText, Sparkles, Send, Loader2, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../../utils/api';
@@ -9,6 +9,8 @@ import PageTransition, { MotionContainer } from '../ui/PageTransition';
 
 const BookAppointment = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [faculties, setFaculties] = useState([]);
   const [selectedFaculty, setSelectedFaculty] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -38,6 +40,11 @@ const BookAppointment = () => {
       const response = await api.get('/faculty/all');
       const facultiesData = Array.isArray(response.data) ? response.data : response.data?.data || [];
       setFaculties(facultiesData);
+
+      const targetFacultyId = searchParams.get('facultyId') || location.state?.facultyId;
+      if (targetFacultyId) {
+        selectFacultyById(targetFacultyId, facultiesData);
+      }
     } catch (error) {
       console.error('Error fetching faculties:', error);
       toast.error('Failed to load faculty list');
@@ -90,8 +97,7 @@ const BookAppointment = () => {
     }
   };
 
-  const handleFacultySelect = async (e) => {
-    const facultyId = e.target.value;
+  const selectFacultyById = async (facultyId, facultyList = faculties) => {
     setSelectedFaculty(facultyId);
     setSelectedTime('');
     setAvailableSlots([]);
@@ -102,10 +108,14 @@ const BookAppointment = () => {
         const facultyData = response.data?.data || response.data;
         setFacultyDetails(facultyData);
       } catch (error) {
-        const faculty = faculties.find(f => f._id === facultyId);
+        const faculty = facultyList.find(f => f._id === facultyId);
         if (faculty) setFacultyDetails(faculty);
       }
     }
+  };
+
+  const handleFacultySelect = (e) => {
+    selectFacultyById(e.target.value);
   };
 
   const handleSubmit = async (e) => {
@@ -311,12 +321,23 @@ const BookAppointment = () => {
 
                 {/* Faculty Details */}
                 {facultyDetails && (
-                  <div className="p-4 rounded-xl bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 space-y-1">
-                    <h3 className="font-bold text-sm text-primary-700 dark:text-primary-400">Faculty Details</h3>
-                    <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                  <div className="p-4 rounded-xl bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 rounded-2xl bg-primary-500 flex items-center justify-center text-white font-bold text-base shadow-md shadow-primary-500/25 overflow-hidden shrink-0">
+                        {facultyDetails.profileImage ? (
+                          <img src={facultyDetails.profileImage} alt={facultyDetails.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span>{facultyDetails.name?.[0]?.toUpperCase() || 'F'}</span>
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-sm text-primary-700 dark:text-primary-400">{facultyDetails.name || 'Faculty Member'}</h3>
+                        <p className="text-xs text-primary-600 dark:text-primary-500">{facultyDetails.designation || 'Faculty Member'}</p>
+                      </div>
+                    </div>
+                    <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1 border-t border-primary-500/10 pt-3">
                       <p><MapPin className="inline-block w-3.5 h-3.5 mr-1 text-primary-500 dark:text-primary-400" /> Office: {facultyDetails.officeRoom || 'N/A'}</p>
                       <p>Department: {facultyDetails.department || 'N/A'}</p>
-                      <p>Designation: {facultyDetails.designation || 'Faculty Member'}</p>
                     </div>
                   </div>
                 )}

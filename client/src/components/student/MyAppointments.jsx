@@ -150,8 +150,12 @@ const MyAppointments = () => {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                   <div className="space-y-3 flex-grow">
                     <div className="flex items-center gap-3">
-                      <div className="p-3 bg-primary-50 dark:bg-primary-950/30 border border-primary-500/10 dark:border-primary-500/20 rounded-2xl text-primary-500 dark:text-primary-400">
-                        <User className="w-5 h-5" />
+                      <div className="w-12 h-12 rounded-2xl bg-primary-50 dark:bg-primary-950/30 border border-primary-500/10 dark:border-primary-500/20 flex items-center justify-center font-bold text-lg shrink-0 overflow-hidden">
+                        {appointment.facultyId?.profileImage ? (
+                          <img src={appointment.facultyId.profileImage} alt={appointment.facultyId?.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-primary-500 dark:text-primary-400">{appointment.facultyId?.name?.[0]?.toUpperCase() || 'F'}</span>
+                        )}
                       </div>
                       <div>
                         <h3 className="font-bold text-lg text-slate-900 dark:text-white">

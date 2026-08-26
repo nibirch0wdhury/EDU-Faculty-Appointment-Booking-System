@@ -17,6 +17,7 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import PrivateRoute from './components/common/PrivateRoute';
 import ManageUsers from './components/admin/ManageUsers';
 import ManageFaculties from './components/admin/ManageFaculties';
+import StudentFacultyMembers from './components/student/StudentFacultyMembers';
 import SystemSettings from './components/admin/SystemSettings';
 import BookAppointment from './components/student/BookAppointment';
 import MyAppointments from './components/student/MyAppointments';
@@ -59,6 +60,9 @@ function App() {
                   <Route path="/student/dashboard" element={
                     <PrivateRoute role="student"><StudentDashboard /></PrivateRoute>
                   } />
+                  <Route path="/student/faculty-members" element={
+                    <PrivateRoute role="student"><StudentFacultyMembers /></PrivateRoute>
+                  } />
                   <Route path="/student/book-appointment" element={
                     <PrivateRoute role="student"><BookAppointment /></PrivateRoute>
                   } />
@@ -94,7 +98,7 @@ function App() {
                     <PrivateRoute role="admin"><AdminContactMessages /></PrivateRoute>
                   } />
                   
-                  {/* ✅ User Routes - Message icon redirects here */}
+                  {/* User Routes */}
                   <Route path="/user/messages" element={
                     <PrivateRoute><UserContactMessages /></PrivateRoute>
                   } />

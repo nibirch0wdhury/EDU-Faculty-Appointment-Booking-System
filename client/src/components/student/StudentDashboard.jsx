@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, FileText, PlusCircle, List, Mail, ArrowRight, Sparkles, UserCheck, AlertCircle, GraduationCap } from 'lucide-react';
+import { Calendar, Clock, FileText, PlusCircle, List, Mail, ArrowRight, UserCheck, AlertCircle, GraduationCap } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import SpotlightCard from '../ui/SpotlightCard';
@@ -54,6 +54,13 @@ const StudentDashboard = () => {
       spotlight: 'rgba(153, 0, 0, 0.08)',
     },
     {
+      icon: <GraduationCap className="w-6 h-6 text-primary-500" />,
+      title: 'Faculty Members',
+      description: 'Explore academics by department and book slots',
+      link: '/student/faculty-members',
+      spotlight: 'rgba(153, 0, 0, 0.08)',
+    },
+    {
       icon: <List className="w-6 h-6 text-primary-500" />,
       title: 'My Appointments',
       description: 'View, track, or manage your bookings',
@@ -87,10 +94,6 @@ const StudentDashboard = () => {
           <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
           <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
           <div className="space-y-2 z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
-              <span>Student Dashboard</span>
-            </div>
             <h1 className="text-3xl sm:text-4xl font-display font-bold text-slate-900 dark:text-white">
               Welcome Back, <span className="brand-text-gradient">{user?.name || 'Student'}</span>!
             </h1>
@@ -157,7 +160,7 @@ const StudentDashboard = () => {
         </MotionContainer>
 
         {/* Quick Actions */}
-        <MotionContainer delay={0.2} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <MotionContainer delay={0.2} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {quickActions.map((action, idx) => (
             <Link key={idx} to={action.link} className="block group">
               <SpotlightCard spotlightColor={action.spotlight} className="p-6 h-full bg-white dark:bg-slate-900/95 border-primary-500/10 dark:border-primary-500/20 hover:border-primary-500/30 dark:hover:border-primary-500/40 shadow-card dark:shadow-card-dark hover:shadow-card-hover dark:hover:shadow-card-hover-dark transition-all duration-300">
