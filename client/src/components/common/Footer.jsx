@@ -86,12 +86,8 @@ const Footer = () => {
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-primary-400 shrink-0" />
                 <a href="mailto:edubook@eastdelta.edu.bd" className="hover:text-primary-300 transition-colors">
-                  edubook@eastdelta.edu.bd  
+                  edumeet@eastdelta.edu.bd  
                 </a>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-primary-400 shrink-0" />
-                <span>+8801XXXXXXXXX</span>
               </li>
             </ul>
           </div>
