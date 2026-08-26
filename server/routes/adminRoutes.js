@@ -5,11 +5,29 @@ const Settings = require('../models/Settings');
 const User = require('../models/User');
 const Appointment = require('../models/Appointment');
 
-// ==================== SYSTEM SETTINGS ====================
-
-// @desc    Get system settings
-// @route   GET /api/admin/settings
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /admin/settings:
+ *   get:
+ *     summary: Get system settings
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: System settings retrieved
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Settings'
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/settings', protect, admin, async (req, res) => {
   try {
     console.log('📡 Fetching system settings...');
@@ -46,9 +64,31 @@ router.get('/settings', protect, admin, async (req, res) => {
   }
 });
 
-// @desc    Update system settings
-// @route   PUT /api/admin/settings
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /admin/settings:
+ *   put:
+ *     summary: Update system settings
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Settings'
+ *     responses:
+ *       200:
+ *         description: Settings updated successfully *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Admin only
+ */
 router.put('/settings', protect, admin, async (req, res) => {
   try {
     console.log('📝 Updating system settings...');
@@ -103,11 +143,37 @@ router.put('/settings', protect, admin, async (req, res) => {
   }
 });
 
-// ==================== SYSTEM STATISTICS ====================
-
-// @desc    Get system statistics
-// @route   GET /api/admin/stats
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /admin/stats:
+ *   get:
+ *     summary: Get system statistics
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: System statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalUsers:
+ *                   type: number
+ *                 totalStudents:
+ *                   type: number
+ *                 totalFaculties:
+ *                   type: number
+ *                 totalAdmins:
+ *                   type: number
+ *                 totalAppointments:
+ *                   type: number
+ *                 pendingAppointments:
+ *                   type: number
+ *                 unreadMessages:
+ *                   type: number
+ */
 router.get('/stats', protect, admin, async (req, res) => {
   try {
     console.log('📊 Fetching system stats...');
@@ -144,11 +210,24 @@ router.get('/stats', protect, admin, async (req, res) => {
   }
 });
 
-// ==================== USER MANAGEMENT ====================
-
-// @desc    Get all users
-// @route   GET /api/admin/users
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /admin/users:
+ *   get:
+ *     summary: Get all users
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ */
 router.get('/users', protect, admin, async (req, res) => {
   try {
     const users = await User.find().select('-password').sort({ createdAt: -1 });
@@ -159,9 +238,30 @@ router.get('/users', protect, admin, async (req, res) => {
   }
 });
 
-// @desc    Get user by ID
-// @route   GET /api/admin/users/:id
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /admin/users/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: User not found
+ */
 router.get('/users/:id', protect, admin, async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
@@ -175,9 +275,38 @@ router.get('/users/:id', protect, admin, async (req, res) => {
   }
 });
 
-// @desc    Update user role
-// @route   PUT /api/admin/users/:id/role
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /admin/users/{id}/role:
+ *   put:
+ *     summary: Update user role
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [student, faculty, admin]
+ *     responses:
+ *       200:
+ *         description: Role updated
+ *       400:
+ *         description: Invalid role
+ *       404:
+ *         description: User not found
+ */
 router.put('/users/:id/role', protect, admin, async (req, res) => {
   try {
     const { role } = req.body;
@@ -204,9 +333,46 @@ router.put('/users/:id/role', protect, admin, async (req, res) => {
   }
 });
 
-// @desc    Update user details
-// @route   PUT /api/admin/users/:id
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /admin/users/{id}:
+ *   put:
+ *     summary: Update user details
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *                 enum: [student, faculty, admin]
+ *               department:
+ *                 type: string
+ *               profileImage:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User updated
+ *       404:
+ *         description: User not found
+ */
 router.put('/users/:id', protect, admin, async (req, res) => {
   try {
     const { name, email, password, role, department, profileImage } = req.body;
@@ -238,9 +404,28 @@ router.put('/users/:id', protect, admin, async (req, res) => {
   }
 });
 
-// @desc    Delete user
-// @route   DELETE /api/admin/users/:id
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /admin/users/{id}:
+ *   delete:
+ *     summary: Delete user
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User deleted
+ *       400:
+ *         description: Cannot delete own account
+ *       404:
+ *         description: User not found
+ */
 router.delete('/users/:id', protect, admin, async (req, res) => {
   try {
     const userId = req.params.id;
@@ -296,11 +481,18 @@ router.delete('/users/:id', protect, admin, async (req, res) => {
   }
 });
 
-// ==================== FACULTY MANAGEMENT ====================
-
-// @desc    Get all faculties
-// @route   GET /api/admin/faculties
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /admin/faculties:
+ *   get:
+ *     summary: Get all faculties
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of faculties
+ */
 router.get('/faculties', protect, admin, async (req, res) => {
   try {
     const faculties = await User.find({ role: 'faculty' }).select('-password');
@@ -327,24 +519,41 @@ router.get('/faculties', protect, admin, async (req, res) => {
   }
 });
 
-// @desc    Get single faculty by ID
-// @route   GET /api/admin/faculties/:id
-// @access  Private (Admin)
-router.get('/faculties/:id', protect, admin, async (req, res) => {
-  try {
-    const faculty = await User.findById(req.params.id).select('-password');
-    if (!faculty || faculty.role !== 'faculty') {
-      return res.status(404).json({ message: 'Faculty not found' });
-    }
-    res.json(faculty);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// @desc    Update faculty
-// @route   PUT /api/admin/faculties/:id
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /admin/faculties/{id}:
+ *   put:
+ *     summary: Update faculty
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               designation:
+ *                 type: string
+ *               officeRoom:
+ *                 type: string
+ *               department:
+ *                 type: string
+ *               facultyId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Faculty updated
+ *       404:
+ *         description: Faculty not found
+ */
 router.put('/faculties/:id', protect, admin, async (req, res) => {
   try {
     const { designation, officeRoom, department, facultyId } = req.body;
@@ -366,9 +575,26 @@ router.put('/faculties/:id', protect, admin, async (req, res) => {
   }
 });
 
-// @desc    Delete faculty
-// @route   DELETE /api/admin/faculties/:id
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /admin/faculties/{id}:
+ *   delete:
+ *     summary: Delete faculty
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Faculty deleted
+ *       404:
+ *         description: Faculty not found
+ */
 router.delete('/faculties/:id', protect, admin, async (req, res) => {
   try {
     const faculty = await User.findById(req.params.id);
@@ -384,11 +610,18 @@ router.delete('/faculties/:id', protect, admin, async (req, res) => {
   }
 });
 
-// ==================== APPOINTMENT MANAGEMENT ====================
-
-// @desc    Get all appointments
-// @route   GET /api/admin/appointments
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /admin/appointments:
+ *   get:
+ *     summary: Get all appointments
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all appointments
+ */
 router.get('/appointments', protect, admin, async (req, res) => {
   try {
     const appointments = await Appointment.find()
