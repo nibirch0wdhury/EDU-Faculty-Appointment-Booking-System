@@ -1,15 +1,53 @@
-const nodemailer = require('nodemailer');
+const https = require('https');
 
-// Create transporter
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.EMAIL_PORT) || 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+// Brevo API client (no SMTP transport required)
+const transporter = {
+  verify: (callback) => callback(null, true),
+  sendMail: ({ from, to, subject, html }) => {
+    const apiKey = process.env.BREVO_API_KEY;
+    const senderEmail = process.env.BREVO_SENDER_EMAIL || process.env.EMAIL_USER;
+    const senderName = process.env.BREVO_SENDER_NAME || 'EDU Meet';
+
+    if (!apiKey) return Promise.reject(new Error('BREVO_API_KEY is not configured'));
+    if (!senderEmail) return Promise.reject(new Error('BREVO_SENDER_EMAIL is not configured'));
+
+    const body = JSON.stringify({
+      sender: { name: senderName, email: senderEmail },
+      to: [{ email: to }],
+      subject,
+      htmlContent: html,
+    });
+
+    return new Promise((resolve, reject) => {
+      const request = https.request('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'api-key': apiKey,
+          'content-type': 'application/json',
+          'content-length': Buffer.byteLength(body),
+        },
+      }, (response) => {
+        let responseBody = '';
+        response.on('data', (chunk) => { responseBody += chunk; });
+        response.on('end', () => {
+          let data = {};
+          try { data = responseBody ? JSON.parse(responseBody) : {}; } catch (_) { data = {}; }
+
+          if (response.statusCode >= 200 && response.statusCode < 300) {
+            resolve({ messageId: data.messageId });
+          } else {
+            reject(new Error(data.message || `Brevo API request failed (${response.statusCode})`));
+          }
+        });
+      });
+
+      request.on('error', reject);
+      request.write(body);
+      request.end();
+    });
   },
-});
+};
 
 // Verify transporter connection
 transporter.verify((error, success) => {
