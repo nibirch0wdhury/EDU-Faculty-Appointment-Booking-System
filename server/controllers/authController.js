@@ -68,6 +68,15 @@ const registerUser = async (req, res) => {
           message: 'Faculty/Admin email must end with @eastdelta.edu.bd and include at least one letter before @ (numbers-only is not allowed)'
         });
       }
+
+      if (role === 'faculty') {
+        if (!facultyId || !facultyId.trim()) {
+          return res.status(400).json({ message: 'Faculty ID is required for faculty account' });
+        }
+        if (!/[a-zA-Z]/.test(facultyId.trim())) {
+          return res.status(400).json({ message: 'Faculty ID must include at least one letter' });
+        }
+      }
     }
 
     // Check if user exists

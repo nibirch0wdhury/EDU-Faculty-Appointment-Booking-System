@@ -59,7 +59,6 @@ const Register = () => {
       setFormData(prev => ({
         ...prev,
         facultyId: cleanFacultyId,
-        email: cleanFacultyId ? `${cleanFacultyId}@eastdelta.edu.bd` : ''
       }));
     }
     
@@ -122,16 +121,13 @@ const Register = () => {
     } else if (formData.role === 'faculty') {
       if (!formData.facultyId.trim()) {
         newErrors.facultyId = 'Faculty ID is required';
+      }
+
+      if (!formData.email.trim()) {
+        newErrors.email = 'Faculty email is required';
       } else {
-        const autoFacultyEmail = `${formData.facultyId.trim()}@eastdelta.edu.bd`;
-        const emailError = validateEmail(autoFacultyEmail, 'faculty');
-        if (emailError) {
-          newErrors.facultyId = 'Faculty ID must include at least one letter';
-        }
-        setFormData(prev => ({
-          ...prev,
-          email: autoFacultyEmail
-        }));
+        const emailError = validateEmail(formData.email.trim(), 'faculty');
+        if (emailError) newErrors.email = emailError;
       }
     } else {
       if (!formData.email.trim()) {
@@ -157,6 +153,8 @@ const Register = () => {
   const getEmailHint = (role) => {
     if (role === 'student') {
       return 'Your email will be automatically generated from your Student ID';
+    } else if (role === 'faculty') {
+      return 'Use your faculty email ending with @eastdelta.edu.bd (numbers-only before @ is not allowed)';
     } else if (role === 'admin') {
       return 'Use any @eastdelta.edu.bd email with at least one letter before @';
     }
@@ -175,9 +173,9 @@ const Register = () => {
     if (!validateForm()) return;
 
     setLoading(true);
-    const resolvedEmail = formData.role === 'faculty'
-      ? `${formData.facultyId.trim()}@eastdelta.edu.bd`
-      : formData.email;
+    const resolvedEmail = formData.role === 'student'
+      ? `${formData.studentId.trim()}@eastdelta.edu.bd`
+      : formData.email.trim();
 
     const registerData = {
       name: formData.name,
@@ -260,7 +258,7 @@ const Register = () => {
               </div>
             </div>
 
-            <div className={`grid gap-4 ${formData.role === 'faculty' ? 'sm:grid-cols-5' : 'sm:grid-cols-2'}`}>
+            <div className={`grid gap-4 ${formData.role === 'faculty' ? 'sm:grid-cols-5' : formData.role === 'student' ? 'sm:grid-cols-[minmax(0,1fr)_max-content]' : 'sm:grid-cols-1'}`}>
               <div className={formData.role === 'faculty' ? 'sm:col-span-3' : ''}>
                 <label className="input-label">Full Name</label>
                 <div className="relative">
@@ -291,48 +289,103 @@ const Register = () => {
                       placeholder="JHD"
                     />
                   </div>
-                  {formData.facultyId && (
-                    <p className="mt-1 text-[11px] text-primary-600 dark:text-primary-400 flex items-center gap-1.5">
-                      <Mail className="w-3.5 h-3.5" />
-                      <span>Email will be: <strong>{formData.facultyId}@eastdelta.edu.bd</strong></span>
-                    </p>
-                  )}
                   {errors.facultyId && <p className="mt-1 text-xs text-red-500">{errors.facultyId}</p>}
                 </div>
               ) : (
-                <div>
-                  <label className="input-label">
-                    Email Address
-                    {formData.role === 'student' && (
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 ml-1 font-normal">
-                        (Auto-generated)
-                      </span>
-                    )}
-                  </label>
+                formData.role === 'student' ? (
+                  <div className="sm:justify-self-end">
+                    <label className="input-label">
+                      <BadgeCheck className="inline-block w-4 h-4 mr-1.5 text-primary-500 dark:text-primary-400" />
+                      Student ID <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <BadgeCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
+                      <input
+                        type="text"
+                        name="studentId"
+                        value={formData.studentId}
+                        onChange={handleChange}
+                        className={`input-field pl-11 w-[calc(12ch+3.5rem)] font-mono tabular-nums ${errors.studentId ? 'input-field-error' : ''}`}
+                        placeholder="242021012"
+                      />
+                    </div>
+                    {errors.studentId && <p className="mt-1 text-xs text-red-500">{errors.studentId}</p>}
+                  </div>
+                ) : (
+                  <></>
+                )
+              )}
+
+              {formData.role === 'faculty' && (
+                <div className="sm:col-span-5">
+                  <label className="input-label">Email Address</label>
                   <div className="relative">
                     <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
                     <input
                       type="email"
                       name="email"
-                      value={formData.role === 'student' ? getEmailDisplay('student') : formData.email}
+                      value={formData.email}
                       onChange={handleEmailChange}
-                      disabled={formData.role === 'student'}
-                      className={`input-field pl-11 ${errors.email ? 'input-field-error' : ''} ${formData.role === 'student' ? 'bg-slate-100 dark:bg-slate-800/50 cursor-not-allowed' : ''}`}
-                      placeholder={formData.role === 'student' ? 'Auto-generated from Student ID' : 'john12@eastdelta.edu.bd'}
+                      className={`input-field pl-11 ${errors.email ? 'input-field-error' : ''}`}
+                      placeholder="john12@eastdelta.edu.bd"
                     />
                   </div>
-                  <p className="mt-1 text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
-                    <Info className="w-3 h-3" />
-                    <span>{getEmailHint(formData.role)}</span>
-                  </p>
                   {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
                 </div>
               )}
             </div>
 
+            {formData.role === 'admin' && (
+              <div>
+                <label className="input-label">Email Address</label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleEmailChange}
+                    className={`input-field pl-11 ${errors.email ? 'input-field-error' : ''}`}
+                    placeholder="john12@eastdelta.edu.bd"
+                  />
+                </div>
+                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+              </div>
+            )}
+
+            {formData.role === 'student' && (
+              <div>
+                <label className="input-label">
+                  Email Address
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 ml-1 font-normal">
+                    (Auto-generated)
+                  </span>
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
+                  <input
+                    type="email"
+                    name="email"
+                    value={getEmailDisplay('student')}
+                    onChange={handleEmailChange}
+                    disabled
+                    className={`input-field pl-11 ${errors.email ? 'input-field-error' : ''} bg-slate-100 dark:bg-slate-800/50 cursor-not-allowed`}
+                    placeholder="Auto-generated from Student ID"
+                  />
+                </div>
+                {formData.studentId && (
+                  <p className="mt-1 text-[11px] text-primary-600 dark:text-primary-400 flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Your email will be: <strong>{formData.studentId}@eastdelta.edu.bd</strong></span>
+                  </p>
+                )}
+                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+              </div>
+            )}
+
             {(formData.role === 'student' || formData.role === 'faculty') && (
               <div>
-                <label className="input-label">Academic Department</label>
+                <label className="input-label">Department</label>
                 <div className="relative">
                   <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5 pointer-events-none" />
                   <select
@@ -350,36 +403,6 @@ const Register = () => {
                   </select>
                 </div>
                 {errors.department && <p className="mt-1 text-xs text-red-500">{errors.department}</p>}
-              </div>
-            )}
-
-            {formData.role === 'student' && (
-              <div>
-                <label className="input-label">
-                  <BadgeCheck className="inline-block w-4 h-4 mr-1.5 text-primary-500 dark:text-primary-400" />
-                  Student ID <span className="text-red-500">*</span>
-                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 ml-1 font-normal">
-                    (Your email will be: ID@eastdelta.edu.bd)
-                  </span>
-                </label>
-                <div className="relative">
-                  <BadgeCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
-                  <input
-                    type="text"
-                    name="studentId"
-                    value={formData.studentId}
-                    onChange={handleChange}
-                    className={`input-field pl-11 ${errors.studentId ? 'input-field-error' : ''}`}
-                    placeholder="242021012"
-                  />
-                </div>
-                {formData.studentId && (
-                  <p className="mt-1 text-[11px] text-primary-600 dark:text-primary-400 flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5" />
-                    <span>Your email will be: <strong>{formData.studentId}@eastdelta.edu.bd</strong></span>
-                  </p>
-                )}
-                {errors.studentId && <p className="mt-1 text-xs text-red-500">{errors.studentId}</p>}
               </div>
             )}
 
