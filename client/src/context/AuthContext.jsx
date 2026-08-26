@@ -47,6 +47,12 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('❌ Fetch profile error:', error);
+      
+      // ✅ Check if maintenance mode
+      if (error.response?.data?.maintenanceMode) {
+        toast.warning('🚧 System is under maintenance. Please try again later.');
+      }
+      
       localStorage.removeItem('token');
       if (error.code !== 'ERR_CONNECTION_REFUSED') {
         toast.error('Session expired. Please login again.');
@@ -60,15 +66,20 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post('/auth/login', { email, password });
       
+      // ✅ Check if maintenance mode
+      if (response.data?.maintenanceMode) {
+        toast.error('🚧 System is under maintenance. Please try again later.');
+        return { success: false, maintenanceMode: true };
+      }
+      
       if (!response.data || typeof response.data !== 'object' || !response.data.token) {
-        toast.error('Invalid server response. Please verify VITE_API_URL environment variable.');
+        toast.error('Invalid server response.');
         return { success: false };
       }
 
       const { token, ...userData } = response.data;
       localStorage.setItem('token', token);
 
-      // Hydrate from profile endpoint so fields like profileImage are always up-to-date on first login render.
       let hydratedUserData = userData;
       try {
         const profileResponse = await api.get('/auth/profile');
@@ -76,7 +87,7 @@ export const AuthProvider = ({ children }) => {
           hydratedUserData = profileResponse.data;
         }
       } catch (profileError) {
-        console.warn('⚠️ Could not hydrate profile after login, using login payload:', profileError?.message || profileError);
+        console.warn('⚠️ Could not hydrate profile after login:', profileError?.message || profileError);
       }
 
       setUser({
@@ -97,6 +108,13 @@ export const AuthProvider = ({ children }) => {
       return { success: true, user: hydratedUserData };
     } catch (error) {
       console.error('Login error:', error);
+      
+      // ✅ Handle maintenance mode error
+      if (error.response?.data?.maintenanceMode) {
+        toast.error('🚧 System is under maintenance. Please try again later.');
+        return { success: false, maintenanceMode: true };
+      }
+      
       if (error.code === 'ERR_CONNECTION_REFUSED') {
         toast.error('Cannot connect to server. Please try again later.');
       } else {
@@ -114,7 +132,7 @@ export const AuthProvider = ({ children }) => {
       const response = await api.post('/auth/register', userData);
       
       if (!response.data || typeof response.data !== 'object' || !response.data.token) {
-        toast.error('Invalid server response. Please verify VITE_API_URL environment variable.');
+        toast.error('Invalid server response.');
         return { success: false };
       }
 
@@ -139,6 +157,13 @@ export const AuthProvider = ({ children }) => {
       return { success: true, user };
     } catch (error) {
       console.error('Registration error:', error);
+      
+      // ✅ Handle maintenance mode error
+      if (error.response?.data?.maintenanceMode) {
+        toast.error('🚧 System is under maintenance. Registration is disabled.');
+        return { success: false, maintenanceMode: true };
+      }
+      
       if (error.code === 'ERR_CONNECTION_REFUSED') {
         toast.error('Cannot connect to server. Please try again later.');
       } else {

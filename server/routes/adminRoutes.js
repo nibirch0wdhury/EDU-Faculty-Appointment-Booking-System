@@ -1,9 +1,107 @@
 const express = require('express');
 const router = express.Router();
 const { protect, admin } = require('../middleware/auth');
-
+const Settings = require('../models/Settings');
 const User = require('../models/User');
 const Appointment = require('../models/Appointment');
+
+// ==================== SYSTEM SETTINGS ====================
+
+// @desc    Get system settings
+// @route   GET /api/admin/settings
+// @access  Private (Admin)
+router.get('/settings', protect, admin, async (req, res) => {
+  try {
+    console.log('📡 Fetching system settings...');
+    
+    let settings = await Settings.findOne();
+    
+    if (!settings) {
+      console.log('ℹ️ No settings found, creating defaults...');
+      settings = await Settings.create({
+        siteName: 'EDU Appointment System',
+        siteDescription: 'Faculty appointment booking system for East Delta University',
+        maxAppointmentsPerDay: 10,
+        appointmentDuration: 30,
+        workingHours: { start: '09:00', end: '17:00' },
+        breakHours: { start: '13:00', end: '14:00' },
+        emailNotifications: true,
+        smsNotifications: false,
+        maintenanceMode: false,
+        updatedBy: req.user._id,
+      });
+    }
+    
+    console.log('✅ Settings retrieved successfully');
+    res.json({
+      success: true,
+      data: settings,
+    });
+  } catch (error) {
+    console.error('❌ Get settings error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch settings',
+    });
+  }
+});
+
+// @desc    Update system settings
+// @route   PUT /api/admin/settings
+// @access  Private (Admin)
+router.put('/settings', protect, admin, async (req, res) => {
+  try {
+    console.log('📝 Updating system settings...');
+    console.log('📦 Update data:', req.body);
+    
+    const {
+      siteName,
+      siteDescription,
+      maxAppointmentsPerDay,
+      appointmentDuration,
+      workingHours,
+      breakHours,
+      emailNotifications,
+      smsNotifications,
+      maintenanceMode,
+    } = req.body;
+
+    let settings = await Settings.findOne();
+    
+    if (!settings) {
+      settings = new Settings();
+    }
+
+    if (siteName !== undefined) settings.siteName = siteName;
+    if (siteDescription !== undefined) settings.siteDescription = siteDescription;
+    if (maxAppointmentsPerDay !== undefined) settings.maxAppointmentsPerDay = maxAppointmentsPerDay;
+    if (appointmentDuration !== undefined) settings.appointmentDuration = appointmentDuration;
+    if (workingHours !== undefined) settings.workingHours = workingHours;
+    if (breakHours !== undefined) settings.breakHours = breakHours;
+    if (emailNotifications !== undefined) settings.emailNotifications = emailNotifications;
+    if (smsNotifications !== undefined) settings.smsNotifications = smsNotifications;
+    if (maintenanceMode !== undefined) settings.maintenanceMode = maintenanceMode;
+    
+    settings.updatedBy = req.user._id;
+    settings.updatedAt = Date.now();
+
+    await settings.save();
+
+    console.log('✅ Settings updated successfully');
+
+    res.json({
+      success: true,
+      message: 'Settings updated successfully',
+      data: settings,
+    });
+  } catch (error) {
+    console.error('❌ Update settings error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to update settings',
+    });
+  }
+});
 
 // ==================== SYSTEM STATISTICS ====================
 
@@ -12,13 +110,16 @@ const Appointment = require('../models/Appointment');
 // @access  Private (Admin)
 router.get('/stats', protect, admin, async (req, res) => {
   try {
+    console.log('📊 Fetching system stats...');
+    
     const totalUsers = await User.countDocuments();
     const totalStudents = await User.countDocuments({ role: 'student' });
     const totalFaculties = await User.countDocuments({ role: 'faculty' });
     const totalAdmins = await User.countDocuments({ role: 'admin' });
     const totalAppointments = await Appointment.countDocuments();
     const pendingAppointments = await Appointment.countDocuments({ status: 'pending' });
-    const unreadMessages = 0; // Will be implemented later
+    
+    console.log('✅ Stats retrieved successfully');
     
     res.json({
       totalUsers,
@@ -27,10 +128,10 @@ router.get('/stats', protect, admin, async (req, res) => {
       totalAdmins,
       totalAppointments,
       pendingAppointments,
-      unreadMessages,
+      unreadMessages: 0,
     });
   } catch (error) {
-    console.error('Stats error:', error);
+    console.error('❌ Stats error:', error);
     res.json({
       totalUsers: 25,
       totalStudents: 17,
@@ -38,7 +139,7 @@ router.get('/stats', protect, admin, async (req, res) => {
       totalAdmins: 1,
       totalAppointments: 45,
       pendingAppointments: 3,
-      unreadMessages: 5,
+      unreadMessages: 0,
     });
   }
 });
@@ -137,8 +238,6 @@ router.put('/users/:id', protect, admin, async (req, res) => {
   }
 });
 
-// ==================== DELETE USER (FIXED) ====================
-
 // @desc    Delete user
 // @route   DELETE /api/admin/users/:id
 // @access  Private (Admin)
@@ -148,7 +247,6 @@ router.delete('/users/:id', protect, admin, async (req, res) => {
     
     console.log(`🗑️ Admin deleting user: ${userId}`);
     
-    // Find the user
     const user = await User.findById(userId);
     
     if (!user) {
@@ -158,7 +256,6 @@ router.delete('/users/:id', protect, admin, async (req, res) => {
       });
     }
     
-    // Prevent admin from deleting themselves
     if (userId === req.user._id.toString()) {
       return res.status(400).json({
         success: false,
@@ -166,7 +263,6 @@ router.delete('/users/:id', protect, admin, async (req, res) => {
       });
     }
     
-    // Check if user has any appointments
     const appointmentCount = await Appointment.countDocuments({
       $or: [
         { studentId: userId },
@@ -175,7 +271,6 @@ router.delete('/users/:id', protect, admin, async (req, res) => {
     });
     
     if (appointmentCount > 0) {
-      // Delete all related appointments
       await Appointment.deleteMany({
         $or: [
           { studentId: userId },
@@ -185,10 +280,7 @@ router.delete('/users/:id', protect, admin, async (req, res) => {
       console.log(`✅ Deleted ${appointmentCount} related appointments`);
     }
     
-    // Delete the user
     await user.deleteOne();
-    
-    console.log(`✅ User ${user.name} (${userId}) deleted successfully`);
     
     res.json({
       success: true,
@@ -284,9 +376,7 @@ router.delete('/faculties/:id', protect, admin, async (req, res) => {
       return res.status(404).json({ message: 'Faculty not found' });
     }
     
-    // Delete related appointments
     await Appointment.deleteMany({ facultyId: req.params.id });
-    
     await faculty.deleteOne();
     res.json({ message: 'Faculty deleted successfully' });
   } catch (error) {
