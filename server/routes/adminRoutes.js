@@ -80,10 +80,18 @@ router.get('/settings', protect, admin, async (req, res) => {
  *             $ref: '#/components/schemas/Settings'
  *     responses:
  *       200:
- *         description: Settings updated successfully *         content:
+ *         description: Settings updated successfully
+ *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/SuccessResponse'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/Settings'
  *       401:
  *         description: Unauthorized
  *       403:
@@ -492,6 +500,37 @@ router.delete('/users/:id', protect, admin, async (req, res) => {
  *     responses:
  *       200:
  *         description: List of faculties
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   userId:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *                       profileImage:
+ *                         type: string
+ *                   department:
+ *                     type: string
+ *                   designation:
+ *                     type: string
+ *                   officeRoom:
+ *                     type: string
+ *                   facultyId:
+ *                     type: string
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
  */
 router.get('/faculties', protect, admin, async (req, res) => {
   try {
@@ -621,6 +660,12 @@ router.delete('/faculties/:id', protect, admin, async (req, res) => {
  *     responses:
  *       200:
  *         description: List of all appointments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Appointment'
  */
 router.get('/appointments', protect, admin, async (req, res) => {
   try {
@@ -630,6 +675,7 @@ router.get('/appointments', protect, admin, async (req, res) => {
       .sort({ createdAt: -1 });
     res.json(appointments);
   } catch (error) {
+    console.error('❌ Get appointments error:', error);
     res.status(500).json({ message: error.message });
   }
 });
