@@ -1,5 +1,6 @@
 const Appointment = require('../models/Appointment');
 const User = require('../models/User');
+const Schedule = require('../models/Schedule'); // ✅ ADD THIS IMPORT
 
 // @desc    Book a new appointment
 // @route   POST /api/appointments/book
@@ -42,6 +43,26 @@ const bookAppointment = async (req, res) => {
     const endOfDay = new Date(appointmentDate);
     endOfDay.setHours(23, 59, 59, 999);
     
+    // ============================================
+    // ✅ CHECK IF SLOT EXISTS AND IS AVAILABLE
+    // ============================================
+    const slot = await Schedule.findOne({
+      facultyId: facultyId,
+      date: { $gte: startOfDay, $lte: endOfDay },
+      startTime: startTime,
+      isAvailable: true,
+    });
+
+    if (!slot) {
+      return res.status(400).json({
+        success: false,
+        message: 'This time slot is not available. Please select another slot.'
+      });
+    }
+
+    // ✅ USE THE SLOT'S END TIME (NOT HARDCODED 30 MIN)
+    const endTime = slot.endTime;
+    
     const existingAppointment = await Appointment.findOne({
       studentId: req.user._id,
       date: {
@@ -59,25 +80,19 @@ const bookAppointment = async (req, res) => {
       });
     }
     
-    // Calculate end time (30 minutes after start)
-    const [hours, minutes] = startTime.split(':').map(Number);
-    const endMinutes = minutes + 30;
-    const endHours = hours + Math.floor(endMinutes / 60);
-    const finalMinutes = endMinutes % 60;
-    const endTime = `${String(endHours).padStart(2, '0')}:${String(finalMinutes).padStart(2, '0')}`;
-    
-    // CREATE APPOINTMENT IN DATABASE
+    // ✅ CREATE APPOINTMENT WITH FULL SLOT DURATION
     const appointment = await Appointment.create({
       studentId: req.user._id,
       facultyId: facultyId,
       date: new Date(date),
       startTime: startTime,
-      endTime: endTime,
+      endTime: endTime, // ✅ Full slot end time
       purpose: purpose.trim(),
       status: 'pending',
     });
     
     console.log('✅ Appointment created in database:', appointment._id);
+    console.log(`📅 Slot: ${startTime} - ${endTime} (from schedule)`);
     
     // Populate the appointment with user details
     const populatedAppointment = await Appointment.findById(appointment._id)
@@ -106,7 +121,6 @@ const getStudentAppointments = async (req, res) => {
   try {
     console.log('📋 Fetching appointments for student:', req.user._id);
     
-    // GET APPOINTMENTS FROM DATABASE
     const appointments = await Appointment.find({ studentId: req.user._id })
       .populate('facultyId', 'name email department designation profileImage')
       .sort({ date: -1, startTime: 1 });
