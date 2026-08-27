@@ -7,6 +7,15 @@ import MagneticButton from '../ui/MagneticButton';
 import SpotlightCard from '../ui/SpotlightCard';
 import PageTransition, { MotionContainer } from '../ui/PageTransition';
 
+// A slot belongs to a calendar day, not a timestamp. Keep date-only values at
+// the API boundary so a browser timezone cannot move the selected day.
+const formatDateForApi = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const BookAppointment = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -60,7 +69,7 @@ const BookAppointment = () => {
     setSelectedTime('');
     try {
       const response = await api.get(`/faculty/${selectedFaculty}/slots`, {
-        params: { date: selectedDate.toISOString() }
+        params: { date: formatDateForApi(selectedDate) }
       });
       const slotsData = Array.isArray(response.data) ? response.data : response.data?.data || [];
       
@@ -128,7 +137,7 @@ const BookAppointment = () => {
     try {
       await api.post('/appointments/book', {
         facultyId: selectedFaculty,
-        date: selectedDate.toISOString(),
+        date: formatDateForApi(selectedDate),
         startTime: selectedTime,
         purpose: purpose.trim(),
       });

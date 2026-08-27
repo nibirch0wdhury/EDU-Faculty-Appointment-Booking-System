@@ -2,6 +2,17 @@ const Appointment = require('../models/Appointment');
 const User = require('../models/User');
 const Schedule = require('../models/Schedule'); // ✅ ADD THIS IMPORT
 
+// Preserve a date-only booking on its intended calendar day in every timezone.
+const parseCalendarDate = (dateString) => {
+  if (typeof dateString !== 'string') return null;
+
+  const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
+  if (!year || !month || !day) return null;
+
+  const date = new Date(year, month - 1, day, 12, 0, 0, 0);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
 // @desc    Book a new appointment
 // @route   POST /api/appointments/book
 // @access  Private (Student)
@@ -37,7 +48,13 @@ const bookAppointment = async (req, res) => {
     }
     
     // Check if student has any conflicting appointments on the same date and time
-    const appointmentDate = new Date(date);
+    const appointmentDate = parseCalendarDate(date);
+    if (!appointmentDate) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid date format. Please use YYYY-MM-DD'
+      });
+    }
     const startOfDay = new Date(appointmentDate);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(appointmentDate);
@@ -84,7 +101,7 @@ const bookAppointment = async (req, res) => {
     const appointment = await Appointment.create({
       studentId: req.user._id,
       facultyId: facultyId,
-      date: new Date(date),
+      date: appointmentDate,
       startTime: startTime,
       endTime: endTime, // ✅ Full slot end time
       purpose: purpose.trim(),

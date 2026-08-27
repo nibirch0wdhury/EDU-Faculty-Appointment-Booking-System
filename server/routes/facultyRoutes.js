@@ -1396,7 +1396,10 @@ router.get('/:id/slots', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Date is required' });
     }
     
-    const selectedDate = new Date(date);
+    const selectedDate = parseLocalDateString(date);
+    if (!selectedDate) {
+      return res.status(400).json({ success: false, message: 'Invalid date format' });
+    }
     const startOfDay = new Date(selectedDate);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(selectedDate);
@@ -1498,7 +1501,10 @@ router.get('/:id/availability', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Date is required' });
     }
     
-    const selectedDate = new Date(date);
+    const selectedDate = parseLocalDateString(date);
+    if (!selectedDate) {
+      return res.status(400).json({ success: false, message: 'Invalid date format' });
+    }
     const startOfDay = new Date(selectedDate);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(selectedDate);
