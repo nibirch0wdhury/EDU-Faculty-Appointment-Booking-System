@@ -46,8 +46,13 @@ api.interceptors.response.use(
   (error) => {
     console.error('Response error:', error.response?.data || error.message);
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Do not auto-redirect if 401 comes from login request or if user is already on /login page
+      const isLoginRequest = error.config?.url?.includes('/auth/login');
+      if (!isLoginRequest && window.location.pathname !== '/login') {
+        localStorage.removeItem('token');
+        delete api.defaults.headers.common['Authorization'];
+        window.location.href = '/login';
+      }
     }
     if (error.code === 'ERR_CONNECTION_REFUSED') {
       console.error('❌ Backend server is not running or unreachable');

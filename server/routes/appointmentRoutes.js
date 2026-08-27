@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { protect, faculty } = require('../middleware/auth');
 
-// Import all controller functions
 const {
   bookAppointment,
   getStudentAppointments,
@@ -15,53 +14,300 @@ const {
   getUpcomingAppointments,
 } = require('../controllers/appointmentController');
 
-// ==================== STUDENT ROUTES ====================
-// @route   POST /api/appointments/book
-// @desc    Book a new appointment
-// @access  Private (Student)
+/**
+ * @swagger
+ * /appointments/book:
+ *   post:
+ *     summary: Book a new appointment
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/BookAppointmentRequest'
+ *     responses:
+ *       201:
+ *         description: Appointment booked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 router.post('/book', protect, bookAppointment);
 
-// @route   GET /api/appointments/student
-// @desc    Get all appointments for the logged-in student
-// @access  Private (Student)
+/**
+ * @swagger
+ * /appointments/student:
+ *   get:
+ *     summary: Get student's appointments
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of student appointments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Appointment'
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/student', protect, getStudentAppointments);
 
-// ==================== FACULTY ROUTES ====================
-// @route   GET /api/appointments/faculty
-// @desc    Get all appointments for the logged-in faculty
-// @access  Private (Faculty)
+/**
+ * @swagger
+ * /appointments/faculty:
+ *   get:
+ *     summary: Get faculty's appointments
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of faculty appointments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Appointment'
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/faculty', protect, getFacultyAppointments);
 
-// ==================== ADMIN ROUTES ====================
-// @route   GET /api/appointments/all
-// @desc    Get all appointments (admin only)
-// @access  Private (Admin)
+/**
+ * @swagger
+ * /appointments/all:
+ *   get:
+ *     summary: Get all appointments (Admin only)
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all appointments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Appointment'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Admin only
+ */
 router.get('/all', protect, getAllAppointments);
 
-// ==================== GENERAL ROUTES ====================
-// @route   GET /api/appointments/range
-// @desc    Get appointments by date range
-// @access  Private
+/**
+ * @swagger
+ * /appointments/range:
+ *   get:
+ *     summary: Get appointments by date range
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Start date (YYYY-MM-DD)
+ *       - in: query
+ *         name: endDate
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: End date (YYYY-MM-DD)
+ *     responses:
+ *       200:
+ *         description: List of appointments in date range
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Appointment'
+ *       400:
+ *         description: Missing date parameters
+ */
 router.get('/range', protect, getAppointmentsByDateRange);
 
-// @route   GET /api/appointments/upcoming
-// @desc    Get upcoming appointments
-// @access  Private
+/**
+ * @swagger
+ * /appointments/upcoming:
+ *   get:
+ *     summary: Get upcoming appointments
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of upcoming appointments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Appointment'
+ */
 router.get('/upcoming', protect, getUpcomingAppointments);
 
-// @route   GET /api/appointments/:id
-// @desc    Get appointment by ID
-// @access  Private
+/**
+ * @swagger
+ * /appointments/{id}:
+ *   get:
+ *     summary: Get appointment by ID
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Appointment ID
+ *     responses:
+ *       200:
+ *         description: Appointment details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Appointment'
+ *       404:
+ *         description: Appointment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 router.get('/:id', protect, getAppointmentById);
 
-// @route   PUT /api/appointments/:id/status
-// @desc    Update appointment status
-// @access  Private (Faculty/Admin)
+/**
+ * @swagger
+ * /appointments/{id}/status:
+ *   put:
+ *     summary: Update appointment status
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Appointment ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [pending, confirmed, cancelled, completed]
+ *     responses:
+ *       200:
+ *         description: Status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Invalid status
+ *       404:
+ *         description: Appointment not found
+ */
 router.put('/:id/status', protect, updateAppointmentStatus);
 
-// @route   PUT /api/appointments/:id/cancel
-// @desc    Cancel appointment
-// @access  Private
+/**
+ * @swagger
+ * /appointments/{id}/cancel:
+ *   put:
+ *     summary: Cancel appointment
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Appointment ID
+ *     responses:
+ *       200:
+ *         description: Appointment cancelled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Cannot cancel completed appointment
+ *       404:
+ *         description: Appointment not found
+ */
 router.put('/:id/cancel', protect, cancelAppointment);
 
 module.exports = router;

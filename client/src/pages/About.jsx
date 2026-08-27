@@ -12,8 +12,8 @@ const teamMembers = [
     name: 'Sadman Chowdhury',
     email: '242021012@eastdelta.edu.bd',
     role: 'Backend & DevOps Specialist',
-    responsibilities: ['Backend', 'Deployment and Hosting'],
-    icon: Database,
+    responsibilities: ['User Authentication & Security', 'Deployment and Hosting'],
+    icon: ShieldCheck,
     gradient: 'from-amber-500 via-orange-600 to-rose-600',
     borderGradient: 'hover:border-amber-500/50',
     tags: ['JWT Auth', 'Bcrypt Security', 'CORS Middleware', 'Cloud Hosting']
@@ -23,8 +23,8 @@ const teamMembers = [
     name: 'Muhammad Sharfuddin',
     email: '242020612@eastdelta.edu.bd',
     role: 'Database Engineer & Security',
-    responsibilities: ['Database Integration', 'User Authentication & Security'],
-    icon: ShieldCheck,
+    responsibilities: ['Database Integration', 'API Routing'],
+    icon: Database,
     gradient: 'from-emerald-500 via-teal-600 to-cyan-600',
     borderGradient: 'hover:border-emerald-500/50',
     tags: ['Node.js', 'Express.js', 'MongoDB', 'Mongoose REST API']
@@ -34,7 +34,7 @@ const teamMembers = [
     name: 'Yeaser Bin Osman Esmam',
     email: '242019112@eastdelta.edu.bd',
     role: 'Frontend UI/UX Architect',
-    responsibilities: ['Frontend Development'],
+    responsibilities: ['Frontend Development', 'Animation & Micro-interactions'],
     icon: Code2,
     gradient: 'from-indigo-500 via-purple-600 to-pink-600',
     borderGradient: 'hover:border-indigo-500/50',
@@ -80,7 +80,7 @@ const About = () => {
 
           <p className="text-slate-500 dark:text-slate-400 text-base sm:text-lg leading-relaxed">
             The talented team of East Delta University students behind the design, architecture, 
-            and deployment of the <strong className="text-slate-900 dark:text-white">EDU Faculty Appointment Booking System</strong>.
+            and deployment of <strong className="text-slate-900 dark:text-white">EDU Meet</strong>.
           </p>
         </MotionContainer>
 

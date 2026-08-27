@@ -57,7 +57,7 @@ const Navbar = () => {
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-display font-bold tracking-tight text-slate-900 dark:text-white">
-                EDU<span className="text-primary-500">Book</span>
+                EDU<span className="text-primary-500">Meet</span>
               </span>
               <span className="text-[10px] font-medium tracking-[0.2em] text-slate-400 dark:text-slate-500 uppercase">
                 Appointment Portal
@@ -67,11 +67,21 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1 bg-slate-50/80 dark:bg-slate-900/80 p-1.5 rounded-2xl border border-primary-500/5 dark:border-primary-500/10 backdrop-blur-md absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-            {[
+            {(user?.role === 'admin' ? [
+              { path: '/', label: 'Home' },
+              { path: '/admin/manage-faculties', label: 'Faculty Members' },
+              { path: '/admin/manage-users', label: 'Users' },
+              { path: '/about', label: 'About' },
+            ] : user?.role === 'student' ? [
+              { path: '/', label: 'Home' },
+              { path: '/student/faculty-members', label: 'Faculty Members' },
+              { path: '/about', label: 'About' },
+              { path: '/contact', label: 'Contact' },
+            ] : [
               { path: '/', label: 'Home' },
               { path: '/about', label: 'About' },
               { path: '/contact', label: 'Contact' },
-            ].map((navItem) => (
+            ]).map((navItem) => (
               <Link
                 key={navItem.path}
                 to={navItem.path}
@@ -118,6 +128,7 @@ const Navbar = () => {
                   <span>Dashboard</span>
                 </Link>
                 
+                {/* ✅ FIXED: Message Icon redirects to contact messages */}
                 <Link 
                   to="/user/messages" 
                   className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/30 transition-all duration-200 relative"
@@ -201,6 +212,33 @@ const Navbar = () => {
               >
                 Home
               </Link>
+              {user?.role === 'admin' && (
+                <>
+                  <Link 
+                    to="/admin/manage-faculties" 
+                    className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive('/admin/manage-faculties') ? 'bg-primary-500/10 text-primary-500 border border-primary-500/20 dark:bg-primary-500/20 dark:text-primary-400' : 'text-slate-600 dark:text-slate-300 hover:bg-primary-50 dark:hover:bg-primary-950/30 hover:text-primary-500 dark:hover:text-primary-400'}`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Faculty Members
+                  </Link>
+                  <Link 
+                    to="/admin/manage-users" 
+                    className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive('/admin/manage-users') ? 'bg-primary-500/10 text-primary-500 border border-primary-500/20 dark:bg-primary-500/20 dark:text-primary-400' : 'text-slate-600 dark:text-slate-300 hover:bg-primary-50 dark:hover:bg-primary-950/30 hover:text-primary-500 dark:hover:text-primary-400'}`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Manage Users
+                  </Link>
+                </>
+              )}
+              {user?.role === 'student' && (
+                <Link 
+                  to="/student/faculty-members" 
+                  className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive('/student/faculty-members') ? 'bg-primary-500/10 text-primary-500 border border-primary-500/20 dark:bg-primary-500/20 dark:text-primary-400' : 'text-slate-600 dark:text-slate-300 hover:bg-primary-50 dark:hover:bg-primary-950/30 hover:text-primary-500 dark:hover:text-primary-400'}`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Faculty Members
+                </Link>
+              )}
               <Link 
                 to="/about" 
                 className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive('/about') ? 'bg-primary-500/10 text-primary-500 border border-primary-500/20 dark:bg-primary-500/20 dark:text-primary-400' : 'text-slate-600 dark:text-slate-300 hover:bg-primary-50 dark:hover:bg-primary-950/30 hover:text-primary-500 dark:hover:text-primary-400'}`}
@@ -208,13 +246,15 @@ const Navbar = () => {
               >
                 About
               </Link>
-              <Link 
-                to="/contact" 
-                className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive('/contact') ? 'bg-primary-500/10 text-primary-500 border border-primary-500/20 dark:bg-primary-500/20 dark:text-primary-400' : 'text-slate-600 dark:text-slate-300 hover:bg-primary-50 dark:hover:bg-primary-950/30 hover:text-primary-500 dark:hover:text-primary-400'}`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Contact
-              </Link>
+              {user?.role !== 'admin' && (
+                <Link 
+                  to="/contact" 
+                  className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive('/contact') ? 'bg-primary-500/10 text-primary-500 border border-primary-500/20 dark:bg-primary-500/20 dark:text-primary-400' : 'text-slate-600 dark:text-slate-300 hover:bg-primary-50 dark:hover:bg-primary-950/30 hover:text-primary-500 dark:hover:text-primary-400'}`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Contact
+                </Link>
+              )}
             </div>
 
             <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
@@ -247,9 +287,10 @@ const Navbar = () => {
                     <User className="w-4 h-4 text-primary-500" />
                     <span>My Profile</span>
                   </Link>
+                  {/* ✅ FIXED: Mobile message link */}
                   <Link 
                     to="/user/messages" 
-                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 font-medium text-sm border border-slate-200 dark:border-slate-700"
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 font-medium text-sm border border-slate-200 dark:border-slate-700 hover:border-primary-500 dark:hover:border-primary-500"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <MessageSquare className="w-4 h-4 text-primary-500" />

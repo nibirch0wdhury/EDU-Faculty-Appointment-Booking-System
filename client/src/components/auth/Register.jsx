@@ -1,11 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { User, Mail, Lock, Building, Briefcase, UserCircle, BadgeCheck, Eye, EyeOff, Sparkles, Loader2, ArrowRight, GraduationCap } from 'lucide-react';
+import {
+  User, Mail, Lock, Building, Briefcase, UserCircle, BadgeCheck,
+  Eye, EyeOff, Sparkles, Loader2, ArrowRight, GraduationCap,
+  Info, AlertCircle, Shield, Clock, Send, CheckCircle, XCircle
+} from 'lucide-react';
 import MagneticButton from '../ui/MagneticButton';
 import PageTransition, { MotionContainer } from '../ui/PageTransition';
+import { toast } from 'react-toastify';
+import api from '../../utils/api';
+
+const DEPARTMENTS = [
+  'Business Administration',
+  'Computer Science & Engineering',
+  'Digitalization, Innovation and Entrepreneurship',
+  'Economics',
+  'Electrical & Electronic Engineering',
+  'Electronics & Telecommunication Engineering',
+  'English',
+  'Public Leadership, Management and Governance'
+];
 
 const Register = () => {
+  const navigate = useNavigate();
+  const { register } = useAuth();
+
+  // Form state
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -16,79 +37,473 @@ const Register = () => {
     studentId: '',
     facultyId: '',
   });
+
+  // OTP State
+  const [step, setStep] = useState('form');
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [otpExpiry, setOtpExpiry] = useState(null);
+  const [timer, setTimer] = useState(0);
+  const [resendDisabled, setResendDisabled] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [resending, setResending] = useState(false);
+
+  // UI state
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const { register } = useAuth();
-  const navigate = useNavigate();
+
+  const timerRef = useRef(null);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  // Start countdown timer
+  const startTimer = (expiryDate) => {
+    const expiry = new Date(expiryDate);
+    const now = new Date();
+    let seconds = Math.floor((expiry - now) / 1000);
+
+    if (seconds <= 0) seconds = 300;
+
+    setTimer(seconds);
+    setResendDisabled(true);
+
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    timerRef.current = setInterval(() => {
+      setTimer(prev => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current);
+          setResendDisabled(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const formatTimer = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+
+    if (name === 'studentId' && formData.role === 'student') {
+      const cleanId = value.trim();
+      if (cleanId) {
+        setFormData(prev => ({
+          ...prev,
+          studentId: cleanId,
+          email: `${cleanId}@eastdelta.edu.bd`
+        }));
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          studentId: '',
+          email: ''
+        }));
+      }
+    }
+
+    if (name === 'facultyId' && formData.role === 'faculty') {
+      setFormData(prev => ({
+        ...prev,
+        facultyId: value.trim()
+      }));
+    }
+
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
+  const handleEmailChange = (e) => {
+    const { value } = e.target;
+    setFormData(prev => ({ ...prev, email: value }));
+    if (errors.email) {
+      setErrors(prev => ({ ...prev, email: '' }));
+    }
+  };
+
+  const validateEmail = (email, role) => {
+    const domainRegex = /@eastdelta\.edu\.bd$/;
+    if (!domainRegex.test(email)) {
+      return 'Only institutional emails (@eastdelta.edu.bd) are allowed';
+    }
+    if (role === 'student') {
+      if (!/^\d+@eastdelta\.edu\.bd$/.test(email)) {
+        return 'Student email must be your Student ID followed by @eastdelta.edu.bd';
+      }
+    } else if (role === 'faculty' || role === 'admin') {
+      const emailPrefix = email.split('@')[0];
+      if (!/[a-zA-Z]/.test(emailPrefix)) {
+        return 'Faculty/Admin email must include at least one letter before @';
+      }
+    }
+    return null;
+  };
+
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.name.trim()) newErrors.name = 'Full name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
+
+    if (formData.role === 'student') {
+      if (!formData.studentId.trim()) {
+        newErrors.studentId = 'Student ID is required';
+      } else {
+        const autoEmail = `${formData.studentId.trim()}@eastdelta.edu.bd`;
+        if (!/^\d+@eastdelta\.edu\.bd$/.test(autoEmail)) {
+          newErrors.studentId = 'Student ID must contain only numbers';
+        }
+        setFormData(prev => ({
+          ...prev,
+          email: autoEmail
+        }));
+      }
+    } else if (formData.role === 'faculty') {
+      if (!formData.facultyId.trim()) {
+        newErrors.facultyId = 'Faculty ID is required';
+      }
+      if (!formData.email.trim()) {
+        newErrors.email = 'Faculty email is required';
+      } else {
+        const emailError = validateEmail(formData.email.trim(), 'faculty');
+        if (emailError) newErrors.email = emailError;
+      }
+    } else {
+      if (!formData.email.trim()) {
+        newErrors.email = 'Email is required';
+      } else {
+        const emailError = validateEmail(formData.email, formData.role);
+        if (emailError) newErrors.email = emailError;
+      }
+    }
+
     if (!formData.password) newErrors.password = 'Password is required';
     else if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
     if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
-    if (formData.role === 'student' && !formData.studentId) newErrors.studentId = 'Student ID is required';
-    if (formData.role === 'faculty' && !formData.facultyId) newErrors.facultyId = 'Faculty ID is required';
+
     if ((formData.role === 'student' || formData.role === 'faculty') && !formData.department) {
       newErrors.department = 'Department is required';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSendOTP = async (e) => {
     e.preventDefault();
+
     if (!validateForm()) return;
 
+    const resolvedEmail = formData.role === 'student'
+      ? `${formData.studentId.trim()}@eastdelta.edu.bd`
+      : formData.email.trim();
+
     setLoading(true);
-    const registerData = {
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-      role: formData.role,
-      department: formData.department,
-      studentId: formData.role === 'student' ? formData.studentId : undefined,
-      facultyId: formData.role === 'faculty' ? formData.facultyId : undefined,
-    };
+    setOtpError('');
 
     try {
-      const result = await register(registerData);
-      if (result?.success) {
-        switch (formData.role) {
-          case 'student': navigate('/student/dashboard'); break;
-          case 'faculty': navigate('/faculty/dashboard'); break;
-          case 'admin': navigate('/admin/dashboard'); break;
-          default: navigate('/');
-        }
+      const response = await api.post('/auth/send-otp', { email: resolvedEmail });
+
+      if (response.data.success) {
+        setOtpSent(true);
+        setStep('otp');
+        setOtpExpiry(response.data.expiresAt);
+        startTimer(response.data.expiresAt);
+        toast.success('OTP sent to your email!');
       }
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('Send OTP error:', error);
+      const msg = error.response?.data?.message || 'Failed to send OTP. Please try again.';
+      setOtpError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleVerifyOTP = async () => {
+    if (!otp || otp.length !== 6) {
+      setOtpError('Please enter a valid 6-digit OTP');
+      toast.error('Please enter a valid 6-digit OTP');
+      return;
+    }
+
+    setVerifying(true);
+    setOtpError('');
+
+    try {
+      const resolvedEmail = formData.role === 'student'
+        ? `${formData.studentId.trim()}@eastdelta.edu.bd`
+        : formData.email.trim();
+
+      const response = await api.post('/auth/verify-otp', {
+        email: resolvedEmail,
+        otp: otp.trim(),
+      });
+
+      if (response.data.success) {
+        setOtpVerified(true);
+        setStep('complete');
+        toast.success('✅ Email verified successfully!');
+
+        await handleCompleteRegistration();
+      }
+    } catch (error) {
+      console.error('Verify OTP error:', error);
+      const msg = error.response?.data?.message || 'Invalid OTP. Please try again.';
+      setOtpError(msg);
+      toast.error(msg);
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const handleCompleteRegistration = async () => {
+    const resolvedEmail = formData.role === 'student'
+      ? `${formData.studentId.trim()}@eastdelta.edu.bd`
+      : formData.email.trim();
+
+    const registerData = {
+      name: formData.name,
+      email: resolvedEmail,
+      password: formData.password,
+      role: formData.role,
+      department: formData.department,
+      studentId: formData.role === 'student' ? formData.studentId : undefined,
+      facultyId: formData.role === 'faculty' ? formData.facultyId : undefined,
+      otp: otp.trim(),
+    };
+
+    try {
+      const result = await register(registerData);
+      if (result?.success) {
+        toast.success('🎉 Registration complete! Welcome to EDU Meet.');
+        setTimeout(() => {
+          navigate('/student/dashboard');
+        }, 1500);
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast.error('Registration failed. Please try again.');
+    }
+  };
+
+  const handleResendOTP = async () => {
+    if (resendDisabled) return;
+
+    setResending(true);
+    setOtpError('');
+
+    try {
+      const resolvedEmail = formData.role === 'student'
+        ? `${formData.studentId.trim()}@eastdelta.edu.bd`
+        : formData.email.trim();
+
+      const response = await api.post('/auth/resend-otp', { email: resolvedEmail });
+
+      if (response.data.success) {
+        toast.success('New OTP sent to your email!');
+        setOtpExpiry(response.data.expiresAt);
+        startTimer(response.data.expiresAt);
+        setOtp('');
+      }
+    } catch (error) {
+      console.error('Resend OTP error:', error);
+      const msg = error.response?.data?.message || 'Failed to resend OTP.';
+      setOtpError(msg);
+      toast.error(msg);
+    } finally {
+      setResending(false);
+    }
+  };
+
+  const handleBackToForm = () => {
+    setStep('form');
+    setOtpSent(false);
+    setOtpVerified(false);
+    setOtp('');
+    setOtpError('');
+    if (timerRef.current) clearInterval(timerRef.current);
+    setTimer(0);
+  };
+
+  const getEmailDisplay = () => {
+    if (formData.role === 'student') {
+      return formData.studentId ? `${formData.studentId}@eastdelta.edu.bd` : 'Enter Student ID to generate email';
+    }
+    return formData.email || 'Enter your email';
+  };
+
+  const getEmailHint = (role) => {
+    if (role === 'student') {
+      return 'Your email will be automatically generated from your Student ID';
+    } else if (role === 'faculty') {
+      return 'Use your faculty email ending with @eastdelta.edu.bd';
+    } else if (role === 'admin') {
+      return 'Use any @eastdelta.edu.bd email with at least one letter before @';
+    }
+    return '';
+  };
+
+  // ============================================
+  // OTP VERIFICATION UI
+  // ============================================
+  if (step === 'otp' || step === 'complete') {
+    return (
+      <PageTransition className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
+        <MotionContainer className="max-w-md w-full">
+          <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-8 sm:p-10 space-y-8 relative overflow-hidden transition-all duration-300">
+            <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
+
+            <div className="text-center space-y-3 relative z-10">
+              <div className="flex justify-center">
+                <div className={`w-16 h-16 rounded-2xl ${
+                  step === 'complete' ? 'bg-emerald-500' : 'bg-primary-500'
+                } text-white flex items-center justify-center shadow-lg ${
+                  step === 'complete' ? 'shadow-emerald-500/25' : 'shadow-primary-500/25'
+                }`}>
+                  {step === 'complete' ? (
+                    <CheckCircle className="w-8 h-8" />
+                  ) : (
+                    <Shield className="w-8 h-8" />
+                  )}
+                </div>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-semibold">
+                <Sparkles className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
+                <span>{step === 'complete' ? 'Verified!' : 'Email Verification'}</span>
+              </div>
+              <h2 className="text-2xl font-display font-bold text-slate-900 dark:text-white">
+                {step === 'complete' ? 'Email Verified!' : 'Verify Your Email'}
+              </h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">
+                {step === 'complete'
+                  ? 'Your email has been verified successfully. Creating your account...'
+                  : `We sent a 6-digit code to ${formData.role === 'student' ? formData.studentId + '@eastdelta.edu.bd' : formData.email}`
+                }
+              </p>
+            </div>
+
+            {step === 'otp' && (
+              <>
+                <div className="space-y-4">
+                  <div className="relative">
+                    <label className="input-label">Enter 6-Digit OTP</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={otp}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                          setOtp(val);
+                          if (otpError) setOtpError('');
+                        }}
+                        className={`input-field text-center text-2xl font-mono tracking-[0.5em] ${otpError ? 'input-field-error' : ''}`}
+                        placeholder="000000"
+                        maxLength={6}
+                        autoFocus
+                      />
+                      {otp.length === 6 && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500">
+                          <CheckCircle className="w-5 h-5" />
+                        </div>
+                      )}
+                    </div>
+                    {otpError && (
+                      <p className="mt-1 text-xs text-red-500 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {otpError}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>Expires in: <strong className="text-primary-600 dark:text-primary-400">{formatTimer(timer)}</strong></span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleResendOTP}
+                      disabled={resendDisabled || resending}
+                      className={`text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300 font-semibold transition-colors ${
+                        resendDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {resending ? 'Sending...' : 'Resend OTP'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <MagneticButton
+                    type="button"
+                    variant="primary"
+                    onClick={handleVerifyOTP}
+                    disabled={verifying || otp.length !== 6}
+                    className="flex-1 py-3.5 shadow-lg shadow-primary-500/25 dark:shadow-primary-500/50"
+                  >
+                    {verifying ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Verifying...</span>
+                      </span>
+                    ) : (
+                      <span className="flex items-center justify-center gap-2">
+                        <CheckCircle className="w-4 h-4" />
+                        <span>Verify OTP</span>
+                      </span>
+                    )}
+                  </MagneticButton>
+                  <MagneticButton
+                    type="button"
+                    variant="secondary"
+                    onClick={handleBackToForm}
+                    className="px-5 py-3.5"
+                  >
+                    <span>Back</span>
+                  </MagneticButton>
+                </div>
+              </>
+            )}
+
+            {step === 'complete' && (
+              <div className="text-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-3 border-primary-500 border-t-transparent mx-auto"></div>
+                <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+                  Creating your account...
+                </p>
+              </div>
+            )}
+          </div>
+        </MotionContainer>
+      </PageTransition>
+    );
+  }
+
+  // ============================================
+  // REGISTRATION FORM UI
+  // ============================================
   return (
     <PageTransition className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50/80 dark:bg-slate-950/80 pattern-dots">
       <MotionContainer className="max-w-xl w-full">
         <div className="bg-white dark:bg-slate-900/95 rounded-3xl shadow-card dark:shadow-card-dark border border-primary-500/10 dark:border-primary-500/20 p-8 sm:p-10 space-y-8 relative overflow-hidden transition-all duration-300">
-          {/* Top red accent */}
           <div className="absolute top-0 inset-x-0 h-1 bg-primary-500 dark:shadow-[0_0_20px_rgba(153,0,0,0.3)]" />
-          
-          {/* Dark mode glow */}
           <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -100,14 +515,15 @@ const Register = () => {
             </div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/30 border border-primary-500/20 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-semibold">
               <Sparkles className="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
-              <span>Join EDU Portal</span>
+              <span>Join EDU Meet</span>
             </div>
             <h2 className="text-3xl font-display font-bold text-slate-900 dark:text-white">Create Account</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">Fill in your details to register as Student or Faculty</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">
+              Fill in your details to register as Student or Faculty
+            </p>
           </div>
 
-          <form className="space-y-5 relative z-10" onSubmit={handleSubmit}>
-            {/* Role Switcher */}
+          <form className="space-y-5 relative z-10" onSubmit={handleSendOTP}>
             <div>
               <label className="input-label">Select Account Role</label>
               <div className="grid grid-cols-3 gap-2 bg-slate-50 dark:bg-slate-800/50 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
@@ -120,7 +536,11 @@ const Register = () => {
                     key={roleItem.id}
                     type="button"
                     onClick={() => {
-                      setFormData(prev => ({ ...prev, role: roleItem.id }));
+                      setFormData(prev => ({
+                        ...prev,
+                        role: roleItem.id,
+                        email: roleItem.id === 'student' ? '' : prev.email
+                      }));
                       setErrors({});
                     }}
                     className={`py-2 text-xs font-bold rounded-lg transition-all duration-200 ${
@@ -135,9 +555,8 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Name & Email */}
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
+            <div className={`grid gap-4 ${formData.role === 'faculty' ? 'sm:grid-cols-5' : formData.role === 'student' ? 'sm:grid-cols-[minmax(0,1fr)_max-content]' : 'sm:grid-cols-1'}`}>
+              <div className={formData.role === 'faculty' ? 'sm:col-span-3' : ''}>
                 <label className="input-label">Full Name</label>
                 <div className="relative">
                   <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
@@ -153,6 +572,67 @@ const Register = () => {
                 {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
               </div>
 
+              {formData.role === 'faculty' ? (
+                <div className="sm:col-span-2">
+                  <label className="input-label">Faculty ID</label>
+                  <div className="relative">
+                    <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
+                    <input
+                      type="text"
+                      name="facultyId"
+                      value={formData.facultyId}
+                      onChange={handleChange}
+                      className={`input-field pl-11 ${errors.facultyId ? 'input-field-error' : ''}`}
+                      placeholder="JHD"
+                    />
+                  </div>
+                  {errors.facultyId && <p className="mt-1 text-xs text-red-500">{errors.facultyId}</p>}
+                </div>
+              ) : (
+                formData.role === 'student' ? (
+                  <div className="sm:justify-self-end">
+                    <label className="input-label">
+                      <BadgeCheck className="inline-block w-4 h-4 mr-1.5 text-primary-500 dark:text-primary-400" />
+                      Student ID <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <BadgeCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
+                      <input
+                        type="text"
+                        name="studentId"
+                        value={formData.studentId}
+                        onChange={handleChange}
+                        className={`input-field pl-11 w-[calc(12ch+3.5rem)] font-mono tabular-nums ${errors.studentId ? 'input-field-error' : ''}`}
+                        placeholder="242021012"
+                      />
+                    </div>
+                    {errors.studentId && <p className="mt-1 text-xs text-red-500">{errors.studentId}</p>}
+                  </div>
+                ) : (
+                  <></>
+                )
+              )}
+
+              {formData.role === 'faculty' && (
+                <div className="sm:col-span-5">
+                  <label className="input-label">Email Address</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleEmailChange}
+                      className={`input-field pl-11 ${errors.email ? 'input-field-error' : ''}`}
+                      placeholder="john12@eastdelta.edu.bd"
+                    />
+                  </div>
+                  {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+                </div>
+              )}
+            </div>
+
+            {formData.role === 'admin' && (
               <div>
                 <label className="input-label">Email Address</label>
                 <div className="relative">
@@ -161,19 +641,47 @@ const Register = () => {
                     type="email"
                     name="email"
                     value={formData.email}
-                    onChange={handleChange}
+                    onChange={handleEmailChange}
                     className={`input-field pl-11 ${errors.email ? 'input-field-error' : ''}`}
-                    placeholder="you@eastdelta.edu.bd"
+                    placeholder="john12@eastdelta.edu.bd"
                   />
                 </div>
                 {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
               </div>
-            </div>
+            )}
 
-            {/* Department */}
+            {formData.role === 'student' && (
+              <div>
+                <label className="input-label">
+                  Email Address
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 ml-1 font-normal">
+                    (Auto-generated)
+                  </span>
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
+                  <input
+                    type="email"
+                    name="email"
+                    value={getEmailDisplay()}
+                    disabled
+                    className={`input-field pl-11 ${errors.email ? 'input-field-error' : ''} bg-slate-100 dark:bg-slate-800/50 cursor-not-allowed`}
+                    placeholder="Auto-generated from Student ID"
+                  />
+                </div>
+                {formData.studentId && (
+                  <p className="mt-1 text-[11px] text-primary-600 dark:text-primary-400 flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Your email will be: <strong>{formData.studentId}@eastdelta.edu.bd</strong></span>
+                  </p>
+                )}
+                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+              </div>
+            )}
+
             {(formData.role === 'student' || formData.role === 'faculty') && (
               <div>
-                <label className="input-label">Academic Department</label>
+                <label className="input-label">Department</label>
                 <div className="relative">
                   <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5 pointer-events-none" />
                   <select
@@ -183,60 +691,17 @@ const Register = () => {
                     className={`input-field pl-11 bg-white dark:bg-slate-900 ${errors.department ? 'input-field-error' : ''}`}
                   >
                     <option value="" className="text-slate-400 dark:text-slate-500">Select Department</option>
-                    <option value="Computer Science">Computer Science</option>
-                    <option value="Business Administration">Business Administration</option>
-                    <option value="Engineering">Engineering</option>
-                    <option value="Mathematics">Mathematics</option>
-                    <option value="Physics">Physics</option>
-                    <option value="Chemistry">Chemistry</option>
-                    <option value="Biology">Biology</option>
-                    <option value="Economics">Economics</option>
-                    <option value="Psychology">Psychology</option>
-                    <option value="Sociology">Sociology</option>
+                    {DEPARTMENTS.map((dept) => (
+                      <option key={dept} value={dept} className="bg-white dark:bg-slate-900">
+                        {dept}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 {errors.department && <p className="mt-1 text-xs text-red-500">{errors.department}</p>}
               </div>
             )}
 
-            {/* ID Field */}
-            {formData.role === 'student' && (
-              <div>
-                <label className="input-label">Student ID</label>
-                <div className="relative">
-                  <BadgeCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
-                  <input
-                    type="text"
-                    name="studentId"
-                    value={formData.studentId}
-                    onChange={handleChange}
-                    className={`input-field pl-11 ${errors.studentId ? 'input-field-error' : ''}`}
-                    placeholder="e.g. EDU-2024-001"
-                  />
-                </div>
-                {errors.studentId && <p className="mt-1 text-xs text-red-500">{errors.studentId}</p>}
-              </div>
-            )}
-
-            {formData.role === 'faculty' && (
-              <div>
-                <label className="input-label">Faculty ID</label>
-                <div className="relative">
-                  <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
-                  <input
-                    type="text"
-                    name="facultyId"
-                    value={formData.facultyId}
-                    onChange={handleChange}
-                    className={`input-field pl-11 ${errors.facultyId ? 'input-field-error' : ''}`}
-                    placeholder="e.g. FAC-2024-001"
-                  />
-                </div>
-                {errors.facultyId && <p className="mt-1 text-xs text-red-500">{errors.facultyId}</p>}
-              </div>
-            )}
-
-            {/* Passwords */}
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="input-label">Password</label>
@@ -266,13 +731,20 @@ const Register = () => {
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5" />
                   <input
-                    type={showPassword ? "text" : "password"}
+                    type={showConfirmPassword ? "text" : "password"}
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     className={`input-field pl-11 ${errors.confirmPassword ? 'input-field-error' : ''}`}
                     placeholder="••••••••"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
                 {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
               </div>
@@ -287,12 +759,12 @@ const Register = () => {
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Creating Account...</span>
+                  <span>Sending OTP...</span>
                 </span>
               ) : (
                 <span className="flex items-center justify-center gap-2">
-                  <span>Complete Registration</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <Send className="w-4 h-4" />
+                  <span>Continue with Email Verification</span>
                 </span>
               )}
             </MagneticButton>

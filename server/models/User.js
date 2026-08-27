@@ -32,12 +32,12 @@ const UserSchema = new mongoose.Schema({
   designation: {
     type: String,
     trim: true,
-    default: 'Faculty Member',
+    default: '',
   },
   officeRoom: {
     type: String,
     trim: true,
-    default: 'N/A',
+    default: '',
   },
   studentId: {
     type: String,
