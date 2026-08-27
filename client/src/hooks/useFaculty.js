@@ -2,6 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import api from '../utils/api';
 
+const formatDateForApi = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export const useFaculty = () => {
   const [faculties, setFaculties] = useState([]);
   const [selectedFaculty, setSelectedFaculty] = useState(null);
@@ -67,7 +74,7 @@ export const useFaculty = () => {
     setError(null);
     try {
       const response = await api.get(`/faculty/${facultyId}/slots`, {
-        params: { date: date.toISOString() }
+        params: { date: formatDateForApi(date) }
       });
       return response.data;
     } catch (error) {
